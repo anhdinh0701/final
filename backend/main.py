@@ -1214,6 +1214,89 @@ def generate_comic_prompt(req: ComicPromptAgentRequest):
     }
 
 
+class ComicPromptAgentImageRequest(BaseModel):
+    story_text: str
+    genre: Optional[str] = ""
+    setting_anchor: Optional[str] = None
+    character_dna_map: Optional[Dict[str, Any]] = None
+    narrative_mode: Optional[str] = None
+    cultural_tier: Optional[int] = None
+    seed: Optional[int] = None
+    layout_type: Optional[str] = "square"
+    force_refresh: Optional[bool] = False
+    return_json: Optional[bool] = False
+
+
+@app.post("/api/comic/prompt-agent/generate-image")
+def generate_image_with_prompt_agent(req: ComicPromptAgentImageRequest):
+    """
+    AI Agent Pipeline: Analyzes story context, crafts an optimal manga prompt with LoRAs,
+    and directly invokes ComfyUI to render the comic illustration on GPU.
+    """
+    import base64
+    from agents.comic_prompt_agent import ComicPromptAgent
+    from services.comfyui_service import get_comfyui_service, generate_image_comfyui
+
+    agent = ComicPromptAgent()
+    prompt_data = agent.craft_panel_prompt(
+        story_text=req.story_text,
+        character_dna_map=req.character_dna_map,
+        setting_anchor=req.setting_anchor,
+        genre=req.genre or "",
+        narrative_mode=req.narrative_mode,
+        cultural_tier=req.cultural_tier
+    )
+
+    image_prompt = prompt_data.get("image_prompt", req.story_text)
+    negative_prompt_suffix = prompt_data.get("negative_prompt_suffix", "")
+    layout_type = req.layout_type or prompt_data.get("layout_type", "square")
+    recommended_loras = prompt_data.get("recommended_loras", [])
+
+    # Render image via ComfyUI (fallback to Cloudflare AI / Pollinations if ComfyUI offline)
+    try:
+        service = get_comfyui_service()
+        if service.is_available():
+            img_bytes = generate_image_comfyui(
+                prompt=image_prompt,
+                seed=req.seed or 123456,
+                negative_prompt_suffix=negative_prompt_suffix,
+                layout_type=layout_type,
+                loras=recommended_loras
+            )
+            media_type = "image/jpeg" if img_bytes[:2] == b'\xff\xd8' else "image/png"
+        else:
+            from services.cloudflare_ai import generate_image_cf
+            img_bytes = generate_image_cf(
+                prompt=image_prompt,
+                seed=req.seed or 123456,
+                negative_prompt_suffix=negative_prompt_suffix,
+                cultural_tier=req.cultural_tier,
+                narrative_mode=req.narrative_mode,
+                genre=req.genre or ""
+            )
+            media_type = "image/jpeg"
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={
+                "status": "error",
+                "message": f"Image generation failed: {str(e)}",
+                "prompt_metadata": prompt_data
+            }
+        )
+
+    if req.return_json:
+        b64_img = base64.b64encode(img_bytes).decode('utf-8')
+        return {
+            "status": "success",
+            "prompt_metadata": prompt_data,
+            "media_type": media_type,
+            "image_base64": f"data:{media_type};base64,{b64_img}"
+        }
+
+    return Response(content=img_bytes, media_type=media_type)
+
+
 class ComfyUITestRequest(BaseModel):
     prompt: Optional[str] = "masterpiece monochrome Japanese manga illustration of a heroic protagonist"
     layout_type: Optional[str] = "square"

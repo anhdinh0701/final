@@ -67,6 +67,13 @@ KNOWN_LORAS_CATALOG = {
         "trigger_prompt": "SonMaiVN style, traditional Vietnamese lacquer painting, gold leaf lacquer texture, rich lacquer art finish",
         "default_strength": 1.0,
         "description": "Nghệ thuật tranh sơn mài truyền thống Việt Nam"
+    },
+    "vietnam_xinom": {
+        "patterns": ["xinomvnpony", "xinom", "ao dai", "áo dài", "non la", "nón lá", "vietnamese woman", "vietnam girl"],
+        "default_filename": "xinomvnpony.safetensors",
+        "trigger_prompt": "xinomvnpony, Vietnamese cultural aesthetic, authentic Vietnamese clothing",
+        "default_strength": 0.8,
+        "description": "Trang phục và nhân vật văn hóa Việt Nam (áo dài, nón lá, nét đẹp truyền thống)"
     }
 }
 

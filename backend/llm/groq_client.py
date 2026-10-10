@@ -39,6 +39,14 @@ class GroqClient:
         self.client = Groq(api_key=self.api_key)
         self.model = model_name
     
+    def generate(self, prompt: str, system_prompt: str = "", temperature: float = 0.7, max_tokens: int = 2000, response_format = None) -> str:
+        """Convenience method to generate text from a prompt with optional system prompt."""
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": prompt})
+        return self.chat(messages, temperature=temperature, max_tokens=max_tokens, response_format=response_format)
+
     def chat(self, messages, temperature=0.7, max_tokens=2000, response_format=None):
         """Send message to Groq LLM"""
         safe_max_tokens = self._safe_max_tokens(messages, max_tokens)

@@ -964,7 +964,6 @@ def extract_sentence_bounded_chunk(text: str, target_size: int = 5000, max_limit
 
 @app.post("/api/comic/generate")
 def create_comic(request: ComicRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    deduct_ref = None
     try:
         if not current_user:
             return JSONResponse(
@@ -992,20 +991,11 @@ def create_comic(request: ComicRequest, db: Session = Depends(get_db), current_u
             db.commit()
             db.refresh(story)
 
-        # Server-authoritative coin deduction (16 xu)
-        deduct_ok, deduct_ref, bal_after = deduct_coins(
-            db=db,
-            user_id=current_user.id,
-            amount=COST_MANGA,
-            action_type=ACTION_COMIC_GENERATE,
-            description=f"Chuyển thể Manga - {COST_MANGA} xu",
-            raise_on_insufficient=True
-        )
-        
+        # 4-panel batching (First batch of 4 panels is FREE as part of 12-panel free tier)
         memory = _get_story_memory(story, db)
         
-        # Adapt first chunk of story using sentence boundaries (up to ~5000-6500 chars)
-        text_to_adapt, adapted_len = extract_sentence_bounded_chunk(request.story_text, target_size=5000, max_limit=6500)
+        # Adapt first chunk of story using sentence boundaries (up to ~1500-2500 chars for 4 panels)
+        text_to_adapt, adapted_len = extract_sentence_bounded_chunk(request.story_text, target_size=1500, max_limit=2500)
             
         from agents.comic_agent import ComicDirectorAgent
         director = ComicDirectorAgent()
@@ -1016,14 +1006,125 @@ def create_comic(request: ComicRequest, db: Session = Depends(get_db), current_u
         db.commit()
         db.refresh(comic)
         
-        panels_response = _save_panels(db, comic, script_data)
+        # Save first 4 panels
+        panels_response = _save_panels(db, comic, script_data[:4])
         has_more = len(request.story_text) > adapted_len
             
         return {
             "status": "success",
             "comic_id": comic.id,
             "panels": panels_response,
+            "total_panels": len(panels_response),
+            "free_batches_left": 2,
+            "next_cost": 0,
             "adapted_offset": adapted_len,
+            "has_more": has_more
+        }
+    except HTTPException as he:
+        return JSONResponse(
+            status_code=he.status_code,
+            content={
+                "status": "error",
+                "message": he.detail,
+                "detail": he.detail,
+                "code": he.status_code
+            }
+        )
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return {"status": "error", "message": f"Lỗi tạo truyện tranh: {str(e)}"}
+
+@app.post("/api/comic/continue")
+def continue_comic(request: ComicContinueRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    deduct_ref = None
+    try:
+        if not current_user:
+            return JSONResponse(
+                status_code=401,
+                content={"status": "error", "message": "Bạn chưa đăng nhập.", "code": 401}
+            )
+
+        comic = db.query(Comic).filter(
+            Comic.id == request.comic_id,
+            Comic.user_id == current_user.id,
+        ).first()
+        if not comic:
+            return JSONResponse(
+                status_code=404,
+                content={"status": "error", "message": "Không tìm thấy truyện tranh."}
+            )
+        
+        current_offset = comic.adapted_offset or 0
+        remaining_text = request.story_text[current_offset:]
+        
+        if len(remaining_text.strip()) < 50:
+            return {"status": "error", "message": "Nội dung truyện chữ chưa được viết thêm. Hãy quay lại viết tiếp truyện chữ trước khi tạo thêm truyện tranh.", "no_more_text": True}
+        
+        existing_panels = db.query(ComicPanel).filter(
+            ComicPanel.comic_id == comic.id
+        ).order_by(ComicPanel.panel_index).all()
+        
+        existing_count = len(existing_panels)
+
+        # Quota and Monetization Rule:
+        # First 12 panels (3 batches of 4) are FREE.
+        # From batch 4 onward (existing_count >= 12), costs 100 coins for each 4-panel batch.
+        if existing_count >= 12:
+            if current_user.coins < 100:
+                return JSONResponse(
+                    status_code=402,
+                    content={
+                        "status": "error",
+                        "code": 402,
+                        "error_code": "INSUFFICIENT_COINS",
+                        "message": f"Bạn đã dùng hết 12 khung tranh miễn phí (3 lần). Cần 100 xu để tạo tiếp 4 khung tranh. Số dư hiện tại: {current_user.coins} xu.",
+                        "required_coins": 100,
+                        "current_coins": current_user.coins
+                    }
+                )
+            
+            deduct_ok, deduct_ref, bal_after = deduct_coins(
+                db=db,
+                user_id=current_user.id,
+                amount=100,
+                action_type=ACTION_COMIC_GENERATE,
+                description=f"Tạo tiếp 4 khung tranh Manga (Khung {existing_count + 1}-{existing_count + 4}) - 100 xu",
+                raise_on_insufficient=True
+            )
+        
+        previous_summary = " -> ".join([
+            f"Panel {p.panel_index}: {p.dialogue_text}" 
+            for p in existing_panels[-6:] if p.dialogue_text
+        ])
+        max_index = max([p.panel_index for p in existing_panels]) if existing_panels else 0
+        
+        story = db.query(Story).filter(Story.id == comic.story_id).first()
+        memory = _get_story_memory(story, db)
+        
+        # Adapt continuation chunk using sentence boundaries (up to ~1500-2500 chars for 4 panels)
+        new_text, chunk_len = extract_sentence_bounded_chunk(remaining_text, target_size=1500, max_limit=2500)
+        
+        from agents.comic_agent import ComicDirectorAgent
+        director = ComicDirectorAgent()
+        script_data = director.generate_continuation(previous_summary, new_text, memory=memory)
+        
+        panels_response = _save_panels(db, comic, script_data[:4], start_index=max_index)
+        
+        comic.adapted_offset = current_offset + chunk_len
+        db.commit()
+        
+        total_panels_now = existing_count + len(panels_response)
+        has_more = len(request.story_text) > comic.adapted_offset
+        
+        return {
+            "status": "success",
+            "comic_id": comic.id,
+            "panels": panels_response,
+            "total_panels": total_panels_now,
+            "free_batches_left": max(0, 3 - (total_panels_now // 4)),
+            "next_cost": 0 if total_panels_now < 12 else 100,
+            "adapted_offset": comic.adapted_offset,
             "has_more": has_more
         }
     except HTTPException as he:
@@ -1042,71 +1143,13 @@ def create_comic(request: ComicRequest, db: Session = Depends(get_db), current_u
                 refund_coins(
                     db=db,
                     user_id=current_user.id,
-                    amount=COST_MANGA,
+                    amount=100,
                     reason=ACTION_REFUND_FAILED,
                     reference_id=deduct_ref,
-                    description=f"Hoàn {COST_MANGA} xu do sự cố tạo truyện tranh: {str(e)[:100]}"
+                    description=f"Hoàn 100 xu do sự cố tạo tiếp truyện tranh: {str(e)[:100]}"
                 )
             except Exception as refund_err:
                 print(f"Compensating rollback error: {refund_err}")
-        import traceback
-        traceback.print_exc()
-        return {"status": "error", "message": f"Lỗi tạo truyện tranh: {str(e)}"}
-
-@app.post("/api/comic/continue")
-def continue_comic(request: ComicContinueRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    try:
-        if not current_user:
-            return {"status": "error", "message": "Bạn chưa đăng nhập."}
-
-        comic = db.query(Comic).filter(
-            Comic.id == request.comic_id,
-            Comic.user_id == current_user.id,
-        ).first()
-        if not comic:
-            return {"status": "error", "message": "Không tìm thấy truyện tranh."}
-        
-        current_offset = comic.adapted_offset or 0
-        remaining_text = request.story_text[current_offset:]
-        
-        if len(remaining_text.strip()) < 50:
-            return {"status": "error", "message": "Nội dung truyện chữ chưa được viết thêm. Hãy quay lại viết tiếp truyện chữ trước khi tạo thêm truyện tranh.", "no_more_text": True}
-        
-        existing_panels = db.query(ComicPanel).filter(
-            ComicPanel.comic_id == comic.id
-        ).order_by(ComicPanel.panel_index).all()
-        
-        previous_summary = " -> ".join([
-            f"Panel {p.panel_index}: {p.dialogue_text}" 
-            for p in existing_panels[-6:] if p.dialogue_text
-        ])
-        max_index = max([p.panel_index for p in existing_panels]) if existing_panels else 0
-        
-        story = db.query(Story).filter(Story.id == comic.story_id).first()
-        memory = _get_story_memory(story, db)
-        
-        # Adapt continuation chunk using sentence boundaries (up to ~5000-6500 chars)
-        new_text, chunk_len = extract_sentence_bounded_chunk(remaining_text, target_size=5000, max_limit=6500)
-        
-        from agents.comic_agent import ComicDirectorAgent
-        director = ComicDirectorAgent()
-        script_data = director.generate_continuation(previous_summary, new_text, memory=memory)
-        
-        panels_response = _save_panels(db, comic, script_data, start_index=max_index)
-        
-        comic.adapted_offset = current_offset + chunk_len
-        db.commit()
-        
-        has_more = len(request.story_text) > comic.adapted_offset
-        
-        return {
-            "status": "success",
-            "comic_id": comic.id,
-            "panels": panels_response,
-            "adapted_offset": comic.adapted_offset,
-            "has_more": has_more
-        }
-    except Exception as e:
         import traceback
         traceback.print_exc()
         return {"status": "error", "message": f"Lỗi tiếp tục truyện tranh: {str(e)}"}

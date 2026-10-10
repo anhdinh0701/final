@@ -1252,13 +1252,15 @@ class ComicDirectorAgent:
         system_instruction = f"{BEAT_DIRECTOR_PROMPT}\n\nCHARACTER VISUAL REGISTRY (IMMUTABLE):\n{dna_context}\n\nSETTING VISUAL ANCHOR (IMMUTABLE):\n{setting_context}\n"
 
         words_count = len(story_text.split())
-        target_min = max(8, min(16, words_count // 50))
-        target_max = max(12, min(24, words_count // 30))
 
-        user_content = f"""Adapt this Vietnamese story text into sequential manga panels beat-by-beat.
+        user_content = f"""Adapt this Vietnamese story text into EXACTLY 4 sequential manga panels beat-by-beat.
 Treat the supplied character DNA registry and setting anchor as established story canon. Keep identities, appearance, costumes, location, and persistent fixtures consistent; do not invent replacements.
-DO NOT SKIP ANY DIALOGUE OR MAJOR ACTION. Ensure every character line and key reaction is depicted with expressive dialogue text.
-Aim for {target_min} to {target_max} detailed panels covering the entire excerpt.
+Structure the 4 panels with clear cinematic manga rhythm:
+- Panel 1: Establishing wide or medium shot setting the mood, location, and initial tension.
+- Panel 2: Key character focus / action / expressive dialogue.
+- Panel 3: Rising drama or interaction between characters.
+- Panel 4: Climax / cliffhanger / impactful transition of this scene beat.
+DO NOT SKIP ANY CRITICAL ACTION OR DIALOGUE.
 TUYỆT ĐỐI CẤM SỬ DỤNG DẤU BA CHẤM (..., …, .....) VÀ CẮT XÉN: Mọi câu thoại và lời dẫn dưới mỗi khung tranh PHẢI LÀ CÂU HOÀN CHỈNH, TRỌN Ý, KẾT THÚC BẰNG DẤU CHẤM (.), CHẤM THAN (!), HOẶC CHẤM HỎI (?).
 
 STORY TEXT:
@@ -1271,7 +1273,7 @@ STORY TEXT:
                     {"role": "user", "content": user_content}
                 ],
                 temperature=0.3,
-                max_tokens=4000
+                max_tokens=2500
             )
             panels_raw = self._parse_json_array(response)
             validated_panels = self._validate_panels(
@@ -1281,8 +1283,9 @@ STORY TEXT:
                 cultural_tier=c_tier,
                 narrative_mode=n_mode
             )
-            print(f"[Comic] Successfully created {len(validated_panels)} detailed beat-by-beat panels with background & character consistency.")
-            return validated_panels
+            final_panels = validated_panels[:4] if len(validated_panels) >= 4 else validated_panels
+            print(f"[Comic] Successfully created {len(final_panels)} detailed 4-panel batch.")
+            return final_panels
         except Exception as e:
             print(f"[Comic] Storyboard LLM failed ({e}), creating structured beat fallback...")
             return self._create_structured_beat_fallback(story_text, character_dna, setting_dna)
@@ -1310,8 +1313,9 @@ CHARACTER VISUAL REGISTRY (IMMUTABLE):
 SETTING VISUAL ANCHOR (IMMUTABLE):
 {setting_context}
 """
-        user_content = f"""Continue the comic from the previous progression with sequential panels adapting this new text beat-by-beat.
+        user_content = f"""Continue the comic from the previous progression with EXACTLY 4 new sequential manga panels adapting this new text beat-by-beat.
 Treat the supplied character DNA registry and setting anchor as established story canon. Keep identities, appearance, costumes, location, and persistent fixtures consistent with earlier panels.
+Structure the 4 new panels sequentially (Panel 1 -> Panel 2 -> Panel 3 -> Panel 4).
 DO NOT SKIP DIALOGUES OR ACTIONS. Keep dialogue text expressive, complete, and rich in meaning.
 TUYỆT ĐỐI CẤM SỬ DỤNG DẤU BA CHẤM (..., …, .....) VÀ CẮT XÉN: Mọi câu thoại và lời dẫn dưới mỗi khung tranh PHẢI LÀ CÂU HOÀN CHỈNH, TRỌN Ý, KẾT THÚC BẰNG DẤU CHẤM (.), CHẤM THAN (!), HOẶC CHẤM HỎI (?).
 
@@ -1325,11 +1329,12 @@ NEW STORY TEXT:
                     {"role": "user", "content": user_content}
                 ],
                 temperature=0.3,
-                max_tokens=4000
+                max_tokens=2500
             )
             panels_raw = self._parse_json_array(response)
             validated = self._validate_panels(panels_raw, character_dna_map=character_dna, setting_dna=setting_dna)
-            return validated
+            final_panels = validated[:4] if len(validated) >= 4 else validated
+            return final_panels
         except Exception as e:
             print(f"[Comic] Continuation failed ({e}), creating structured fallback...")
             return self._create_structured_beat_fallback(new_text, character_dna, setting_dna)
@@ -1399,5 +1404,8 @@ NEW STORY TEXT:
                 "dialogue_text": beat,
                 "layout_type": layout
             })
+            if len(raw_panels) >= 4:
+                break
 
-        return self._validate_panels(raw_panels, character_dna_map=character_dna, setting_dna=setting_dna)
+        validated = self._validate_panels(raw_panels, character_dna_map=character_dna, setting_dna=setting_dna)
+        return validated[:4]

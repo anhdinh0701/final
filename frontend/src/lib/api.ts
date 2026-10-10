@@ -344,13 +344,31 @@ export const api = {
     }
   },
 
-  async continueComic(comicId: number, storyText: string): Promise<ComicResponse> {
-    const res = await fetch(`${API_BASE_URL}/comic/continue`, {
-      method: 'POST',
-      headers: authHeaders(),
-      body: JSON.stringify({ comic_id: comicId, story_text: storyText }),
-    });
-    return res.json();
+  async continueComic(comicId: number, storyText: string): Promise<ComicResponse & { code?: number; error_code?: string; required_coins?: number; current_coins?: number }> {
+    try {
+      const res = await fetch(`${API_BASE_URL}/comic/continue`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ comic_id: comicId, story_text: storyText }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        return {
+          status: 'error',
+          message: data.detail || data.message || `Lỗi HTTP ${res.status}`,
+          code: res.status,
+          error_code: data.error_code,
+          required_coins: data.required_coins,
+          current_coins: data.current_coins,
+        } as any;
+      }
+      return data;
+    } catch (err: any) {
+      return {
+        status: 'error',
+        message: err.message || 'Không thể kết nối tới máy chủ khi tạo tiếp tranh',
+      } as any;
+    }
   },
 
   getComicImageUrl(imageUrl: string): string {

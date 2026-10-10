@@ -835,7 +835,7 @@ export default function WorkspacePage() {
     ]);
   };
 
-  // Adapt to Comic
+  // Adapt to Comic (First 4 panels - Free as part of 12-panel free tier)
   const handleAdaptToComic = async () => {
     if (!storyContent || storyContent.length < 10) {
       toast.warning(t.comic_need_content);
@@ -848,22 +848,11 @@ export default function WorkspacePage() {
       return;
     }
 
-    // Refresh số dư thực từ server trước khi trừ — tránh stale state
-    let freshBalance = coinBalance;
-    try {
-      const balRes = await api.getCoinsBalance();
-      if (typeof balRes.coins === "number") freshBalance = balRes.coins;
-      else if (typeof balRes.balance === "number") freshBalance = balRes.balance;
-      setCoinBalance(freshBalance);
-    } catch { /* giữ nguyên balance cũ */ }
-
-    if (freshBalance < 16) {
-      toast.error(lang === "vi"
-        ? `Số xu không đủ. Hiện có ${freshBalance} xu, cần 16 xu để chuyển thể Manga.`
-        : `Not enough coins. You have ${freshBalance}, need 16 for Manga.`);
-      setIsCoinModalOpen(true);
-      return;
-    }
+    // Refresh coin balance in background
+    api.getCoinsBalance().then((bal) => {
+      if (typeof bal.coins === "number") setCoinBalance(bal.coins);
+      else if (typeof bal.balance === "number") setCoinBalance(bal.balance);
+    }).catch(() => {});
 
     setComicLoading(true);
     setActiveTab("comic");
@@ -874,11 +863,11 @@ export default function WorkspacePage() {
         setComicId(res.comic_id || null);
         setComicPanels(res.panels);
         setComicHasMore(!!res.has_more);
-        // Refresh balance sau khi trừ 16 xu
-        api.getCoinsBalance().then((b) => {
-          if (typeof b.coins === "number") setCoinBalance(b.coins);
-          else if (typeof b.balance === "number") setCoinBalance(b.balance);
-        });
+        toast.success(
+          lang === "vi" 
+            ? "Đã tạo thành công 4 khung tranh đầu tiên! (Miễn phí: 4/12 khung)" 
+            : "First 4 panels generated successfully! (Free: 4/12 panels)"
+        );
       } else {
         const errMsg = res.message || (lang === "vi" ? "Lỗi chuyển thể truyện tranh" : "Failed to adapt to comic");
         toast.error(errMsg);
@@ -895,9 +884,32 @@ export default function WorkspacePage() {
     }
   };
 
-  // Continue Comic
+  // Continue Comic (4 panels per batch; 100 coins per batch after 12 panels)
   const handleContinueComic = async () => {
     if (!comicId) return;
+
+    const existingCount = comicPanels.length;
+    // If user has reached 12 panels (3 batches of 4), enforce 100 coin check
+    if (existingCount >= 12) {
+      let freshBalance = coinBalance;
+      try {
+        const balRes = await api.getCoinsBalance();
+        if (typeof balRes.coins === "number") freshBalance = balRes.coins;
+        else if (typeof balRes.balance === "number") freshBalance = balRes.balance;
+        setCoinBalance(freshBalance);
+      } catch { /* retain existing */ }
+
+      if (freshBalance < 100) {
+        toast.error(
+          lang === "vi"
+            ? `Bạn đã dùng hết 12 khung tranh miễn phí. Cần 100 xu để tạo tiếp 4 khung tranh. Số dư hiện tại: ${freshBalance} xu.`
+            : `You have used all 12 free panels. 100 coins required for the next 4 panels. Current balance: ${freshBalance} coins.`
+        );
+        setIsCoinModalOpen(true);
+        return;
+      }
+    }
+
     setComicLoading(true);
     try {
       const res = await api.continueComic(comicId, storyContent);
@@ -905,8 +917,29 @@ export default function WorkspacePage() {
         toast.info(t.comic_no_new_text);
         setComicHasMore(false);
       } else if (res.status === "success" && res.panels) {
-        setComicPanels((prev) => [...prev, ...(res.panels || [])]);
+        const newPanels = [...comicPanels, ...(res.panels || [])];
+        setComicPanels(newPanels);
         setComicHasMore(!!res.has_more);
+        // Refresh balance if coins were spent
+        api.getCoinsBalance().then((bal) => {
+          if (typeof bal.coins === "number") setCoinBalance(bal.coins);
+          else if (typeof bal.balance === "number") setCoinBalance(bal.balance);
+        }).catch(() => {});
+
+        toast.success(
+          lang === "vi"
+            ? `Đã tạo thêm 4 khung tranh tiếp theo! (Tổng cộng: ${newPanels.length} khung)`
+            : `Generated next 4 panels! (Total: ${newPanels.length} panels)`
+        );
+      } else {
+        if ((res as any).code === 402 || (res as any).error_code === "INSUFFICIENT_COINS") {
+          toast.error(
+            res.message || (lang === "vi" ? "Số xu không đủ 100 xu để tạo tiếp 4 khung tranh." : "Insufficient coins (100 required).")
+          );
+          setIsCoinModalOpen(true);
+        } else {
+          toast.error(res.message || (lang === "vi" ? "Không thể tạo tiếp khung tranh." : "Failed to continue comic."));
+        }
       }
     } catch (e: any) {
       toast.error(e.message || t.unknown_error);
@@ -1064,6 +1097,8 @@ export default function WorkspacePage() {
             onContinueComic={handleContinueComic}
             onAdaptToComic={handleAdaptToComic}
             loadingMore={comicLoading}
+            coinBalance={coinBalance}
+            onOpenCoinModal={() => setIsCoinModalOpen(true)}
           />
         )}
 

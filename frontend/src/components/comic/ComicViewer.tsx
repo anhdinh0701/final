@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { translations, Language } from "@/lib/i18n";
 import { ComicPanel } from "@/lib/types";
 import { api } from "@/lib/api";
@@ -28,6 +28,18 @@ function ComicPanelFrame({ panel, t, lang, slot, eager }: {
   const [retryKey, setRetryKey] = useState(0);
   const imageUrl = api.getComicImageUrl(panel.image_url);
   const imageFailed = error || !imageUrl;
+
+  // Auto-retry when GPU is rendering images sequentially in ComfyUI queue
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (error && retryKey < 5) {
+      timer = setTimeout(() => {
+        setError(false);
+        setRetryKey((prev) => prev + 1);
+      }, 3500);
+    }
+    return () => clearTimeout(timer);
+  }, [error, retryKey]);
 
   return (
     <figure className="manga-panel" data-slot={slot}>

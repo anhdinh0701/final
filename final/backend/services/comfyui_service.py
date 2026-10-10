@@ -94,7 +94,7 @@ class ComfyUIService:
         self,
         base_url: Optional[str] = None,
         enabled: Optional[bool] = None,
-        timeout: int = 120,
+        timeout: int = 300,
         checkpoint: Optional[str] = None
     ):
         self.base_url = (
@@ -109,7 +109,7 @@ class ComfyUIService:
         self.custom_checkpoint = checkpoint or os.environ.get("COMFYUI_CHECKPOINT", "").strip() or None
         self.sampler_name = os.environ.get("COMFYUI_SAMPLER_NAME", "euler")
         self.scheduler = os.environ.get("COMFYUI_SCHEDULER", "normal")
-        self.steps = int(os.environ.get("COMFYUI_STEPS", "20"))
+        self.steps = int(os.environ.get("COMFYUI_STEPS", "18"))
         self.cfg = float(os.environ.get("COMFYUI_CFG", "7.0"))
         self._last_avail_check: float = 0.0
         self._last_avail_result: bool = False
@@ -417,11 +417,11 @@ class ComfyUIService:
                     consecutive_errors += 1
             except Exception as e:
                 consecutive_errors += 1
-                print(f"[ComfyUI] Polling history warning: {e}")
-                if consecutive_errors >= 3:
+                print(f"[ComfyUI] Polling history notice: {e}")
+                if consecutive_errors >= 10:
                     raise ConnectionError(f"Lost connection to ComfyUI at {self.base_url} while polling prompt {prompt_id}: {e}")
 
-            time.sleep(0.5)
+            time.sleep(0.8)
 
         raise TimeoutError(f"ComfyUI prompt execution timed out after {max_time}s (prompt_id: {prompt_id})")
 

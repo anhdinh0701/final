@@ -68,11 +68,11 @@ function ComicPanelFrame({ panel, t, lang, slot, eager }: {
   // Auto-retry when GPU is rendering images sequentially in ComfyUI queue
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (error && retryKey < 6) {
+    if (error && retryKey < 25) {
       timer = setTimeout(() => {
         setError(false);
         setRetryKey((prev) => prev + 1);
-      }, 3500);
+      }, 4000);
     }
     return () => clearTimeout(timer);
   }, [error, retryKey]);
@@ -139,13 +139,19 @@ function ComicPanelFrame({ panel, t, lang, slot, eager }: {
 
           {imageFailed ? (
             <div className="manga-image-error">
-              <span>{t.panel_load_error || (lang === "vi" ? "Chưa tạo được ảnh. Đang đợi máy chủ GPU xử lý lượt vẽ..." : "Image generation queued. Retrying for GPU render...")}</span>
+              <span>
+                {error && retryKey < 25
+                  ? (lang === "vi" 
+                      ? `Đang xếp hàng vẽ qua GPU ComfyUI... (Lượt ${retryKey + 1}/25)` 
+                      : `ComfyUI GPU rendering in progress... (Attempt ${retryKey + 1}/25)`)
+                  : (t.panel_load_error || (lang === "vi" ? "Chưa tạo được ảnh. Hãy bấm thử lại để yêu cầu ảnh mới." : "Image generation failed. Click retry."))}
+              </span>
               {imageUrl && (
                 <button
                   type="button"
                   onClick={() => {
                     setError(false);
-                    setRetryKey((key) => key + 1);
+                    setRetryKey(0);
                   }}
                   className="manga-image-retry"
                 >

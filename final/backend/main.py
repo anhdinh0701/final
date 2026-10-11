@@ -239,10 +239,16 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     cache_mgr = get_cache_manager()
     cached_user = cache_mgr.get_user_token(token)
     if cached_user and isinstance(cached_user, dict):
+        user_id = cached_user.get("id")
+        if user_id:
+            user = db.query(User).filter(User.id == user_id).first()
+            if user:
+                return user
         return User(
             id=cached_user.get("id"),
             username=cached_user.get("username"),
-            full_name=cached_user.get("full_name", "")
+            full_name=cached_user.get("full_name", ""),
+            coins=cached_user.get("coins", 0) or 0
         )
         
     payload = decode_access_token(token)
@@ -255,7 +261,8 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
         cache_mgr.set_user_token(token, {
             "id": user.id,
             "username": user.username,
-            "full_name": getattr(user, "full_name", "") or ""
+            "full_name": getattr(user, "full_name", "") or "",
+            "coins": getattr(user, "coins", 0) or 0
         }, ttl=1800)
         
     return user
@@ -1068,22 +1075,23 @@ def continue_comic(request: ComicContinueRequest, db: Session = Depends(get_db),
             ComicPanel.comic_id == comic.id
         ).order_by(ComicPanel.panel_index).all()
         
-        existing_count = len(existing_panels)
+        existing_count = len(existing_panels) if existing_panels else 0
 
         # Quota and Monetization Rule:
         # First 12 panels (3 batches of 4) are FREE.
         # From batch 4 onward (existing_count >= 12), costs 100 coins for each 4-panel batch.
+        user_coins = (current_user.coins if (current_user and current_user.coins is not None) else 0)
         if existing_count >= 12:
-            if current_user.coins < 100:
+            if user_coins < 100:
                 return JSONResponse(
                     status_code=402,
                     content={
                         "status": "error",
                         "code": 402,
                         "error_code": "INSUFFICIENT_COINS",
-                        "message": f"Bạn đã dùng hết 12 khung tranh miễn phí (3 lần). Cần 100 xu để tạo tiếp 4 khung tranh. Số dư hiện tại: {current_user.coins} xu.",
+                        "message": f"Bạn đã dùng hết 12 khung tranh miễn phí (3 lần). Cần 100 xu để tạo tiếp 4 khung tranh. Số dư hiện tại: {user_coins} xu.",
                         "required_coins": 100,
-                        "current_coins": current_user.coins
+                        "current_coins": user_coins
                     }
                 )
             
@@ -1098,7 +1106,7 @@ def continue_comic(request: ComicContinueRequest, db: Session = Depends(get_db),
         
         previous_summary = " -> ".join([
             f"Panel {p.panel_index}: {p.dialogue_text}" 
-            for p in existing_panels[-6:] if p.dialogue_text
+            for p in (existing_panels[-6:] if existing_panels else []) if p.dialogue_text
         ])
         max_index = max([p.panel_index for p in existing_panels]) if existing_panels else 0
         
@@ -1117,17 +1125,17 @@ def continue_comic(request: ComicContinueRequest, db: Session = Depends(get_db),
         comic.adapted_offset = current_offset + chunk_len
         db.commit()
         
-        total_panels_now = existing_count + len(panels_response)
-        has_more = len(request.story_text) > comic.adapted_offset
+        total_panels_now = (existing_count or 0) + len(panels_response or [])
+        has_more = len(request.story_text) > (comic.adapted_offset or 0)
         
         return {
             "status": "success",
             "comic_id": comic.id,
             "panels": panels_response,
             "total_panels": total_panels_now,
-            "free_batches_left": max(0, 3 - (total_panels_now // 4)),
-            "next_cost": 0 if total_panels_now < 12 else 100,
-            "adapted_offset": comic.adapted_offset,
+            "free_batches_left": max(0, 3 - ((total_panels_now or 0) // 4)),
+            "next_cost": 0 if (total_panels_now or 0) < 12 else 100,
+            "adapted_offset": comic.adapted_offset or 0,
             "has_more": has_more
         }
     except HTTPException as he:
@@ -1159,7 +1167,7 @@ def continue_comic(request: ComicContinueRequest, db: Session = Depends(get_db),
 
 @app.get("/api/comic/image/{panel_id}")
 @app.get("/api/comics/panels/{panel_id}/image")
-def get_comic_image(panel_id: int, retry: int = 0, db: Session = Depends(get_db)):
+def get_comic_image(panel_id: int, retry: int = 0, refresh: bool = False, db: Session = Depends(get_db)):
     """Proxies comic panel image generation with local disk cache and image-provider fallback."""
     panel = db.query(ComicPanel).filter(ComicPanel.id == panel_id).first()
     if not panel:
@@ -1181,9 +1189,9 @@ def get_comic_image(panel_id: int, retry: int = 0, db: Session = Depends(get_db)
             cultural_tier=getattr(bible, "cultural_tier", None),
             narrative_mode=getattr(bible, "narrative_mode", None),
             genre=str(getattr(bible, "genre", "") or (story.genre if story else "") or ""),
-            force_refresh=retry > 0,
+            force_refresh=refresh,
         )
-        headers = {"Cache-Control": "no-store"} if retry > 0 else None
+        headers = {"Cache-Control": "public, max-age=86400"}
         return Response(content=img_bytes, media_type=media_type, headers=headers)
     except Exception as e:
         print(f"[Comic Image] Generation failed for panel {panel_id}: {e}")

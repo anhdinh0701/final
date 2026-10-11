@@ -201,31 +201,24 @@ def get_cached_or_generate_image(
     Returns (image_bytes, media_type).
     """
     cache_path = os.path.join(CACHE_DIR, f"panel_{panel_id}.jpg")
-    
-    # A retry must not serve the image that just failed at the client, even if
-    # it happens to be a valid image payload in the local cache.
-    if force_refresh:
-        try:
-            os.remove(cache_path)
-        except FileNotFoundError:
-            pass
-        except Exception as e:
-            print(f"[Comic Cache] Could not clear cached panel_{panel_id} before retry: {e}")
 
     panel_lock = _get_panel_lock(panel_id)
     with panel_lock:
-        # 1. Check local persistent disk cache unless the user explicitly retried.
-        if not force_refresh and os.path.isfile(cache_path) and os.path.getsize(cache_path) > 1000:
+        # 1. ALWAYS check local persistent disk cache first.
+        # If a valid image already exists on disk (whether completed in background or cached),
+        # return it immediately (sub-second response) without overloading the GPU/tunnel.
+        if os.path.isfile(cache_path) and os.path.getsize(cache_path) > 1000:
             try:
                 with open(cache_path, "rb") as f:
                     img_bytes = f.read()
                 if _is_valid_image_payload(img_bytes):
                     media_type = "image/jpeg" if img_bytes[:2] == b'\xff\xd8' else "image/png"
                     return img_bytes, media_type
-                print(f"[Comic Cache] Cached panel_{panel_id} is not a valid image; regenerating")
-                os.remove(cache_path)
-            except FileNotFoundError:
-                pass
+                print(f"[Comic Cache] Cached panel_{panel_id} payload is corrupted; purging")
+                try:
+                    os.remove(cache_path)
+                except Exception:
+                    pass
             except Exception as e:
                 print(f"[Comic Cache] Failed to read cached panel_{panel_id}: {e}")
 

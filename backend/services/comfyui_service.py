@@ -78,6 +78,8 @@ KNOWN_LORAS_CATALOG = {
     }
 }
 
+_comfyui_gpu_lock = threading.Lock()
+
 
 class ComfyUIService:
     """
@@ -469,7 +471,7 @@ class ComfyUIService:
 
         while time.time() - start_time < max_time:
             try:
-                resp = requests.get(url, headers=self._get_headers(), timeout=3)
+                resp = requests.get(url, headers=self._get_headers(), timeout=10)
                 if resp.status_code == 200:
                     consecutive_errors = 0
                     history = resp.json()
@@ -503,15 +505,17 @@ class ComfyUIService:
                             raise RuntimeError(f"ComfyUI prompt {prompt_id} completed without image outputs")
                 else:
                     consecutive_errors += 1
+                    time.sleep(1.0)
             except RuntimeError:
                 raise
             except Exception as e:
                 consecutive_errors += 1
-                print(f"[ComfyUI] Polling history notice: {e}")
-                if consecutive_errors >= 10:
+                print(f"[ComfyUI] Polling history notice (attempt {consecutive_errors}/30): {e}")
+                if consecutive_errors >= 30:
                     raise ConnectionError(f"Lost connection to ComfyUI at {self.base_url} while polling prompt {prompt_id}: {e}")
+                time.sleep(1.5)
 
-            time.sleep(0.8)
+            time.sleep(2.0)
 
         raise TimeoutError(f"ComfyUI prompt execution timed out after {max_time}s (prompt_id: {prompt_id})")
 
@@ -551,6 +555,7 @@ class ComfyUIService:
         3. Submit prompt to ComfyUI
         4. Poll for output completion
         5. Fetch image bytes and return
+        Acquires _comfyui_gpu_lock to prevent concurrent GPU/tunnel collisions.
         """
         width, height = LAYOUT_MAP_DIMS(layout_type)
 
@@ -566,15 +571,16 @@ class ComfyUIService:
             cfg=cfg
         )
 
-        prompt_id = self.queue_prompt(workflow)
-        print(f"[ComfyUI] Queued manga generation prompt_id={prompt_id}, dims={width}x{height}, seed={seed}, loras={len(loras or [])}")
+        with _comfyui_gpu_lock:
+            prompt_id = self.queue_prompt(workflow)
+            print(f"[ComfyUI] Queued manga generation prompt_id={prompt_id}, dims={width}x{height}, seed={seed}, loras={len(loras or [])}")
 
-        filename, subfolder, folder_type = self.poll_for_image_output(prompt_id)
-        if not filename:
-            raise RuntimeError(f"ComfyUI completed without output image for prompt_id={prompt_id}")
+            filename, subfolder, folder_type = self.poll_for_image_output(prompt_id)
+            if not filename:
+                raise RuntimeError(f"ComfyUI completed without output image for prompt_id={prompt_id}")
 
-        img_bytes = self.fetch_image_bytes(filename, subfolder, folder_type)
-        return img_bytes
+            img_bytes = self.fetch_image_bytes(filename, subfolder, folder_type)
+            return img_bytes
 
 
 def LAYOUT_MAP_DIMS(layout_type: str) -> Tuple[int, int]:

@@ -40,16 +40,29 @@ function parseComicDialogue(rawText: string) {
   return { speaker: null, text: clean, isDialogue: false };
 }
 
-function ComicPanelFrame({ panel, t, lang, slot, eager }: {
+function ComicPanelFrame({
+  panel,
+  t,
+  lang,
+  slot,
+  globalIndex,
+  canLoad,
+  activeQueueIndex,
+  onPanelDone,
+}: {
   panel: ComicPanel;
   t: (typeof translations)[Language];
   lang: Language;
   slot: number;
-  eager: boolean;
+  globalIndex: number;
+  canLoad: boolean;
+  activeQueueIndex: number;
+  onPanelDone: () => void;
 }) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
+  const [manualTrigger, setManualTrigger] = useState(false);
 
   const parsed = parseComicDialogue(panel.dialogue_text || "");
   const dialogueText = parsed.text || sanitizeComicCaption(panel.dialogue_text || "");
@@ -59,20 +72,38 @@ function ComicPanelFrame({ panel, t, lang, slot, eager }: {
   const panelIdentifier = panel.id || panel.panel_id;
   const rawUrl = panel.image_url || (panelIdentifier ? `/api/comic/image/${panelIdentifier}` : "");
   const fullUrl = rawUrl ? api.getComicImageUrl(rawUrl) : "";
-  const imageUrl = fullUrl
-    ? `${fullUrl}${fullUrl.includes("?") ? "&" : "?"}v=${retryKey}&retry=${retryKey}&t=${retryKey}&refresh=${retryKey > 0 ? "true" : "false"}`
+
+  // Sequential loading: only fetch image when it's this panel's turn, or manually triggered, or already loaded
+  const shouldFetch = (canLoad || manualTrigger || loaded) && !!fullUrl;
+  const imageUrl = shouldFetch
+    ? `${fullUrl}${fullUrl.includes("?") ? "&" : "?"}v=${retryKey}`
     : "";
-  const imageFailed = !imageUrl || error;
+  const imageFailed = !fullUrl || error;
 
   return (
     <figure className="manga-panel relative" data-slot={slot}>
       <div className={`manga-artwork relative overflow-hidden ${imageFailed ? "has-error" : ""}`}>
-        {/* Loading overlay when waiting for ComfyUI GPU generation */}
-        {imageUrl && !loaded && !error && (
+        {/* Queued state: waiting for preceding panel in sequence to finish rendering */}
+        {!shouldFetch && !loaded && !error && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-neutral-100/90 dark:bg-neutral-900/90 backdrop-blur-xs font-mono z-10">
+            <div className="w-2.5 h-2.5 rounded-full bg-neutral-400 dark:bg-neutral-500 animate-pulse mb-2.5" />
+            <span className="text-xs font-bold text-neutral-600 dark:text-neutral-400 uppercase tracking-wider">
+              {lang === "vi" ? `[CHỜ GPU: KHUNG ${globalIndex + 1}]` : `[QUEUED: PANEL ${globalIndex + 1}]`}
+            </span>
+            <p className="mt-1.5 text-[11px] text-neutral-400 dark:text-neutral-500 max-w-xs">
+              {lang === "vi"
+                ? `Đang xếp hàng kết xuất (Khung ${activeQueueIndex + 1} đang vẽ...)`
+                : `Waiting in GPU rendering queue...`}
+            </p>
+          </div>
+        )}
+
+        {/* Active rendering overlay when this panel is actively being generated via GPU */}
+        {shouldFetch && imageUrl && !loaded && !error && (
           <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-neutral-100/90 dark:bg-neutral-900/90 backdrop-blur-xs font-mono z-10 animate-fadeIn">
             <RefreshCw className="w-5 h-5 animate-spin text-black dark:text-white mb-2" />
             <span className="text-xs font-bold text-black dark:text-white uppercase tracking-wider">
-              {lang === "vi" ? "Đang tạo tranh ComfyUI..." : "Generating Manga..."}
+              {lang === "vi" ? `Đang tạo tranh ComfyUI... (Khung ${globalIndex + 1})` : `Generating Manga... (Panel ${globalIndex + 1})`}
             </span>
             <p className="mt-1 text-[11px] text-neutral-500 max-w-xs">
               {lang === "vi"
@@ -82,26 +113,29 @@ function ComicPanelFrame({ panel, t, lang, slot, eager }: {
           </div>
         )}
 
-        {imageUrl && !error ? (
+        {shouldFetch && imageUrl && !error ? (
           <img
             src={imageUrl}
             alt={dialogueText || `Manga panel ${panel.panel_index}`}
-            loading={eager ? "eager" : "lazy"}
+            loading="eager"
             decoding="async"
             className={loaded ? "is-loaded" : "is-loading opacity-0"}
             onLoad={() => {
               setLoaded(true);
               setError(false);
+              onPanelDone();
             }}
             onError={() => {
-              if (retryKey < 5) {
-                // Auto-retry after 5s to allow queued GPU jobs to complete
+              if (retryKey < 3) {
+                // Auto-retry with 4s delay to allow queued GPU jobs to complete
                 setTimeout(() => {
                   setError(false);
                   setRetryKey((k) => k + 1);
-                }, 5000);
+                }, 4000);
               } else {
                 setError(true);
+                // Unblock queue so other panels can continue
+                onPanelDone();
               }
             }}
           />
@@ -117,12 +151,13 @@ function ComicPanelFrame({ panel, t, lang, slot, eager }: {
                 ? "Máy chủ hình ảnh hoặc ComfyUI chưa sẵn sàng." 
                 : "Image renderer or ComfyUI is not ready."}
             </p>
-            {imageUrl && (
+            {fullUrl && (
               <button
                 type="button"
                 onClick={() => {
                   setError(false);
                   setLoaded(false);
+                  setManualTrigger(true);
                   setRetryKey((k) => k + 1);
                 }}
                 className="mt-3 flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-bold uppercase rounded border border-neutral-400 bg-white text-black hover:bg-neutral-100 dark:border-neutral-700 dark:bg-black dark:text-white dark:hover:bg-neutral-900 transition-colors cursor-pointer active:scale-95 shadow-xs"
@@ -157,12 +192,13 @@ function ComicPanelFrame({ panel, t, lang, slot, eager }: {
               <span className="text-[11px] font-mono text-neutral-500">
                 {lang === "vi" ? "Chưa tải được ảnh." : "Failed to load image."}
               </span>
-              {imageUrl && (
+              {fullUrl && (
                 <button
                   type="button"
                   onClick={() => {
                     setError(false);
                     setLoaded(false);
+                    setManualTrigger(true);
                     setRetryKey((k) => k + 1);
                   }}
                   className="text-xs font-mono font-bold underline text-black dark:text-neutral-900 cursor-pointer ml-1.5"
@@ -173,7 +209,9 @@ function ComicPanelFrame({ panel, t, lang, slot, eager }: {
             </div>
           ) : !loaded ? (
             <span className="manga-image-status block mt-1 text-[11px] font-mono text-neutral-400 animate-pulse">
-              {lang === "vi" ? "Đang kết nối ComfyUI & tạo tranh..." : t.loading_comic}
+              {shouldFetch 
+                ? (lang === "vi" ? `Đang kết nối ComfyUI & tạo khung ${globalIndex + 1}...` : t.loading_comic)
+                : (lang === "vi" ? `Đang chờ tới lượt vẽ GPU (Khung ${globalIndex + 1})...` : "Queued...")}
             </span>
           ) : null}
         </figcaption>
@@ -228,6 +266,13 @@ export function ComicViewer({
   const isFreeTier = totalPanels < 12;
   const remainingFreeBatches = Math.max(0, 3 - Math.floor(totalPanels / 4));
   const currentBatchNumber = Math.min(3, Math.floor(totalPanels / 4) + 1);
+
+  // Sequential rendering queue: renders panels sequentially to eliminate concurrent GPU/tunnel contention
+  const [activeQueueIndex, setActiveQueueIndex] = useState(0);
+
+  const handlePanelDone = (globalIndex: number) => {
+    setActiveQueueIndex((prev) => Math.max(prev, globalIndex + 1));
+  };
 
   const [comfyStatus, setComfyStatus] = useState<{ available: boolean } | null>(null);
 
@@ -351,16 +396,22 @@ export function ComicViewer({
                 </span>
                 <span className="text-neutral-500">NarrAI 2D Manga Studio</span>
               </div>
-              {page.map((panel, panelIndex) => (
-                <ComicPanelFrame
-                  key={panel.panel_id || `${pageIndex}-${panelIndex}`}
-                  panel={panel}
-                  t={t}
-                  lang={lang}
-                  slot={panelIndex + 1}
-                  eager={pageIndex === 0}
-                />
-              ))}
+              {page.map((panel, panelIndex) => {
+                const globalIndex = pageIndex * 4 + panelIndex;
+                return (
+                  <ComicPanelFrame
+                    key={panel.id || panel.panel_id || `${pageIndex}-${panelIndex}`}
+                    panel={panel}
+                    t={t}
+                    lang={lang}
+                    slot={panelIndex + 1}
+                    globalIndex={globalIndex}
+                    canLoad={globalIndex <= activeQueueIndex}
+                    activeQueueIndex={activeQueueIndex}
+                    onPanelDone={() => handlePanelDone(globalIndex)}
+                  />
+                );
+              })}
             </section>
           ))}
         </div>

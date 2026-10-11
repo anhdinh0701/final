@@ -1208,7 +1208,7 @@ def get_comic_image(panel_id: int, retry: int = 0, refresh: bool = False, db: Se
             cultural_tier=getattr(bible, "cultural_tier", None),
             narrative_mode=getattr(bible, "narrative_mode", None),
             genre=str(getattr(bible, "genre", "") or (story.genre if story else "") or ""),
-            force_refresh=bool(refresh or (retry > 0)),
+            force_refresh=bool(refresh),
         )
         headers = {"Cache-Control": "public, max-age=86400"}
         return Response(content=img_bytes, media_type=media_type, headers=headers)

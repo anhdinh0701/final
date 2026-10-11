@@ -407,13 +407,11 @@ export const api = {
   // Coins & Banking
   async getCoinsBalance(): Promise<{ status: string; coins?: number; balance?: number }> {
     try {
-      const res = await fetch(`${API_BASE_URL}/balance`, { headers: authHeaders() });
-      if (!res.ok) {
-        const fallbackRes = await fetch(`${API_BASE_URL}/coins/balance`, { headers: authHeaders() });
-        if (fallbackRes.ok) return fallbackRes.json();
-        return { status: 'error', coins: 0 };
-      }
-      return res.json();
+      const res = await fetch(`${API_BASE_URL}/coins/balance`, { headers: authHeaders() });
+      if (res.ok) return res.json();
+      const fallbackRes = await fetch(`${API_BASE_URL}/balance`, { headers: authHeaders() });
+      if (fallbackRes.ok) return fallbackRes.json();
+      return { status: 'error', coins: 0 };
     } catch {
       return { status: 'error', coins: 0 };
     }

@@ -486,6 +486,23 @@ def read_users_me(current_user: User = Depends(get_current_user)):
         "full_name": current_user.full_name or current_user.username
     }
 
+@app.get("/api/balance")
+def get_user_balance_alias(
+    current_user: Optional[User] = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Chưa đăng nhập (Not logged in)")
+    user = db.query(User).filter(User.id == current_user.id).first()
+    coins = user.coins if user and user.coins is not None else (current_user.coins or 0)
+    return {
+        "status": "success",
+        "user_id": current_user.id,
+        "username": current_user.username,
+        "coins": coins,
+        "balance": coins,
+    }
+
 # ============ CORE ENDPOINTS ============
 
 @app.post("/api/chat-interview")

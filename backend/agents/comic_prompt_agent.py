@@ -2,6 +2,10 @@ import os
 import json
 import re
 from typing import Dict, Any, List, Optional, Tuple
+from dotenv import load_dotenv
+
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"))
+
 from llm.groq_client import GroqClient
 from agents.story_memory import StoryMemory
 

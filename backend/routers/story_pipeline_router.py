@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 import logging
 
 from db.models import User
-from auth import get_current_user
+from auth import decode_access_token
 from services.story_pipeline_manager import StoryPipelineManager
 
 logger = logging.getLogger("narrai.story_pipeline_router")

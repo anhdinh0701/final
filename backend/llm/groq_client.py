@@ -47,28 +47,43 @@ class GroqClient:
         messages.append({"role": "user", "content": prompt})
         return self.chat(messages, temperature=temperature, max_tokens=max_tokens, response_format=response_format)
 
+    FALLBACK_MODELS = [
+        "openai/gpt-oss-20b",
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.8-27b",
+        "allam-2-7b",
+    ]
+
     def chat(self, messages, temperature=0.7, max_tokens=2000, response_format=None):
-        """Send message to Groq LLM"""
-        safe_max_tokens = self._safe_max_tokens(messages, max_tokens)
-        budgets = self._retry_budgets(safe_max_tokens)
+        """Send message to Groq LLM with multi-model rate-limit resilience"""
+        models_to_try = [self.model] + [m for m in self.FALLBACK_MODELS if m != self.model]
         last_error = None
-        for index, budget in enumerate(budgets):
-            params = {
-                "model": self.model,
-                "messages": messages,
-                "temperature": temperature,
-                "max_tokens": budget,
-            }
-            if response_format:
-                params["response_format"] = response_format
-            try:
-                response = self.client.chat.completions.create(**params)
-                return response.choices[0].message.content
-            except Exception as error:
-                last_error = error
-                if not self._is_request_too_large(error) or index == len(budgets) - 1:
-                    raise
-                time.sleep(0.25)
+
+        for model_candidate in models_to_try:
+            safe_max_tokens = self._safe_max_tokens(messages, max_tokens)
+            budgets = self._retry_budgets(safe_max_tokens)
+            
+            for index, budget in enumerate(budgets):
+                params = {
+                    "model": model_candidate,
+                    "messages": messages,
+                    "temperature": temperature,
+                    "max_tokens": budget,
+                }
+                if response_format:
+                    params["response_format"] = response_format
+                try:
+                    response = self.client.chat.completions.create(**params)
+                    return response.choices[0].message.content
+                except Exception as error:
+                    last_error = error
+                    err_msg = str(error).lower()
+                    if "rate_limit" in err_msg or "429" in err_msg or "tokens per day" in err_msg:
+                        # Break budget loop to immediately switch to next model candidate
+                        break
+                    if not self._is_request_too_large(error) or index == len(budgets) - 1:
+                        raise
+                    time.sleep(0.25)
         raise last_error
 
     def chat_stream(self, messages, temperature=0.7, max_tokens=2000):

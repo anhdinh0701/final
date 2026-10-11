@@ -33,15 +33,15 @@ except ImportError:
         normalize_cultural_tier = lambda x: 1
 
 
-# STRICT style prefix and suffix to force Diffusion model attention to Modern Monochrome School Manga
+# STRICT style prefix and suffix to force Diffusion model attention to Authentic 2D Monochrome Anime Manga Lineart
 STYLE_PREFIX = (
-    "masterpiece monochrome Japanese manga illustration, professional manga comic art, "
-    "crisp clean black and white ink lineart, "
+    "masterpiece 2D Japanese anime manga illustration, clean monochrome black ink lineart, "
+    "official anime comic art, sharp cel shaded line art, "
 )
 STYLE_SUFFIX = (
-    ", clean G-pen lineart, delicate screentone shading, fine dot pattern tones, "
-    "high contrast black ink on bright white paper, no color, pure monochrome, "
-    "studio quality 2D manga illustration, expressive anime aesthetic, sharp contours"
+    ", clean G-pen ink lineart, authentic manga screentone shading, fine dot pattern tones, "
+    "high contrast black ink on crisp white paper, pure monochrome, "
+    "2D anime manga drawing, expressive anime character design, sharp contours, single panel composition, no realistic portrait"
 )
 
 
@@ -134,41 +134,59 @@ Return ONLY a valid JSON object:
 """
 
 # ==================== BEAT-BY-BEAT MANGA DIRECTOR ====================
-BEAT_DIRECTOR_PROMPT = """You are a professional manga director and storyboard artist specializing in clear sequential storytelling, expressive acting, and readable panel composition.
+BEAT_DIRECTOR_PROMPT = """You are a master manga director and storyboard artist specializing in cohesive sequential storytelling, strict character continuity, and expressive anime manga panel composition.
 
-YOUR MISSION: Faithfully adapt the provided Vietnamese story text into a SEQUENTIAL, BEAT-BY-BEAT MANGA SCRIPT.
+YOUR MISSION: Faithfully adapt the provided Vietnamese story text into EXACTLY 4 SEQUENTIAL, COHESIVE MANGA PANELS that tell a single, continuous, connected scene.
 
-ABSOLUTE CRITICAL RULES:
-1. NO SKIPPING / NO SUMMARIZING: DO NOT summarize several paragraphs into one generic panel! Adapt EVERY significant exchange, dialogue line, reaction, and physical action into sequential panels.
-   - If Character A says something and Character B responds, that is AT LEAST 2 sequential panels (Speaker A -> Reaction/Reply B).
-   - If an action or dramatic gesture occurs (e.g. someone stands up, looks out the window, draws a breath, opens a door), give it its own panel.
-2. CHARACTER CONSISTENCY: Every panel featuring a character MUST name each visible character and describe their exact hair, face, and signature costume from the CHARACTER REGISTRY in `image_prompt`. Do NOT change character clothing, age, or hairstyle across panels. Do not add characters who are not in the story beat.
-3. SETTING & BACKGROUND CONSISTENCY: Identify the location of each individual story beat. Reuse the matching architecture, lighting, and persistent props from the SETTING REGISTRY for scenes in that location. For a different location, describe that location from the story instead of forcing the primary setting into the panel.
-4. IMAGE PROMPT (English): Under 65 words. Every prompt MUST describe the visible subject(s), their physical action and expression, camera framing, and concrete background/environment details. Avoid abstract-only prompts, empty establishing scenes where a character is acting, generic "manga scene", and details unsupported by the story.
-5. COMPLETE DIALOGUE & CAPTION TEXT (Vietnamese):
-   - TUYỆT ĐỐI CẤM SỬ DỤNG DẤU BA CHẤM (..., …, .....) VÀ CẮT XÉN: Nghiêm cấm tuyệt đối mọi dấu ba chấm hoặc chuỗi chấm lửng ở giữa câu hoặc cuối câu. Không được để câu nói cụt, đứt đoạn, hay lửng lơ.
-   - Mọi lời thoại và lời dẫn dưới mỗi khung tranh BẮT BUỘC là câu nói hoàn chỉnh, giàu cảm xúc, ngữ pháp trọn vẹn và kết thúc bằng dấu câu chuẩn mực: dấu chấm (.), dấu chấm than (!), hoặc dấu chấm hỏi (?).
-   - Nếu nhân vật ngập ngừng hay ngắt nhịp cảm xúc, sử dụng dấu gạch nối ( - ) hoặc dấu phẩy (,) để giữ trọn ý nghĩa và nhịp điệu cảm xúc mà không dùng dấu ba chấm.
-   - Định dạng chuẩn: `[Tên nhân vật]: "[Câu thoại trọn vẹn giàu cảm xúc]"` hoặc câu độc thoại/dẫn chuyện hoàn chỉnh.
-6. LAYOUT TYPE: Choose dynamically:
-   - "wide": for establishing rooms, wide action scenes, panoramic moments.
-   - "tall": for dramatic full-body poses, towering figures, intense emotional heights.
-   - "square": for dialogues, face-to-face exchanges, medium shots.
+ABSOLUTE CRITICAL RULES FOR VISUAL & CHARACTER CONSISTENCY:
+1. UNIFIED 2D ANIME MANGA ART STYLE:
+   - All panels MUST be generated in pure 2D Japanese anime manga style with clean ink lineart, delicate screentone shading, and cel shading.
+   - Absolutely NO realistic portraits, NO 3D, NO pencil sketch drawings, NO graphite portraits, NO collage or multi-frame layouts in a single panel.
+2. STRICT CHARACTER CONTINUITY:
+   - Identify the characters in the story (e.g. Duy, An, or the protagonist).
+   - In `image_prompt`, EVERY panel featuring a character MUST use their EXACT same physical DNA description from the CHARACTER REGISTRY (exact face, hair style/color, age, and signature outfit).
+   - NEVER switch outfits, hairstyles, or artistic styles between panels.
+3. SCENE & ENVIRONMENT CONTINUITY:
+   - The 4 panels MUST depict the sequential flow of the EXACT SAME story scene from the text (e.g. if it is a rainy night by the window with a contract, keep the rain on the window, the moody lighting, and the room environment consistent across all 4 panels).
+   - Panel 1: Establishing scene & mood (wide/medium shot introducing the character in their environment).
+   - Panel 2: Key action / gesture / focus (character holding document, looking intently, starting dialogue).
+   - Panel 3: Emotional dialogue / reaction / rising drama (medium close-up of intense facial expression, interacting).
+   - Panel 4: Impactful turning point / cliffhanger / resolution of this beat (dramatic angle, decisive posture, powerful closing thought).
+4. COMPLETE DIALOGUE & CONTEXT SUBTITLE (VIETNAMESE):
+   - NO TRUNCATION / NO ELLIPSES (...): Every dialogue and caption MUST be a complete, grammatically sound, expressive Vietnamese sentence ending with (.), (!), or (?).
+   - If there is a speaker, format clearly as: `[Tên nhân vật]: "[Câu thoại trọn vẹn giàu cảm xúc]"` (e.g. `Duy: "Tôi đã ký tên trên tờ giấy, không còn đường quay lại."`).
+   - If it is narrative description, provide a vivid, engaging narrator sentence (e.g. `Mưa rơi không ngớt bên ngoài khung cửa kính mờ, giam hãm mọi thanh âm trong sự tĩnh lặng nặng nề.`).
+5. IMAGE PROMPT (ENGLISH):
+   - Concise prompt under 55 words: `[Character Visual DNA], [Specific Action & Expression], [Environment details], [Camera framing], [2D manga lineart]`.
+   - Never use "realistic", "pencil sketch", "portrait drawing", "multi-panel".
 
 OUTPUT FORMAT:
-Return ONLY a valid JSON array of panel objects:
+Return ONLY a valid JSON array of 4 panel objects:
 [
   {
     "panel_index": 1,
-    "image_prompt": "wide establishing shot of a quiet sunlit classroom, wooden desks neatly arranged beside large glass windows, morning light casting soft diagonal shadows across the floor",
-    "dialogue_text": "Hôm nay là một ngày thật đặc biệt đối với tôi.",
+    "image_prompt": "young Vietnamese protagonist with neat dark hair and expressive dark eyes wearing casual jacket and white shirt, standing near large rain-streaked window looking out at gloomy storm, moody 2D anime manga screentone",
+    "dialogue_text": "Mưa rơi không ngớt, từng giọt va vào kính mờ tạo thành bức tường âm thanh ngăn cách với thế giới bên ngoài.",
     "layout_type": "wide"
   },
   {
     "panel_index": 2,
-    "image_prompt": "medium close-up shot of the young student turning around with a bright, curious smile, sitting at the wooden desk near the window",
-    "dialogue_text": "An: \\\\\"Chào bạn, chúng ta cùng nhau cố gắng nhé!\\\\\"",
+    "image_prompt": "young Vietnamese protagonist with neat dark hair and expressive dark eyes wearing casual jacket and white shirt, sitting at wooden desk holding pen over a signed document with resolute focused gaze, medium shot 2D manga lineart",
+    "dialogue_text": "Duy: \\\"Tôi đã ký tên trên tờ giấy, không còn đường quay lại.\\\"",
     "layout_type": "square"
+  },
+  {
+    "panel_index": 3,
+    "image_prompt": "young Vietnamese protagonist with neat dark hair and expressive dark eyes wearing casual jacket and white shirt, close-up intense profile view, sharp determined eyes, dramatic manga contrast",
+    "dialogue_text": "Duy: \\\"Nếu không có tôi, họ sẽ không bao giờ biết được sự thật phía sau bóng tối này.\\\"",
+    "layout_type": "square"
+  },
+  {
+    "panel_index": 4,
+    "image_prompt": "young Vietnamese protagonist with neat dark hair and expressive dark eyes wearing casual jacket and white shirt, standing tall against the night window, clenching fist with unyielding resolve, dramatic low angle 2D manga",
+    "dialogue_text": "Duy: \\\"Dù phải trả bất cứ giá nào, tôi cũng sẽ đi đến cùng con đường đã chọn!\\\"",
+    "layout_type": "tall"
+  }
 ]
 """
 
@@ -290,8 +308,13 @@ def resolve_spatial_enclosure(
         }
 
     if not matched_enc:
-        matched_enc = dict(SPATIAL_ENCLOSURES["classroom"])
-        matched_enc["key"] = "classroom"
+        dynamic_anchor = sdna.get("setting_anchor") or "detailed atmospheric story setting"
+        matched_enc = {
+            "key": "dynamic_scene",
+            "detection_keywords": [],
+            "anchor_description": dynamic_anchor,
+            "forbidden_spatial_tokens": sdna.get("forbidden_spatial_tokens", [])
+        }
 
     # If setting_dna provides specific forbidden tokens from DSGO, merge them in cleanly
     if sdna.get("forbidden_spatial_tokens"):
@@ -305,14 +328,14 @@ def resolve_spatial_enclosure(
 def sanitize_spatial_prompt(prompt: str, enclosure: dict = None) -> str:
     """
     Spatial Quarantine Filter:
-    Strips conflicting/outdoor/traffic/ancient/weapon keywords (street, road, highway, car, bus, traffic, palace, sword)
-    before rendering indoor classroom scenes, while strictly preserving subwords like 'classroom', 'cardigan', and 'scarf'.
+    Strips conflicting keywords for specific enclosures while strictly preserving valid subwords.
     Handles modifiers, prepositions, irregular plurals, and collapses consecutive commas cleanly.
     """
     if not prompt or not isinstance(prompt, str):
         return ""
-    if enclosure is None:
-        enclosure = SPATIAL_ENCLOSURES["classroom"]
+    if enclosure is None or enclosure.get("key") == "dynamic_scene":
+        # Keep clean story tokens for dynamic scenes
+        return re.sub(r'[,.\s]*,[,.\s]*', ', ', prompt).strip(' ,.-')
 
     clean = prompt
     forbidden = enclosure.get("forbidden_spatial_tokens", [])
@@ -348,6 +371,7 @@ def sanitize_spatial_prompt(prompt: str, enclosure: dict = None) -> str:
     clean = re.sub(r'\s{2,}', ' ', clean).strip(' ,.-')
     return clean
 
+
 # ==================== VIETNAMESE NEGATION & PROHIBITION GUARD ====================
 VIETNAMESE_NEGATION_WORDS = {
     "không", "chẳng", "chưa", "đừng", "cấm", "ngừng", "thôi", "chớ", "ko", "k"
@@ -358,67 +382,63 @@ def is_action_negated(text: str, match_start: int) -> bool:
     """
     Checks if a matched action phrase is preceded by a Vietnamese negation or prohibition word
     within the same clause (inspects up to 6 words preceding match_start).
-    Prevents negated actions (e.g., 'không nhìn ra cửa sổ') and dialogue reprimands
-    (e.g., 'đừng có quay sang nói chuyện') from triggering visual gestures.
     """
     pre_text = text[:match_start]
-    # Split by clause boundaries to isolate the immediate clause containing the match
     clause_parts = re.split(CLAUSE_DELIMITERS_PATTERN, pre_text, flags=re.IGNORECASE)
     immediate_clause = clause_parts[-1] if clause_parts else ""
-    # Extract preceding words in the immediate clause
     words = re.findall(r'\b\w+\b', immediate_clause.lower())
     window_words = words[-6:] if len(words) > 6 else words
     return any(w in VIETNAMESE_NEGATION_WORDS for w in window_words)
 
 # ==================== ACTION & GESTURE SEMANTIC MAPPING ====================
 ACTION_GESTURE_MAPPINGS = [
-    # 1. Viết bài, làm việc tại bàn (Strictly requires pairing with viết, chép, ghi, vẽ, làm bài, vở, bài)
+    # 1. Ký tên, viết lách, làm việc với giấy tờ / tài liệu
     (
-        r'(?:cúi đầu|cặm cụi|chăm chú|lúi húi)\s*(?:[\w\s]{0,15})\b(?:viết|chép|ghi|vẽ|làm bài|ghi chép|vở|bài)\b',
-        'sitting at wooden student desk, head gently bowed down, writing attentively in a notebook with pen',
+        r'(?:cúi đầu|cặm cụi|chăm chú|ký tên|ký|đặt bút)\s*(?:[\w\s]{0,15})\b(?:viết|chép|ghi|giấy|văn bản|hợp đồng|tờ giấy|bản cam kết|bút)\b',
+        'holding pen attentively, writing or signing signature on paper document with serious focused gaze',
         'medium close-up'
     ),
-    # 2. Nhìn ra ngoài cửa sổ
+    # 2. Nhìn ra ngoài cửa sổ, ngắm mưa, nhìn bầu trời
     (
-        r'(?:nhìn|ngắm|hướng mắt|dõi theo)\s*(?:ra|qua)?\s*(?:cửa sổ|bầu trời|mây)',
-        'sitting beside the large classroom window, cheek resting on palm, gazing pensively through the glass at sky',
+        r'(?:nhìn|ngắm|hướng mắt|dõi theo)\s*(?:ra|qua)?\s*(?:cửa sổ|bầu trời|mây|mưa|màn đêm)',
+        'standing or sitting near window, looking out through glass at the weather, contemplative dramatic mood',
         'medium shot'
     ),
-    # 3. Quay sang nói chuyện với bạn cùng bàn
+    # 3. Quay sang nói chuyện, biểu cảm đối thoại
     (
         r'(?:quay|ngoảnh|xoay)\s*(?:người|lại|sang)\s*(?:nhìn|cười|nói|hỏi|trò chuyện)',
-        'turning slightly in chair toward desk mate, gentle warm smile, engaging direct eye contact',
+        'turning toward companion with expressive engaged reaction, dramatic anime dialogue pose',
         'over-the-shoulder shot'
     ),
-    # 4. Đứng bật dậy, đập bàn (Strict physical action; removes internal feeling 'kinh ngạc' and standalone thoughts)
+    # 4. Đứng bật dậy, quả quyết, kiên định
     (
-        r'(?:đứng\s*bật\s*dậy|đập\s*tay\s*(?:xuống)?\s*bàn)',
-        'standing up abruptly from desk, hands braced against wooden desktop, wide eyes with sudden realization',
+        r'(?:đứng\s*bật\s*dậy|đập\s*tay|nắm\s*chặt\s*tay|kiên\s*quyết|dứt\s*khoát)',
+        'standing tall with resolute posture, clenched fist, intense determined gaze',
         'dramatic low angle'
     ),
-    # 5. Bước vào lớp học, mở cửa
+    # 5. Bước vào phòng, mở cửa
     (
-        r'(?:bước\s*vào|mở\s*cửa|đứng\s*ở\s*cửa)\s*(?:lớp|phòng)',
-        'standing in the open sliding classroom doorway, holding school backpack strap, stepping inside',
+        r'(?:bước\s*vào|mở\s*cửa|đứng\s*ở\s*cửa)\s*(?:phòng|nhà|sảnh)',
+        'stepping forward through doorway into room, dynamic entrance posture',
         'wide establishing shot'
     ),
-    # 6. Gục đầu xuống bàn (Requires pairing 'thở dài' with gục, bàn, nằm)
+    # 6. Suy tư, dằn vặt, thở dài
     (
-        r'(?:gục đầu|úp mặt|nằm gục)\s*(?:xuống)?\s*(?:bàn)?|(?:thở dài)\s*(?:[\w\s]{0,15})\b(?:gục|bàn|nằm)\b|\b(?:gục|bàn|nằm)\b\s*(?:[\w\s]{0,15})\b(?:thở dài)\b',
-        'resting head down on folded arms upon wooden desk, soft melancholic expression, delicate hair framing face',
+        r'(?:gục đầu|úp mặt|thở dài|dằn vặt|trầm ngâm|suy tư)',
+        'lowered head in deep contemplation, conflicted emotional expression, moody shadows',
         'close-up'
     ),
-    # 7. Chuyền giấy, đưa đồ vật
+    # 7. Đưa đồ vật, trao đổi tài liệu
     (
-        r'(?:chuyền|đưa|trao|gửi)\s*(?:tờ giấy|mẩu tin|cuốn vở|cây bút|mẩu giấy)',
-        'hand delicately passing a small folded note across the wooden desk space toward classmate',
-        'tight focus on hands and note'
+        r'(?:chuyền|đưa|trao|gửi|cầm)\s*(?:tờ giấy|hồ sơ|tài liệu|vật|bức thư|chìa khóa)',
+        'holding and extending document with focused hand gesture',
+        'tight focus on hands and object'
     ),
-    # 8. Nhìn lên bảng đen
+    # 8. Ánh mắt kiên định, trực diện cao trào
     (
-        r'(?:nhìn|ngước|chú ý)\s*(?:lên)?\s*(?:bảng đen|bài giảng|thầy|cô)',
-        'looking forward toward the classroom blackboard, attentive expression, sitting upright at desk',
-        'medium shot'
+        r'(?:ánh mắt|nhìn thẳng|quyết tâm|không lùi bước|đối mặt)',
+        'intense profile close-up, sharp piercing eyes, dramatic black and white manga screentone contrast',
+        'dramatic close-up'
     ),
 ]
 

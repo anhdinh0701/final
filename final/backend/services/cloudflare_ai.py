@@ -25,11 +25,13 @@ CF_MODELS = [
     "@cf/stabilityai/stable-diffusion-xl-base-1.0",
 ]
 
-# Universal Base Negative Prompt: Banning colors, photorealism, Western comics, speech bubbles, and text/watermarks
+# Universal Base Negative Prompt: Banning colors, photorealism, realistic graphite portraits, Western comics, collage frames, speech bubbles, and text/watermarks
 BASE_NEGATIVE_PROMPT = (
     "color, colorful, vibrant, saturated, hue, tint, red, blue, green, yellow, pink, purple, "
-    "photorealistic, photograph, photo, realistic, 3d render, CGI, digital painting, oil painting, "
-    "watercolor, warm skin tones, western comic, american comic book style, superhero art style, "
+    "photorealistic, photograph, photo, realistic portrait, realistic pencil sketch, graphite drawing, "
+    "charcoal drawing, hyperrealistic, 3d render, CGI, digital painting, oil painting, watercolor, "
+    "warm skin tones, western comic, american comic book style, superhero art style, "
+    "multiple frames, collage, split image, multi panel comic, comic strip layout, border frame, "
     "heavy crosshatching, grunge, text, watermark, signature, font, letters, speech bubble, "
     "dialog balloon, bad anatomy, deformed hands, extra fingers, missing fingers, mutated limbs, "
     "distorted face, blurry, low resolution, messy draft, sketch lines"

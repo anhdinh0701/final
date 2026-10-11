@@ -13,7 +13,8 @@ import {
   CheckCircle2, 
   PlusCircle, 
   BookOpen, 
-  PenTool 
+  PenTool,
+  MessageSquareQuote
 } from "lucide-react";
 
 interface Props {
@@ -28,6 +29,28 @@ interface Props {
   onOpenCoinModal?: () => void;
 }
 
+function parseComicDialogue(rawText: string) {
+  const clean = sanitizeComicCaption(rawText);
+  if (!clean) return { speaker: null, text: "", isDialogue: false };
+
+  // Match Speaker: "Speech" or Speaker: Speech
+  const match = clean.match(/^([^:：]{2,25})[:：]\s*(.*)$/);
+  if (match) {
+    const speaker = match[1].trim();
+    let text = match[2].trim();
+    text = text.replace(/^["“](.*)["”]$/, "$1").trim();
+    return { speaker, text, isDialogue: true };
+  }
+
+  // Check if text is wrapped in quotes
+  const quoteMatch = clean.match(/^["“](.*)["”]$/);
+  if (quoteMatch) {
+    return { speaker: null, text: quoteMatch[1].trim(), isDialogue: true };
+  }
+
+  return { speaker: null, text: clean, isDialogue: false };
+}
+
 function ComicPanelFrame({ panel, t, lang, slot, eager }: {
   panel: ComicPanel;
   t: (typeof translations)[Language];
@@ -40,6 +63,7 @@ function ComicPanelFrame({ panel, t, lang, slot, eager }: {
   const [retryKey, setRetryKey] = useState(0);
   const imageUrl = api.getComicImageUrl(panel.image_url);
   const imageFailed = error || !imageUrl;
+  const parsed = parseComicDialogue(panel.dialogue_text || "");
 
   // Auto-retry when GPU is rendering images sequentially in ComfyUI queue
   useEffect(() => {
@@ -55,6 +79,11 @@ function ComicPanelFrame({ panel, t, lang, slot, eager }: {
 
   return (
     <figure className="manga-panel" data-slot={slot}>
+      {/* Panel Index Pill Badge */}
+      <div className="absolute top-2.5 left-2.5 z-10 flex items-center gap-1 rounded-md bg-black/80 px-2 py-0.5 text-[11px] font-bold text-white shadow-md backdrop-blur-xs">
+        <span>{lang === "vi" ? `Khung ${panel.panel_index || slot}` : `Panel ${panel.panel_index || slot}`}</span>
+      </div>
+
       <div className={`manga-artwork${imageFailed ? " has-error" : ""}`}>
         {imageUrl && (
           <img
@@ -76,11 +105,38 @@ function ComicPanelFrame({ panel, t, lang, slot, eager }: {
         )}
       </div>
 
-      {(imageFailed || !loaded || panel.dialogue_text?.trim()) && (
+      {(imageFailed || !loaded || parsed.text) && (
         <figcaption className="manga-caption" aria-live={imageFailed ? "polite" : undefined}>
-          {panel.dialogue_text?.trim() && (
-            <p>{sanitizeComicCaption(panel.dialogue_text)}</p>
+          {parsed.text && (
+            <div className="mb-1.5">
+              {parsed.isDialogue ? (
+                <div className="flex flex-col gap-1">
+                  {parsed.speaker && (
+                    <div className="flex items-center gap-1">
+                      <span className="inline-flex items-center rounded-sm bg-red-600 px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-white uppercase shadow-xs dark:bg-red-700">
+                        💬 {parsed.speaker}
+                      </span>
+                    </div>
+                  )}
+                  <p className="rounded-md border border-slate-200 bg-slate-50 p-2 text-xs font-semibold leading-relaxed text-slate-900 shadow-xs dark:border-slate-800 dark:bg-slate-900/90 dark:text-slate-100">
+                    &ldquo;{parsed.text}&rdquo;
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-1">
+                    <span className="inline-flex items-center rounded-sm bg-slate-700 px-1.5 py-0.5 text-[9px] font-bold tracking-wide text-white uppercase dark:bg-slate-700">
+                      📖 {lang === "vi" ? "Bối cảnh / Diễn biến" : "Scene / Beat"}
+                    </span>
+                  </div>
+                  <p className="rounded-md border border-slate-200/80 bg-slate-50/70 p-2 text-xs italic leading-relaxed text-slate-700 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-300">
+                    {parsed.text}
+                  </p>
+                </div>
+              )}
+            </div>
           )}
+
           {imageFailed ? (
             <div className="manga-image-error">
               <span>{t.panel_load_error || (lang === "vi" ? "Chưa tạo được ảnh. Đang đợi máy chủ GPU xử lý lượt vẽ..." : "Image generation queued. Retrying for GPU render...")}</span>
@@ -188,8 +244,8 @@ export function ComicViewer({
               </h2>
               <p className="hidden text-[11px] text-slate-500 dark:text-slate-400 sm:block">
                 {lang === "vi" 
-                  ? `Đã tạo ${totalPanels} khung tranh manga (4 khung/đợt)` 
-                  : `${totalPanels} manga panels rendered (4 panels/batch)`}
+                  ? `Đã tạo ${totalPanels} khung tranh manga (4 khung/đợt đồng bộ phong cách)` 
+                  : `${totalPanels} manga panels rendered (4 panels/batch, unified art)`}
               </p>
             </div>
           </div>
@@ -251,9 +307,12 @@ export function ComicViewer({
         <div className="manga-pages">
           {pages.map((page, pageIndex) => (
             <section className="manga-page" key={`page-${pageIndex + 1}`} aria-label={`Trang ${pageIndex + 1}`}>
-              <div className="manga-page-header mb-2 flex items-center justify-between border-b border-slate-200 pb-1 text-[11px] font-semibold text-slate-500 dark:border-slate-800 dark:text-slate-400">
-                <span>{lang === "vi" ? `Trang ${pageIndex + 1} (Khung ${pageIndex * 4 + 1} - ${pageIndex * 4 + page.length})` : `Page ${pageIndex + 1} (Panels ${pageIndex * 4 + 1} - ${pageIndex * 4 + page.length})`}</span>
-                <span>NarrAI Manga Studio</span>
+              <div className="col-span-full mb-1 flex items-center justify-between border-b border-slate-700 pb-1.5 text-[11px] font-semibold text-slate-400">
+                <span className="flex items-center gap-1.5 text-white">
+                  <span className="flex h-2 w-2 rounded-full bg-red-500"></span>
+                  {lang === "vi" ? `Trang ${pageIndex + 1} (Khung ${pageIndex * 4 + 1} - ${pageIndex * 4 + page.length})` : `Page ${pageIndex + 1} (Panels ${pageIndex * 4 + 1} - ${pageIndex * 4 + page.length})`}
+                </span>
+                <span className="text-slate-400">NarrAI 2D Manga Studio</span>
               </div>
               {page.map((panel, panelIndex) => (
                 <ComicPanelFrame
@@ -281,7 +340,7 @@ export function ComicViewer({
                 {lang === "vi" ? "Đang phân tích kịch bản và vẽ tiếp 4 khung tranh..." : "AI Director is framing and drawing the next 4 panels..."}
               </p>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                {lang === "vi" ? "GPU ComfyUI đang xuất ảnh từng khung với phong cách Manga nét cao..." : "Rendering high quality manga panels sequentially via ComfyUI..."}
+                {lang === "vi" ? "GPU đang xuất ảnh từng khung với phong cách Manga 2D sắc nét..." : "Rendering 2D manga panels sequentially..."}
               </p>
             </div>
           </div>

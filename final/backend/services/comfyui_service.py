@@ -24,11 +24,12 @@ LAYOUT_DIMENSIONS = {
     "tall": (512, 896),
 }
 
-# Standard ComfyUI default negative prompt for manga
+# Standard ComfyUI default negative prompt for 2D anime manga
 DEFAULT_MANGA_NEGATIVE = (
-    "color, colorful, vibrant, saturated, photorealistic, photograph, 3d render, CGI, "
-    "western comic, bad anatomy, deformed hands, extra limbs, mutated fingers, "
-    "blurry, low resolution, text, watermark, speech bubbles"
+    "color, colorful, vibrant, saturated, photorealistic, photograph, photo, realistic portrait, "
+    "graphite pencil drawing, charcoal sketch, realistic shading, 3d render, CGI, digital painting, "
+    "western comic, multiple frames, collage, split image, multi panel comic, comic strip layout, border frame, "
+    "bad anatomy, deformed hands, extra limbs, mutated fingers, blurry, low resolution, text, watermark, speech bubbles"
 )
 
 # Known LoRAs with style keywords and trigger prompts

@@ -19,7 +19,7 @@ export default function StoryPipelinePage() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#fcfaf6] dark:bg-[#1f1b18]">
+    <div className="flex h-screen overflow-hidden bg-black text-white">
       <Sidebar
         username={user?.username || ""}
         fullName={user?.full_name || ""}

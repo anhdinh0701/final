@@ -3,8 +3,6 @@
 import { translations, Language } from "@/lib/i18n";
 import { ThemeToggle } from "./ThemeToggle";
 import { LanguageSwitcher } from "./LanguageSwitcher";
-import { PlusCircle, BookOpen, LogOut, User, MessageSquare, Users, FileText, Palette, Workflow, GitPullRequest } from "lucide-react";
-import { CoinBadgeMorphicon } from "@/components/morphicons/CoinBadgeMorphicon";
 
 interface Props {
   username: string;
@@ -45,93 +43,87 @@ export function Sidebar({
   const displayName = fullName || username;
 
   return (
-    <aside className="hidden lg:flex w-64 h-screen border-r border-[#ddd4c8] dark:border-[#50453c] bg-[#f8f5ee] dark:bg-[#28231f] flex-col justify-between p-4 select-none shrink-0 transition-colors z-10">
+    <aside className="hidden lg:flex w-64 h-screen border-r border-neutral-800 bg-black text-white flex-col justify-between p-4 select-none shrink-0 transition-colors z-10 font-sans">
       <div>
-        {/* Logo */}
-        <div className="flex items-center gap-2.5 px-2 py-3 mb-4">
-          <div className="w-8 h-8 rounded-lg bg-[#714033] flex items-center justify-center text-[#fffaf0] font-serif font-bold text-base">
-            N
+        {/* Logo (Minimalist Typography) */}
+        <div className="px-2 py-3 mb-4 border-b border-neutral-800/80">
+          <div className="flex items-center gap-2">
+            <span className="w-6 h-6 rounded bg-white text-black flex items-center justify-center font-mono font-bold text-xs">
+              N
+            </span>
+            <h1 className="font-bold text-base tracking-widest uppercase text-white font-mono">NarrAI</h1>
           </div>
-          <div>
-            <h1 className="font-serif font-bold text-base tracking-tight text-[#342722] dark:text-[#eee6d9]">NarrAI</h1>
-            <p className="text-[10px] uppercase tracking-[0.12em] text-[#82766c] dark:text-[#b8aa9b]">
-              {lang === "vi" ? "Không gian sáng tác" : "Writing workspace"}
-            </p>
-          </div>
+          <p className="text-[10px] uppercase tracking-[0.16em] text-neutral-500 mt-1 font-mono">
+            {lang === "vi" ? "Không gian sáng tác" : "Writing workspace"}
+          </p>
         </div>
 
-        {/* User Card */}
-        <div className="p-3 rounded-lg bg-[#f1ece3] dark:bg-[#332c26] border border-[#e2d8cb] dark:border-[#50453c] mb-4">
+        {/* User Card (Black & White) */}
+        <div className="p-3 rounded-lg bg-neutral-950 border border-neutral-800 mb-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 overflow-hidden">
-              <div className="w-7 h-7 rounded-full bg-[#e8d8c9] dark:bg-[#4a382e] flex items-center justify-center text-[#704331] dark:text-[#dfb79b] shrink-0">
-                <User className="w-4 h-4" />
-              </div>
-              <div className="flex flex-col min-w-0">
-                <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                  {displayName || t.not_logged_in}
+            <div className="flex flex-col min-w-0">
+              <span className="text-xs font-bold text-white truncate font-mono">
+                {displayName || t.not_logged_in}
+              </span>
+              {fullName && username && (
+                <span className="text-[10px] text-neutral-500 truncate font-mono">
+                  @{username}
                 </span>
-                {fullName && username && (
-                  <span className="text-[10px] text-slate-400 dark:text-slate-500 truncate">
-                    @{username}
-                  </span>
-                )}
-              </div>
+              )}
             </div>
             {username && (
               <button
                 onClick={onLogout}
-                className="text-slate-400 hover:text-red-600 dark:hover:text-red-400 p-1 transition-colors"
+                className="text-[10px] font-mono text-neutral-400 hover:text-white uppercase px-1.5 py-0.5 rounded border border-neutral-800 hover:border-neutral-600 transition-colors"
                 title={t.logout}
-                aria-label={t.logout}
               >
-                <LogOut className="w-3.5 h-3.5" />
+                Thoát
               </button>
             )}
           </div>
 
-          {/* Coin Badge Micro-Interaction (Layer 2) */}
-          <div className="mt-3 pt-2.5 border-t border-[#ded3c6] dark:border-[#50453c] flex items-center justify-between">
-            <CoinBadgeMorphicon
-              balance={coinBalance}
+          {/* Coin Badge (Black & White Typography) */}
+          <div className="mt-3 pt-2.5 border-t border-neutral-800/80 flex items-center justify-between">
+            <button
               onClick={onOpenCoinTopup}
-              lang={lang}
-              size="sm"
-              className="w-full justify-between"
-            />
+              className="w-full flex items-center justify-between px-2.5 py-1.5 rounded bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-[11px] font-mono transition-colors"
+            >
+              <span className="text-neutral-400 uppercase tracking-wider">Số dư xu</span>
+              <span className="font-bold text-white font-mono">{coinBalance} XU</span>
+            </button>
           </div>
         </div>
 
-        {/* Menu Navigation */}
-        <div className="space-y-1">
+        {/* Menu Navigation (Zero Icons, Pure Typography) */}
+        <div className="space-y-1.5">
           {/* Sáng tác mới */}
           <button
             onClick={() => {
               onNewStory();
               onTabChange?.("setup");
             }}
-            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${
+            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs tracking-wider uppercase transition-colors ${
               activeTab === "setup"
-                ? "bg-brand-50 dark:bg-brand-950/70 text-brand-700 dark:text-brand-300 font-bold"
-                : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                ? "bg-white text-black font-bold shadow"
+                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
             }`}
           >
-            <PlusCircle className="w-4 h-4 text-brand-600 dark:text-brand-400" />
             <span>{t.tab_create || t.new_story}</span>
+            {activeTab === "setup" && <span className="text-[10px] font-mono">[•]</span>}
           </button>
 
           {/* Bản thảo (Editor) */}
           {hasActiveStory && (
             <button
               onClick={() => onTabChange?.("editor")}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs tracking-wider uppercase transition-colors ${
                 activeTab === "editor"
-                  ? "bg-[#e9dfd0] dark:bg-[#45352c] text-[#704331] dark:text-[#dfb79b] font-bold"
-                  : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  ? "bg-white text-black font-bold shadow"
+                  : "text-neutral-400 hover:text-white hover:bg-neutral-900"
               }`}
             >
-              <FileText className="w-4 h-4 text-[#805342] dark:text-[#d5a88e]" />
               <span>{t.tab_editor}</span>
+              {activeTab === "editor" && <span className="text-[10px] font-mono">[•]</span>}
             </button>
           )}
 
@@ -139,79 +131,70 @@ export function Sidebar({
           {hasActiveComic && (
             <button
               onClick={() => onTabChange?.("comic")}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs tracking-wider uppercase transition-colors ${
                 activeTab === "comic"
-                  ? "bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 font-bold"
-                  : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  ? "bg-white text-black font-bold shadow"
+                  : "text-neutral-400 hover:text-white hover:bg-neutral-900"
               }`}
             >
-              <Palette className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
               <span>{t.tab_comic}</span>
+              {activeTab === "comic" && <span className="text-[10px] font-mono">[•]</span>}
             </button>
           )}
 
           {/* Mạng xã hội / Cộng đồng tác giả (Community Feed) */}
           <button
             onClick={() => onTabChange?.("posts")}
-            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${
+            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs tracking-wider uppercase transition-colors ${
               activeTab === "posts"
-                ? "bg-[#e9dfd0] dark:bg-[#45352c] text-[#704331] dark:text-[#dfb79b] font-bold"
-                : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                ? "bg-white text-black font-bold shadow"
+                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
             }`}
           >
-            <Users className="w-4 h-4 text-[#805342] dark:text-[#d5a88e]" />
             <span>{lang === "vi" ? "Mạng xã hội" : "Community & Social"}</span>
+            {activeTab === "posts" && <span className="text-[10px] font-mono">[•]</span>}
           </button>
 
           {/* Trạm biên soạn truyện AI (AI Story Pipeline) */}
           <button
             onClick={() => onTabChange?.("pipeline")}
-            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${
+            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs tracking-wider uppercase transition-colors ${
               activeTab === "pipeline"
-                ? "bg-amber-100/80 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200 font-bold border border-amber-300 dark:border-amber-700/60"
-                : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                ? "bg-white text-black font-bold shadow"
+                : "text-neutral-400 hover:text-white hover:bg-neutral-900"
             }`}
-            title={lang === "vi" ? "Trạm biên soạn truyện AI (Pipeline tự động hóa)" : "AI Story Pipeline"}
           >
-            <Workflow className="w-4 h-4 text-amber-600 dark:text-amber-400" />
             <span>{lang === "vi" ? "Trạm biên soạn AI" : "AI Story Pipeline"}</span>
+            {activeTab === "pipeline" && <span className="text-[10px] font-mono">[•]</span>}
           </button>
 
           {/* Lịch sử */}
           <button
             onClick={onOpenHistory}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs tracking-wider uppercase text-neutral-400 hover:text-white hover:bg-neutral-900 transition-colors"
           >
-            <BookOpen className="w-4 h-4 text-slate-500" />
             <span>{t.story_history}</span>
           </button>
 
-          {/* Open Messenger Trigger Button */}
+          {/* Open Messenger */}
           <button
             onClick={onOpenMessenger}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group"
-            title={lang === "vi" ? "Mở hộp thư Open Messenger" : "Open Messenger"}
+            className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs tracking-wider uppercase text-neutral-400 hover:text-white hover:bg-neutral-900 transition-colors"
           >
-            <div className="flex items-center gap-2.5">
-              <MessageSquare className="w-4 h-4 text-[#805342] dark:text-[#d5a88e]" />
-              <span>{lang === "vi" ? "Open Messenger" : "Messenger"}</span>
-            </div>
+            <span>{lang === "vi" ? "Hộp thư Messenger" : "Messenger"}</span>
             {unreadCount > 0 ? (
-              <span className="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold text-white bg-rose-500 rounded-full animate-pulse shadow-sm">
+              <span className="px-1.5 py-0.2 text-[10px] font-mono font-bold bg-white text-black rounded">
                 {unreadCount}
               </span>
             ) : (
-              <span
-                className="w-2 h-2 rounded-full bg-emerald-500 group-hover:scale-125 transition-transform"
-                title={lang === "vi" ? "Đang trực tuyến" : "Online"}
-              />
+              <span className="text-[10px] font-mono text-neutral-500">[ON]</span>
             )}
           </button>
         </div>
       </div>
 
-      {/* Footer controls */}
-      <div className="pt-4 border-t border-[#ddd4c8] dark:border-[#50453c] flex items-center justify-between px-1">
+      {/* Footer controls (Black & White) */}
+      <div className="pt-4 border-t border-neutral-800 flex items-center justify-between px-1">
         <LanguageSwitcher currentLang={lang} onLanguageChange={onLanguageChange} />
         <ThemeToggle lang={lang} />
       </div>

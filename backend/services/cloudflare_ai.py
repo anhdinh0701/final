@@ -157,43 +157,6 @@ def generate_image_cf(
     raise Exception(f"All Cloudflare models failed. Last error: {last_error}")
 
 
-def format_pollinations_prompt(prompt: str, max_len: int = 500) -> str:
-    """
-    Prepares a clean, semantic-safe prompt for Pollinations fallback image generation.
-    - Slices cleanly at comma/sentence boundaries instead of arbitrary character cuts.
-    - Preserves setting anchor, action gesture, and character DNA without mid-word truncations.
-    - Fits within safe URL length limits for HTTP GET requests.
-    """
-    if not prompt or not isinstance(prompt, str):
-        return "black and white manga drawing, monochrome ink on white paper, Japanese manga style, screentone, no color"
-
-    clean_p = prompt.strip()
-    if len(clean_p) <= max_len:
-        target = clean_p
-    else:
-        # Keep character/action details early, but reserve room for the environment anchor.
-        setting_match = re.search(r'\bsetting:\s*[^,]+(?:,[^,]+){0,2}', clean_p, re.IGNORECASE)
-        setting_clause = setting_match.group(0).strip() if setting_match else ""
-        prompt_without_setting = clean_p
-        if setting_match:
-            prompt_without_setting = f"{clean_p[:setting_match.start()]}, {clean_p[setting_match.end():]}"
-        prompt_budget = max(120, max_len - len(setting_clause) - 2)
-        cutoff = prompt_without_setting[:prompt_budget]
-        last_delim = max(cutoff.rfind(','), cutoff.rfind('.'))
-        if last_delim > prompt_budget // 2:
-            target = cutoff[:last_delim].strip(' ,.-')
-        else:
-            last_space = cutoff.rfind(' ')
-            target = cutoff[:last_space].strip(' ,.-') if last_space > 0 else cutoff
-
-        if setting_clause:
-            target = f"{target}, {setting_clause}"
-
-    # Clean double commas and trailing punctuation
-    target = re.sub(r'[,.\s]*,[,.\s]*', ', ', target).strip(' ,.-')
-    return f"black and white manga drawing, monochrome ink on white paper, Japanese manga style, {target}, screentone, no color"
-
-
 def _is_valid_image_payload(image_bytes: Optional[bytes]) -> bool:
     if not image_bytes or len(image_bytes) <= 500:
         return False
@@ -223,9 +186,8 @@ def get_cached_or_generate_image(
 ) -> tuple[bytes, str]:
     """
     Fetches image from disk cache if available.
-    Otherwise attempts ComfyUI (if running locally/enabled) with dynamic LoRA chaining,
-    with fallback to Cloudflare Workers AI with a deterministic panel-specific seed,
-    with fallback to Pollinations B&W manga, then writes to disk cache.
+    Otherwise generates strictly via ComfyUI with dynamic LoRA chaining (or Cloudflare Workers AI if configured).
+    Pollinations is completely purged to guarantee high-quality 2D Anime Manga without watermark or distortions.
     Returns (image_bytes, media_type).
     """
     cache_path = os.path.join(CACHE_DIR, f"panel_{panel_id}.jpg")
@@ -266,7 +228,7 @@ def get_cached_or_generate_image(
     suffix = negative_prompt_suffix or custom_negative_prompt
     img_bytes = None
 
-    # 2. Preferred: Attempt generation via local/remote ComfyUI if enabled and online
+    # 2. Primary Provider: ComfyUI with GPU Acceleration & Dynamic LoRA Chaining
     try:
         from services.comfyui_service import is_comfyui_enabled, is_comfyui_available, generate_image_comfyui
         if is_comfyui_enabled() and is_comfyui_available():
@@ -279,7 +241,7 @@ def get_cached_or_generate_image(
                     except Exception:
                         active_loras = None
 
-                print(f"[Comic Image] Attempting image generation for panel {panel_id} via ComfyUI (LoRAs: {len(active_loras or [])})...")
+                print(f"[Comic Image] Generating panel {panel_id} via ComfyUI (LoRAs: {len(active_loras or [])})...")
                 img_bytes = generate_image_comfyui(
                     prompt=prompt,
                     seed=panel_seed,
@@ -293,36 +255,33 @@ def get_cached_or_generate_image(
                 if img_bytes and _is_valid_image_payload(img_bytes):
                     print(f"[Comic Image] Panel {panel_id} generated successfully via ComfyUI!")
             except Exception as comfy_err:
-                print(f"[Comic Image] ComfyUI generation failed ({comfy_err}). Falling back to Cloudflare AI...")
+                print(f"[Comic Image] ComfyUI generation error: {comfy_err}")
                 img_bytes = None
     except ImportError:
         pass
 
-    # 3. Fallback to Cloudflare Workers AI
+    # 3. Fallback to Cloudflare Workers AI only if token is configured
     if not img_bytes or not _is_valid_image_payload(img_bytes):
-        try:
-            img_bytes = generate_image_cf(
-                prompt,
-                seed=panel_seed,
-                negative_prompt_suffix=suffix,
-                cultural_tier=cultural_tier,
-                narrative_mode=narrative_mode,
-                genre=genre
-            )
-        except Exception as e:
-            print(f"[Comic Image] Cloudflare AI unavailable ({e}). Falling back to Pollinations...")
+        cf_token = os.environ.get("CLOUDFLARE_API_TOKEN", "").strip()
+        if cf_token:
             try:
-                bw_prompt = format_pollinations_prompt(prompt)
-                safe_prompt = urllib.parse.quote(bw_prompt)
-                fallback_url = f"https://image.pollinations.ai/prompt/{safe_prompt}?width=800&height=800&nologo=true&seed={panel_seed}"
-                resp = requests.get(fallback_url, timeout=20)
-                if resp.status_code == 200 and _is_valid_image_payload(resp.content):
-                    img_bytes = resp.content
-            except Exception as p_err:
-                print(f"[Comic Image] Pollinations fallback also failed ({p_err})")
+                print(f"[Comic Image] Falling back to Cloudflare Workers AI for panel {panel_id}...")
+                img_bytes = generate_image_cf(
+                    prompt,
+                    seed=panel_seed,
+                    negative_prompt_suffix=suffix,
+                    cultural_tier=cultural_tier,
+                    narrative_mode=narrative_mode,
+                    genre=genre
+                )
+            except Exception as cf_err:
+                print(f"[Comic Image] Cloudflare AI failed: {cf_err}")
 
     if not img_bytes or not _is_valid_image_payload(img_bytes):
-        raise RuntimeError(f"Could not render image for panel {panel_id}: all image providers failed")
+        raise RuntimeError(
+            f"Không thể tạo tranh cho khung {panel_id}: Máy chủ ComfyUI chưa phản hồi hoặc chưa được kết nối. "
+            "Vui lòng kiểm tra ComfyUI và đường dẫn Ngrok."
+        )
 
     # 2.5: Server-side Pillow monochrome enforcement — eliminates color leak from ANY source
     try:

@@ -3,7 +3,7 @@
 import { translations, Language } from "@/lib/i18n";
 import { ThemeToggle } from "./ThemeToggle";
 import { LanguageSwitcher } from "./LanguageSwitcher";
-import { PlusCircle, BookOpen, LogOut, User, MessageSquare, Users, FileText, Palette } from "lucide-react";
+import { PlusCircle, BookOpen, LogOut, User, MessageSquare, Users, FileText, Palette, Workflow, GitPullRequest } from "lucide-react";
 import { CoinBadgeMorphicon } from "@/components/morphicons/CoinBadgeMorphicon";
 
 interface Props {
@@ -18,8 +18,8 @@ interface Props {
   onOpenCoinTopup?: () => void;
   onOpenMessenger?: () => void;
   unreadCount?: number;
-  activeTab?: "setup" | "editor" | "comic" | "posts";
-  onTabChange?: (tab: "setup" | "editor" | "comic" | "posts") => void;
+  activeTab?: "setup" | "editor" | "comic" | "posts" | "pipeline";
+  onTabChange?: (tab: "setup" | "editor" | "comic" | "posts" | "pipeline") => void;
   hasActiveStory?: boolean;
   hasActiveComic?: boolean;
 }
@@ -161,6 +161,20 @@ export function Sidebar({
           >
             <Users className="w-4 h-4 text-[#805342] dark:text-[#d5a88e]" />
             <span>{lang === "vi" ? "Mạng xã hội" : "Community & Social"}</span>
+          </button>
+
+          {/* Trạm biên soạn truyện AI (AI Story Pipeline) */}
+          <button
+            onClick={() => onTabChange?.("pipeline")}
+            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${
+              activeTab === "pipeline"
+                ? "bg-amber-100/80 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200 font-bold border border-amber-300 dark:border-amber-700/60"
+                : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+            }`}
+            title={lang === "vi" ? "Trạm biên soạn truyện AI (Pipeline tự động hóa)" : "AI Story Pipeline"}
+          >
+            <Workflow className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+            <span>{lang === "vi" ? "Trạm biên soạn AI" : "AI Story Pipeline"}</span>
           </button>
 
           {/* Lịch sử */}

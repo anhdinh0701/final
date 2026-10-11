@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "stories": [
+    {
+      "id": "tran-hung-dao",
+      "title": "Trần Hưng Đạo",
+      "topic": "Nhân vật lịch sử Việt Nam",
+      "category": "Lịch sử Việt Nam",
+      "genre": ["Lịch sử", "Anh hùng dân tộc", "Kháng chiến chống Nguyên Mông"],
+      "language": "vi",
+      "sourceLanguages": ["vi", "en"],
+      "status": "pending",
+      "createdAt": "2026-10-11T00:00:00Z",
+      "updatedAt": "2026-10-11T00:00:00Z",
+      "prUrl": null,
+      "prNumber": null,
+      "branchName": null,
+      "error": null
+    },
+    {
+      "id": "chu-dong-tu",
+      "title": "Chử Đồng Tử",
+      "topic": "Truyền thuyết Việt Nam",
+      "category": "Truyền thuyết & Thần thoại",
+      "genre": ["Truyền thuyết", "Tứ bất tử", "Tình yêu dân gian"],
+      "language": "vi",
+      "sourceLanguages": ["vi", "en"],
+      "status": "pending",
+      "createdAt": "2026-10-11T00:00:00Z",
+      "updatedAt": "2026-10-11T00:00:00Z",
+      "prUrl": null,
+      "prNumber": null,
+      "branchName": null,
+      "error": null
+    },
+    {
+      "id": "hai-ba-trung",
+      "title": "Hai Bà Trưng",
+      "topic": "Khởi nghĩa & Nữ anh hùng lịch sử",
+      "category": "Lịch sử Việt Nam",
+      "genre": ["Lịch sử", "Nữ tướng", "Khởi nghĩa Mê Linh"],
+      "language": "vi",
+      "sourceLanguages": ["vi", "en"],
+      "status": "pending",
+      "createdAt": "2026-10-11T00:00:00Z",
+      "updatedAt": "2026-10-11T00:00:00Z",
+      "prUrl": null,
+      "prNumber": null,
+      "branchName": null,
+      "error": null
+    },
+    {
+      "id": "son-tinh-thuy-tinh",
+      "title": "Sơn Tinh Thủy Tinh",
+      "topic": "Truyền thuyết dân gian & Thiên nhiên",
+      "category": "Truyền thuyết & Thần thoại",
+      "genre": ["Truyền thuyết", "Thần thoại Việt Nam", "Vua Hùng"],
+      "language": "vi",
+      "sourceLanguages": ["vi", "en"],
+      "status": "pending",
+      "createdAt": "2026-10-11T00:00:00Z",
+      "updatedAt": "2026-10-11T00:00:00Z",
+      "prUrl": null,
+      "prNumber": null,
+      "branchName": null,
+      "error": null
+    }
+  ]
+}

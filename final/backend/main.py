@@ -172,11 +172,14 @@ def get_db():
 from routers.coins_router import router as coins_router
 from routers.social_router import router as social_router, recommender_router
 from routers.messenger_router import router as messenger_router
+from routers.story_pipeline_router import router as story_pipeline_router, public_story_router
 
 app.include_router(coins_router, prefix="/api/coins", tags=["Coins"])
 app.include_router(social_router, prefix="/api/social", tags=["Social"])
 app.include_router(recommender_router)
 app.include_router(messenger_router, prefix="/api/messenger", tags=["Messenger"])
+app.include_router(story_pipeline_router, prefix="/api/admin/story-pipeline", tags=["AI Story Pipeline"])
+app.include_router(public_story_router, prefix="/api/stories", tags=["Published Stories"])
 
 
 # Banking Services

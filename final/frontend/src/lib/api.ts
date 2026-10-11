@@ -601,4 +601,129 @@ export const api = {
       return { status: 'error', url, online: false, message: err.message || 'Không thể kết nối' };
     }
   },
+
+  // ==================== AI STORY PIPELINE ENDPOINTS ====================
+
+  async getPipelineQueue(): Promise<{ status: string; data: import('./types').PipelineOverview }> {
+    const res = await fetch(`${API_BASE_URL}/admin/story-pipeline/queue`, {
+      headers: authHeaders(),
+    });
+    if (!res.ok) throw new Error("Không thể tải danh sách hàng đợi pipeline");
+    return res.json();
+  },
+
+  async addPipelinePrompt(payload: {
+    title: string;
+    id?: string;
+    topic?: string;
+    category?: string;
+    genre?: string[];
+    language?: string;
+    sourceLanguages?: string[];
+  }): Promise<{ status: string; message: string; data: import('./types').PipelineStoryItem }> {
+    const res = await fetch(`${API_BASE_URL}/admin/story-pipeline/queue`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Lỗi khi thêm đề bài vào hàng đợi");
+    return data;
+  },
+
+  async batchAddPipelinePrompts(items: any[]): Promise<{ status: string; data: any }> {
+    const res = await fetch(`${API_BASE_URL}/admin/story-pipeline/queue/batch`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ items }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Lỗi khi nhập hàng loạt đề bài");
+    return data;
+  },
+
+  async updatePipelinePrompt(
+    storyId: string,
+    updates: Partial<import('./types').PipelineStoryItem>
+  ): Promise<{ status: string; message: string; data: import('./types').PipelineStoryItem }> {
+    const res = await fetch(`${API_BASE_URL}/admin/story-pipeline/queue/${storyId}`, {
+      method: 'PATCH',
+      headers: authHeaders(),
+      body: JSON.stringify(updates),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Lỗi khi cập nhật đề bài");
+    return data;
+  },
+
+  async deletePipelinePrompt(storyId: string): Promise<{ status: string; message: string }> {
+    const res = await fetch(`${API_BASE_URL}/admin/story-pipeline/queue/${storyId}`, {
+      method: 'DELETE',
+      headers: authHeaders(),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Lỗi khi xóa đề bài");
+    return data;
+  },
+
+  async runPipeline(payload?: { story_id?: string; limit?: number }): Promise<{ status: string; data: any }> {
+    const res = await fetch(`${API_BASE_URL}/admin/story-pipeline/run`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify(payload || {}),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Lỗi khi thực thi pipeline");
+    return data;
+  },
+
+  async getPipelineJobs(): Promise<{ status: string; overview: import('./types').PipelineOverview; recentLogs: import('./types').PipelineLogEntry[] }> {
+    const res = await fetch(`${API_BASE_URL}/admin/story-pipeline/jobs`, {
+      headers: authHeaders(),
+    });
+    if (!res.ok) throw new Error("Không thể tải trạng thái công việc pipeline");
+    return res.json();
+  },
+
+  async getPipelineJobDetail(storyId: string): Promise<{ status: string; story: import('./types').PipelineStoryItem; logs: import('./types').PipelineLogEntry[]; preview?: import('./types').PipelineStoryDetail }> {
+    const res = await fetch(`${API_BASE_URL}/admin/story-pipeline/jobs/${storyId}`, {
+      headers: authHeaders(),
+    });
+    if (!res.ok) throw new Error("Không thể tải chi tiết tiến trình");
+    return res.json();
+  },
+
+  async getPipelinePullRequests(): Promise<{ status: string; count: number; data: import('./types').PipelinePullRequest[] }> {
+    const res = await fetch(`${API_BASE_URL}/admin/story-pipeline/pull-requests`, {
+      headers: authHeaders(),
+    });
+    if (!res.ok) throw new Error("Không thể tải danh sách Pull Requests");
+    return res.json();
+  },
+
+  async revalidatePipelineStory(storyId: string): Promise<{ status: string; storyId: string; validation: import('./types').PipelineValidationResult }> {
+    const res = await fetch(`${API_BASE_URL}/admin/story-pipeline/validate/${storyId}`, {
+      method: 'POST',
+      headers: authHeaders(),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Lỗi khi kiểm định lại truyện");
+    return data;
+  },
+
+  async getPipelineStoryPreview(storyId: string): Promise<{ status: string; data: import('./types').PipelineStoryDetail }> {
+    const res = await fetch(`${API_BASE_URL}/admin/story-pipeline/preview/${storyId}`, {
+      headers: authHeaders(),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Chưa có bản thảo truyện để xem trước");
+    return data;
+  },
+
+  async getPublishedStories(category?: string): Promise<{ status: string; count: number; data: import('./types').PipelineStoryDetail[] }> {
+    const url = category ? `${API_BASE_URL}/stories/published?category=${encodeURIComponent(category)}` : `${API_BASE_URL}/stories/published`;
+    const res = await fetch(url);
+    if (!res.ok) return { status: 'error', count: 0, data: [] };
+    return res.json();
+  },
 };

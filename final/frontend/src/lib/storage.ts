@@ -12,6 +12,26 @@ export const storage = {
     if (typeof window === 'undefined') return;
     localStorage.removeItem('token');
     localStorage.removeItem('narrai_token');
+    localStorage.removeItem('user');
+  },
+  getUser(): { username: string; full_name?: string } | null {
+    if (typeof window === 'undefined') return null;
+    try {
+      const raw = localStorage.getItem('user');
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  },
+  setUser(user: { username: string; full_name?: string }) {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem('user', JSON.stringify(user));
+  },
+  clear() {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem('token');
+    localStorage.removeItem('narrai_token');
+    localStorage.removeItem('user');
   },
   getLanguage(): 'vi' | 'en' {
     if (typeof window === 'undefined') return 'vi';

@@ -24,6 +24,7 @@ import { StoryEditor } from "@/components/editor/StoryEditor";
 import { AICopilotPanel } from "@/components/editor/AICopilotPanel";
 import { ComicViewer } from "@/components/comic/ComicViewer";
 import { NeuralVisualPreview } from "@/components/canvas/NeuralVisualPreview";
+import { StoryPipelineView } from "@/components/admin/StoryPipelineView";
 
 
 /**
@@ -174,7 +175,7 @@ export default function WorkspacePage() {
   const [user, setUser] = useState<{ username: string; fullName?: string } | null>(null);
   const [lang, setLang] = useState<Language>("vi");
   const [view, setView] = useState<"landing" | "workspace">("landing");
-  const [activeTab, setActiveTab] = useState<"setup" | "editor" | "comic" | "posts">("setup");
+  const [activeTab, setActiveTab] = useState<"setup" | "editor" | "comic" | "posts" | "pipeline">("setup");
 
   const t = translations[lang] || translations.vi;
   const { toast } = useToast();
@@ -184,6 +185,9 @@ export default function WorkspacePage() {
     if (/^\d+$/.test(params.get("post") || "") && params.get("tab") === "posts") {
       setView("workspace");
       setActiveTab("posts");
+    } else if (params.get("tab") === "pipeline") {
+      setView("workspace");
+      setActiveTab("pipeline");
     }
   }, []);
 
@@ -1108,6 +1112,12 @@ export default function WorkspacePage() {
             currentUsername={user?.username}
             onReadInEditor={handleReadStoryInEditor}
           />
+        )}
+
+        {activeTab === "pipeline" && (
+          <div className="flex-1 flex min-h-0 min-w-0 overflow-y-auto">
+            <StoryPipelineView lang={lang} />
+          </div>
         )}
       </main>
 

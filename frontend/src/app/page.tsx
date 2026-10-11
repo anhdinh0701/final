@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BookOpen, Coins, FileText, LogOut, MessageSquare, MoreHorizontal, Palette, PlusCircle, Users } from "lucide-react";
 import { api } from "@/lib/api";
 import { storage } from "@/lib/storage";
 import { Language, translations } from "@/lib/i18n";
@@ -1162,56 +1161,55 @@ export default function WorkspacePage() {
 
       <nav
         aria-label={lang === "vi" ? "Điều hướng không gian sáng tác" : "Workspace navigation"}
-        className="grid h-16 shrink-0 grid-cols-5 border-t border-[#ded5c9] bg-[#faf7f0] px-1 pb-[env(safe-area-inset-bottom)] dark:border-[#50453c] dark:bg-[#28231f] lg:hidden"
+        className="grid h-16 shrink-0 grid-cols-5 border-t border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black px-1 pb-[env(safe-area-inset-bottom)] lg:hidden"
       >
-        <button type="button" onClick={handleNewStory} className={`flex flex-col items-center justify-center gap-1 text-[10px] ${activeTab === "setup" ? "font-semibold text-[#714033] dark:text-[#dfb79b]" : "text-slate-500 dark:text-slate-400"}`}>
-          <PlusCircle className="h-4 w-4" />
+        <button type="button" onClick={handleNewStory} className={`flex flex-col items-center justify-center gap-1 text-[11px] font-mono ${activeTab === "setup" ? "font-bold text-black dark:text-white" : "text-neutral-500"}`}>
+          <span className="text-xs">[+]</span>
           {lang === "vi" ? "Tạo mới" : "Create"}
         </button>
-        <button type="button" onClick={() => { setActiveTab("editor"); setIsMobileCopilotOpen(false); }} disabled={!storyContent} className={`flex flex-col items-center justify-center gap-1 text-[10px] disabled:opacity-40 ${activeTab === "editor" ? "font-semibold text-[#714033] dark:text-[#dfb79b]" : "text-slate-500 dark:text-slate-400"}`}>
-          <FileText className="h-4 w-4" />
+        <button type="button" onClick={() => { setActiveTab("editor"); setIsMobileCopilotOpen(false); }} disabled={!storyContent} className={`flex flex-col items-center justify-center gap-1 text-[11px] font-mono disabled:opacity-40 ${activeTab === "editor" ? "font-bold text-black dark:text-white" : "text-neutral-500"}`}>
+          <span className="text-xs">[ED]</span>
           {lang === "vi" ? "Bản thảo" : "Draft"}
         </button>
-        <button type="button" onClick={() => { setActiveTab("comic"); setIsMobileCopilotOpen(false); }} disabled={comicPanels.length === 0} className={`flex flex-col items-center justify-center gap-1 text-[10px] disabled:opacity-40 ${activeTab === "comic" ? "font-semibold text-[#714033] dark:text-[#dfb79b]" : "text-slate-500 dark:text-slate-400"}`}>
-          <Palette className="h-4 w-4" />
+        <button type="button" onClick={() => { setActiveTab("comic"); setIsMobileCopilotOpen(false); }} disabled={comicPanels.length === 0} className={`flex flex-col items-center justify-center gap-1 text-[11px] font-mono disabled:opacity-40 ${activeTab === "comic" ? "font-bold text-black dark:text-white" : "text-neutral-500"}`}>
+          <span className="text-xs">[MG]</span>
           Manga
         </button>
-        <button type="button" onClick={() => { setActiveTab("posts"); setIsMobileCopilotOpen(false); }} className={`flex flex-col items-center justify-center gap-1 text-[10px] ${activeTab === "posts" ? "font-semibold text-[#714033] dark:text-[#dfb79b]" : "text-slate-500 dark:text-slate-400"}`}>
-          <Users className="h-4 w-4" />
+        <button type="button" onClick={() => { setActiveTab("posts"); setIsMobileCopilotOpen(false); }} className={`flex flex-col items-center justify-center gap-1 text-[11px] font-mono ${activeTab === "posts" ? "font-bold text-black dark:text-white" : "text-neutral-500"}`}>
+          <span className="text-xs">[SOC]</span>
           {lang === "vi" ? "Cộng đồng" : "Community"}
         </button>
-        <button type="button" onClick={() => setIsMobileMenuOpen((open) => !open)} aria-expanded={isMobileMenuOpen} className={`flex flex-col items-center justify-center gap-1 text-[10px] ${isMobileMenuOpen ? "font-semibold text-[#714033] dark:text-[#dfb79b]" : "text-slate-500 dark:text-slate-400"}`}>
-          <MoreHorizontal className="h-4 w-4" />
+        <button type="button" onClick={() => setIsMobileMenuOpen((open) => !open)} aria-expanded={isMobileMenuOpen} className={`flex flex-col items-center justify-center gap-1 text-[11px] font-mono ${isMobileMenuOpen ? "font-bold text-black dark:text-white" : "text-neutral-500"}`}>
+          <span className="text-xs">[•••]</span>
           {lang === "vi" ? "Thêm" : "More"}
         </button>
       </nav>
 
       {isMobileMenuOpen && (
         <>
-        <button type="button" aria-label={lang === "vi" ? "Đóng menu" : "Close menu"} onClick={() => setIsMobileMenuOpen(false)} className="fixed inset-0 z-30 bg-black/10 lg:hidden" />
-        <div className="fixed bottom-[4.5rem] right-3 z-40 w-[min(20rem,calc(100vw-1.5rem))] rounded-xl border border-[#e2d8cb] bg-[#fbf8f1] p-3 shadow-xl dark:border-[#50453c] dark:bg-[#302a25] lg:hidden">
-          <div className="mb-2 flex items-center justify-between border-b border-[#ded5c9] pb-2 dark:border-[#50453c]">
-            <span className="text-xs font-semibold text-[#342722] dark:text-[#eee6d9]">{user?.fullName || user?.username}</span>
-            <button type="button" onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-slate-600 hover:bg-[#eee4d7] dark:text-slate-300 dark:hover:bg-[#45352c]">
-              <LogOut className="h-3.5 w-3.5" />
-              {lang === "vi" ? "Đăng xuất" : "Log out"}
+        <button type="button" aria-label={lang === "vi" ? "Đóng menu" : "Close menu"} onClick={() => setIsMobileMenuOpen(false)} className="fixed inset-0 z-30 bg-black/40 lg:hidden" />
+        <div className="fixed bottom-[4.5rem] right-3 z-40 w-[min(20rem,calc(100vw-1.5rem))] rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 p-3 shadow-xl lg:hidden">
+          <div className="mb-2 flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 pb-2">
+            <span className="text-xs font-semibold text-black dark:text-white font-mono">{user?.fullName || user?.username}</span>
+            <button type="button" onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="rounded px-2 py-1 text-xs font-mono border border-neutral-300 dark:border-neutral-700 text-neutral-600 hover:text-black dark:text-neutral-400 dark:hover:text-white transition-colors">
+              Thoát
             </button>
           </div>
           <div className="grid grid-cols-3 gap-2">
-            <button type="button" onClick={() => { setIsCoinModalOpen(true); setIsMobileMenuOpen(false); }} className="flex flex-col items-center gap-1 rounded-lg bg-[#f1ece3] p-2 text-[11px] text-[#704331] dark:bg-[#332c26] dark:text-[#dfb79b]">
-              <Coins className="h-4 w-4" />
-              {coinBalance} {lang === "vi" ? "Xu" : "Coins"}
+            <button type="button" onClick={() => { setIsCoinModalOpen(true); setIsMobileMenuOpen(false); }} className="flex flex-col items-center gap-1 rounded border border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-900 p-2 text-[11px] font-mono text-black dark:text-white">
+              <span className="font-bold">{coinBalance}</span>
+              <span>{lang === "vi" ? "Xu" : "Coins"}</span>
             </button>
-            <button type="button" onClick={() => { setIsHistoryOpen(true); setIsMobileMenuOpen(false); }} className="flex flex-col items-center gap-1 rounded-lg bg-[#f1ece3] p-2 text-[11px] text-slate-700 dark:bg-[#332c26] dark:text-slate-200">
-              <BookOpen className="h-4 w-4" />
-              {lang === "vi" ? "Lịch sử" : "History"}
+            <button type="button" onClick={() => { setIsHistoryOpen(true); setIsMobileMenuOpen(false); }} className="flex flex-col items-center gap-1 rounded border border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-900 p-2 text-[11px] font-mono text-black dark:text-white">
+              <span>[Sử]</span>
+              <span>{lang === "vi" ? "Lịch sử" : "History"}</span>
             </button>
-            <button type="button" onClick={() => { setIsMessengerOpen(true); setIsMobileMenuOpen(false); }} className="flex flex-col items-center gap-1 rounded-lg bg-[#f1ece3] p-2 text-[11px] text-slate-700 dark:bg-[#332c26] dark:text-slate-200">
-              <MessageSquare className="h-4 w-4" />
-              {lang === "vi" ? "Tin nhắn" : "Messages"}
+            <button type="button" onClick={() => { setIsMessengerOpen(true); setIsMobileMenuOpen(false); }} className="flex flex-col items-center gap-1 rounded border border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-900 p-2 text-[11px] font-mono text-black dark:text-white">
+              <span>[Tin]</span>
+              <span>{lang === "vi" ? "Tin nhắn" : "Messages"}</span>
             </button>
           </div>
-          <div className="mt-3 flex items-center justify-between">
+          <div className="mt-3 flex items-center justify-between pt-2 border-t border-neutral-200 dark:border-neutral-800">
             <LanguageSwitcher currentLang={lang} onLanguageChange={handleLanguageChange} />
             <ThemeToggle lang={lang} />
           </div>

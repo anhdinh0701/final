@@ -616,12 +616,203 @@ def decompose_story_beats(story_text: str) -> list[str]:
 
     return beats
 
+
+def infer_fallback_character_dna(story_text: str) -> dict:
+    """Dynamically infer authentic character DNA from Vietnamese story context without modern classroom bias."""
+    text_lower = str(story_text).lower()
+
+    # 1. Legendary & Historical figures
+    if any(k in text_lower for k in ["thánh gióng", "phù đổng", "ngựa sắt", "roi sắt", "bụi tre"]):
+        return {
+            "Thánh Gióng": {
+                "gender": "male",
+                "role": "lead",
+                "dna": "heroic legendary Vietnamese youth Thánh Gióng, powerful stature, wearing ancient iron battle armor and headband, fierce heroic eyes, wielding iron rod or bamboo clump",
+                "aliases": ["thánh gióng", "gióng", "phù đổng thiên vương", "cậu bé", "chàng trai", "tráng sĩ", "nghĩa sĩ"]
+            }
+        }
+    if any(k in text_lower for k in ["an dương vương", "âu lạc", "cổ loa", "nỏ thần"]):
+        return {
+            "An Dương Vương": {
+                "gender": "male",
+                "role": "lead",
+                "dna": "legendary Vietnamese King An Dương Vương, stately regal presence, royal Đại Việt imperial headband and embroidered robes, majestic resolute expression",
+                "aliases": ["an dương vương", "nhà vua", "vua", "bệ hạ", "thục phán"]
+            }
+        }
+    if any(k in text_lower for k in ["trần hưng đạo", "trần quốc tuấn", "vạn kiếp", "bạch đằng"]):
+        return {
+            "Trần Hưng Đạo": {
+                "gender": "male",
+                "role": "lead",
+                "dna": "venerable Đại Việt supreme commander Trần Hưng Đạo, weathered noble warrior face, sharp tactical gaze, wearing medieval Vietnamese general battle armor and flowing cape",
+                "aliases": ["trần hưng đạo", "quốc công tiết chế", "tiết chế", "hưng đạo vương", "tướng quân", "chủ tướng"]
+            }
+        }
+    if any(k in text_lower for k in ["quang trung", "nguyễn huệ", "tây sơn", "đống đa"]):
+        return {
+            "Quang Trung": {
+                "gender": "male",
+                "role": "lead",
+                "dna": "emperor Quang Trung Nguyễn Huệ, fierce commanding warrior king, wearing battle-tested royal armor and crimson cloak, resolute fiery eyes",
+                "aliases": ["quang trung", "nguyễn huệ", "bắc bình vương", "vua quang trung", "hoàng đế"]
+            }
+        }
+    if any(k in text_lower for k in ["hai bà trưng", "trưng trắc", "mê linh"]):
+        return {
+            "Trưng Trắc": {
+                "gender": "female",
+                "role": "lead",
+                "dna": "heroic Vietnamese warrior queen Trưng Trắc, commanding fearless gaze, wearing ancient bronze-age warrior queen battle attire with yellow sash, tied hair",
+                "aliases": ["trưng trắc", "bà trưng", "nữ vương", "chủ tướng", "nàng"]
+            }
+        }
+    if any(k in text_lower for k in ["sơn tinh", "thủy tinh", "tản viên"]):
+        return {
+            "Sơn Tinh": {
+                "gender": "male",
+                "role": "lead",
+                "dna": "noble mountain deity Sơn Tinh, powerful physique, ancient Vietnamese chieftain attire with sacred feather ornaments, calm commanding presence",
+                "aliases": ["sơn tinh", "tản viên", "chúa núi", "chàng"]
+            }
+        }
+    if any(k in text_lower for k in ["tấm cám", "cô tấm", "nàng tấm"]):
+        return {
+            "Tấm": {
+                "gender": "female",
+                "role": "lead",
+                "dna": "gentle beautiful Vietnamese folk maiden Tấm, kind dark eyes, wearing traditional rural Áo Tứ Thân with dark scarf and graceful belt, modest rustic grace",
+                "aliases": ["tấm", "cô tấm", "nàng tấm", "cô gái", "nàng", "cô bé"]
+            }
+        }
+    if any(k in text_lower for k in ["thạch sanh", "chằn tinh"]):
+        return {
+            "Thạch Sanh": {
+                "gender": "male",
+                "role": "lead",
+                "dna": "brave Vietnamese folk hero Thạch Sanh, muscular woodcutter physique, simple loincloth and fabric wrap, wielding wooden axe or mythical bow, fearless honest eyes",
+                "aliases": ["thạch sanh", "chàng", "người dũng sĩ", "chàng trai"]
+            }
+        }
+
+    # 2. General Historical / Folklore Context
+    hist_cues = ["vua", "tướng", "quân", "giặc", "chiến thuyền", "sa trường", "triều đình", "hoàng cung", "đại việt", "chúa", "thần", "đền", "thôn dã"]
+    if any(k in text_lower for k in hist_cues):
+        is_female = any(k in text_lower for k in ["nàng", "cô gái", "công chúa", "hoàng hậu", "thiếu nữ", "bà"])
+        if is_female:
+            return {
+                "Nữ nhân vật": {
+                    "gender": "female",
+                    "role": "lead",
+                    "dna": "Vietnamese historical maiden, elegant posture, gentle expressive dark eyes, wearing traditional Áo Ngũ Thân or Áo Tứ Thân with tied hair",
+                    "aliases": ["nàng", "tiểu thư", "cô gái", "nữ nhân", "người", "she"]
+                }
+            }
+        return {
+            "Nhân vật lịch sử": {
+                "gender": "male",
+                "role": "lead",
+                "dna": "heroic Vietnamese historical figure, determined sharp gaze, wearing traditional Đại Việt historical robes or warrior armor with tied sash",
+                "aliases": ["chàng", "tướng quân", "nghĩa sĩ", "người", "chàng trai", "he"]
+            }
+        }
+
+    # 3. Modern School / Slice of Life
+    if any(k in text_lower for k in ["lớp", "học sinh", "trường học", "thầy giáo", "cô giáo", "bảng đen", "tiết học"]):
+        return {
+            "Học sinh": {
+                "gender": "unknown",
+                "role": "lead",
+                "dna": "young Vietnamese student, neat dark hair, expressive dark eyes, wearing clean school uniform with white collared shirt",
+                "aliases": ["học sinh", "bạn học", "cậu bé", "cô bé", "cậu ấy", "cô ấy", "nam sinh", "nữ sinh", "protagonist"]
+            }
+        }
+
+    # 4. Contemporary / Open Drama Default
+    return {
+        "Nhân vật chính": {
+            "gender": "unknown",
+            "role": "lead",
+            "dna": "young Vietnamese protagonist, neat dark hair, expressive dark eyes, wearing casual modern attire (jacket over collared shirt), natural posture",
+            "aliases": ["nhân vật chính", "người", "chàng trai", "cô gái", "tôi", "mình", "cậu ấy", "cô ấy", "protagonist"]
+        }
+    }
+
+
+def infer_fallback_setting_dna(story_text: str) -> dict:
+    """Dynamically infer authentic setting anchor from Vietnamese story context without classroom bias."""
+    text_lower = str(story_text).lower()
+
+    if any(k in text_lower for k in ["bạch đằng", "chiến trận", "chiến thuyền", "bãi cọc", "sa trường", "sông", "giặc"]):
+        return {
+            "location_name": "Chiến trường lịch sử Việt Nam",
+            "setting_anchor": "historic Vietnamese battlefield along the river, wooden stakes rising from swirling waters, historic battle boats, fluttering war banners, dynamic manga ink lineart",
+            "atmosphere": "epic dramatic historical battlefield screentone with wind and smoke"
+        }
+    if any(k in text_lower for k in ["hoàng cung", "kinh thành", "thăng long", "cung điện", "ngai vàng", "triều đình"]):
+        return {
+            "location_name": "Hoàng thành Đại Việt",
+            "setting_anchor": "grand historic Đại Việt imperial palace hall, carved wooden pillars, ornate dragon motifs, solemn royal court architecture",
+            "atmosphere": "majestic solemn imperial manga screentone"
+        }
+    if any(k in text_lower for k in ["làng", "cây đa", "bến nước", "mái đình", "thôn", "đồng ruộng", "bờ tre"]):
+        return {
+            "location_name": "Làng quê truyền thống Việt Nam",
+            "setting_anchor": "historic Vietnamese village, ancient mossy village gate, banyan tree by the river wharf, rustic thatched cottages and bamboo grove",
+            "atmosphere": "peaceful nostalgic Vietnamese rural screentone"
+        }
+    if any(k in text_lower for k in ["núi", "rừng", "sơn tinh", "hang", "thác"]):
+        return {
+            "location_name": "Vùng rừng núi hùng vĩ",
+            "setting_anchor": "majestic ancient Vietnamese mountain landscape, misty primeval forest, towering rocky crags, sacred natural aura",
+            "atmosphere": "mystical legendary nature lineart"
+        }
+    if any(k in text_lower for k in ["lớp", "trường", "phòng học", "bảng đen"]):
+        return {
+            "location_name": "Lớp học",
+            "setting_anchor": "bright high school classroom interior, neat student wooden desks, large chalkboard on front wall, window sunlight",
+            "atmosphere": "peaceful youth school manga screentone"
+        }
+
+    return {
+        "location_name": "Bối cảnh câu chuyện",
+        "setting_anchor": "atmospheric narrative setting matching the scene, cinematic composition, authentic screentone textures",
+        "atmosphere": "expressive high contrast manga screentone"
+    }
+
+
+def infer_fallback_action(beat: str, is_dialogue: bool = False) -> str:
+    """Extract realistic physical gesture and posture from Vietnamese beat text."""
+    b_lower = str(beat).lower()
+    if any(w in b_lower for w in ["cưỡi", "phi", "ngựa"]):
+        return "galloping forward heroically on steed with intense momentum, dramatic wide angle"
+    if any(w in b_lower for w in ["nhổ", "tre", "gậy sắt", "vung"]):
+        return "wielding weapon heroically with fierce strength, dynamic action manga lines"
+    if any(w in b_lower for w in ["chém", "đánh", "tiêu diệt", "tấn công", "chiến đấu", "xông"]):
+        return "lunging forward in fierce combat stance, dynamic motion blur and battle impact"
+    if any(w in b_lower for w in ["bay", "lên trời", "biến mất"]):
+        return "ascending gracefully into the open sky and clouds, awe-inspiring legendary farewell"
+    if any(w in b_lower for w in ["quỳ", "lạy", "tạ ơn"]):
+        return "kneeling solemnly with bowed head in profound reverence, emotional camera angle"
+    if any(w in b_lower for w in ["khóc", "nước mắt", "đau đớn", "ngậm ngùi"]):
+        return "tearful emotional face, hand clasped over chest, heart-wrenching close-up manga panel"
+    if any(w in b_lower for w in ["cười", "vui mừng", "reo hò"]):
+        return "joyful triumphant smile, arms raised in victory, uplifting manga screentone"
+    if any(w in b_lower for w in ["bước", "đi", "tiến", "chạy"]):
+        return "striding forward with resolute determination, dynamic diagonal perspective"
+    if any(w in b_lower for w in ["nhìn", "trông", "quan sát", "hướng mắt"]):
+        return "gazing resolutely into the distance, watchful focused expression, cinematic framing"
+    if is_dialogue:
+        return "speaking passionately with expressive emotion, intense facial reaction, dramatic angle"
+    return "standing attentively in scene, focused posture engaged with the surroundings"
+
+
 class ComicDirectorAgent:
     def __init__(self):
         api_key = os.environ.get("GROQ_API_KEY_COMIC") or os.environ.get("GROQ_API_KEY")
         if not api_key:
             raise ValueError("Thiếu GROQ_API_KEY_COMIC hoặc GROQ_API_KEY")
-        comic_model = os.environ.get("GROQ_MODEL_COMIC", "openai/gpt-oss-120b")
+        comic_model = os.environ.get("GROQ_MODEL_COMIC", "qwen/qwen3.8-27b")
         self.llm = GroqClient(model_name=comic_model, api_key=api_key)
 
     def sanitize_complete_dialogue(self, text: str) -> str:
@@ -836,19 +1027,9 @@ class ComicDirectorAgent:
         except Exception as e:
             print(f"[Comic] Character DNA extraction fallback ({e})")
 
-        # Guaranteed rich fallback if nothing extracted
+        # Guaranteed rich dynamic fallback if nothing extracted
         if not existing_dna:
-            existing_dna["Protagonist"] = {
-                "gender": "unknown",
-                "role": "lead",
-                "dna": "young Asian protagonist, neat dark hair, expressive dark eyes, sharp jawline, wearing crisp white collared shirt with small dark ribbon tie, dark navy jacket",
-                "aliases": [
-                    "protagonist", "nhân vật chính", "người", "học sinh", "cô bé", "cậu bé",
-                    "cậu ấy", "cô ấy", "anh bạn", "anh bạn cùng bàn", "bạn cùng bàn", "nữ sinh",
-                    "nam sinh", "chàng trai", "cô gái", "bạn cùng lớp", "bạn học", "người bạn",
-                    "student", "she", "he"
-                ]
-            }
+            existing_dna = infer_fallback_character_dna(story_text)
 
         return existing_dna
 
@@ -921,11 +1102,7 @@ class ComicDirectorAgent:
         except Exception as e:
             print(f"[Comic] Setting DNA extraction fallback ({e})")
             if not existing_setting:
-                existing_setting = {
-                    "location_name": "Bối cảnh chung",
-                    "setting_anchor": "detailed indoor room with wooden furniture and ambient window lighting",
-                    "atmosphere": "dramatic high contrast manga screentone"
-                }
+                existing_setting = infer_fallback_setting_dna(story_text)
 
         return existing_setting
 
@@ -1228,22 +1405,44 @@ class ComicDirectorAgent:
 
             final_prompt = f"{STYLE_PREFIX}{assembled_prompt}{STYLE_SUFFIX}"
 
+            # Pre-flight quality verification: if cultural tier is historical, purge accidental modern leaks
+            is_historical = tier in (1, 2) or (mode and str(mode).lower() in ("chinh_su", "da_su", "strict_historical", "historical_fiction"))
+            if is_historical:
+                for modern_leak in ["school uniform", "schoolgirl", "schoolboy", "classroom", "student desk", "blackboard", "ribbon tie", "blazer", "modern jacket"]:
+                    final_prompt = re.sub(rf'\b{re.escape(modern_leak)}\b', '', final_prompt, flags=re.IGNORECASE)
+                final_prompt = re.sub(r'[,.\s]*,[,.\s]*', ', ', final_prompt).strip(' ,.-')
+
             raw_layout = str(item.get("layout_type") or "square").lower().strip()
             normalized_layout = LAYOUT_MAP.get(raw_layout, "square")
 
+            scene_summary = dialogue or (narrator if narrator else clean_prompt[:120])
+            char_names = [c["name"] for c in matched_chars] if matched_chars else ["Protagonist"]
+
+            # Structured Scene Data Contract
             panel_entry = {
                 "panel_index": i + 1,
+                "scene_id": i + 1,
+                "scene_summary": scene_summary,
+                "characters": char_names,
+                "setting": panel_setting_anchor or "atmospheric narrative setting",
+                "action": action_desc or (infer_fallback_action(dialogue, is_dialogue=True) if dialogue else "standing attentively in scene"),
+                "continuity": f"panel_{i}" if i > 0 else "initial_establishing_shot",
+                "positive_prompt": final_prompt,
                 "image_prompt": final_prompt,
                 "dialogue_text": dialogue,
+                "narrator_text": narrator,
                 "layout_type": normalized_layout
             }
 
-            if tier in (1, 2) or (mode and str(mode).lower() in ("chinh_su", "da_su", "strict_historical", "historical_fiction")):
+            if is_historical:
                 panel_entry["negative_prompt"] = MASTER_NEGATIVE_VIETNAMESE
                 panel_entry["master_negative"] = MASTER_NEGATIVE_VIETNAMESE
                 panel_entry["cultural_tier"] = tier or 1
             elif tier == 3:
                 panel_entry["cultural_tier"] = 3
+                panel_entry["negative_prompt"] = "bad anatomy, blurry, low quality, color, 3d, realistic portrait, deformed limbs"
+            else:
+                panel_entry["negative_prompt"] = "bad anatomy, blurry, low quality, color, 3d, realistic portrait, deformed limbs"
 
             validated.append(panel_entry)
         return validated
@@ -1381,11 +1580,14 @@ NEW STORY TEXT:
         """
         beats = decompose_story_beats(story_text)
 
-        lead_dna = "young Asian protagonist in casual clothes"
-        if character_dna:
-            first_val = list(character_dna.values())[0]
-            lead_dna = first_val.get("dna", first_val) if isinstance(first_val, dict) else str(first_val)
-        bg_anchor = setting_dna.get("setting_anchor", "detailed indoor room with wooden furniture") if setting_dna else "indoor room"
+        if not character_dna:
+            character_dna = infer_fallback_character_dna(story_text)
+        if not setting_dna:
+            setting_dna = infer_fallback_setting_dna(story_text)
+
+        first_val = list(character_dna.values())[0] if character_dna else {}
+        lead_dna = first_val.get("dna", first_val) if isinstance(first_val, dict) else str(first_val)
+        bg_anchor = setting_dna.get("setting_anchor", "atmospheric narrative setting") if setting_dna else "atmospheric narrative setting"
 
         if not beats:
             raw_fallback = [
@@ -1419,10 +1621,8 @@ NEW STORY TEXT:
             action_desc, suggested_shot = extract_action_from_prose(beat)
             if action_desc:
                 shot_desc = action_desc
-            elif is_dialogue:
-                shot_desc = "sitting at wooden desk, talking with expressive emotion"
             else:
-                shot_desc = "sitting attentively in classroom, natural posture"
+                shot_desc = infer_fallback_action(beat, is_dialogue=is_dialogue)
 
             scene_enclosure = resolve_spatial_enclosure(beat, setting_dna=setting_dna)
             scene_anchor = (

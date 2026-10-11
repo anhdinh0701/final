@@ -23,9 +23,12 @@ export const storage = {
       return null;
     }
   },
-  setUser(user: { username: string; full_name?: string }) {
+  setUser(userOrUsername: { username: string; full_name?: string } | string, fullName?: string) {
     if (typeof window === 'undefined') return;
-    localStorage.setItem('user', JSON.stringify(user));
+    const userObj = typeof userOrUsername === 'string'
+      ? { username: userOrUsername, full_name: fullName }
+      : userOrUsername;
+    localStorage.setItem('user', JSON.stringify(userObj));
   },
   clear() {
     if (typeof window === 'undefined') return;

@@ -1,21 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { translations, Language } from "@/lib/i18n";
 import { ComicPanel } from "@/lib/types";
-import { api } from "@/lib/api";
-import { 
-  ArrowLeft, 
-  RefreshCw, 
-  Layers, 
-  Coins, 
-  Sparkles, 
-  CheckCircle2, 
-  PlusCircle, 
-  BookOpen, 
-  PenTool,
-  MessageSquareQuote
-} from "lucide-react";
 
 interface Props {
   panels: ComicPanel[];
@@ -61,107 +48,105 @@ function ComicPanelFrame({ panel, t, lang, slot, eager }: {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
-  const imageUrl = api.getComicImageUrl(panel.image_url);
-  const imageFailed = error || !imageUrl;
-  const parsed = parseComicDialogue(panel.dialogue_text || "");
 
-  // Auto-retry when GPU is rendering images sequentially in ComfyUI queue
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (error && retryKey < 25) {
-      timer = setTimeout(() => {
-        setError(false);
-        setRetryKey((prev) => prev + 1);
-      }, 4000);
-    }
-    return () => clearTimeout(timer);
-  }, [error, retryKey]);
+  const parsed = parseComicDialogue(panel.dialogue_text || "");
+  const dialogueText = parsed.text || sanitizeComicCaption(panel.dialogue_text || "");
+  const speakerName = parsed.speaker;
+  const isDialogue = parsed.isDialogue;
+
+  const rawUrl = panel.image_url;
+  const imageUrl = rawUrl ? `${rawUrl}${rawUrl.includes("?") ? "&" : "?"}v=${retryKey}&t=${retryKey}` : "";
+  const imageFailed = !imageUrl || error;
 
   return (
     <figure className="manga-panel" data-slot={slot}>
-      {/* Panel Index Pill Badge */}
-      <div className="absolute top-2.5 left-2.5 z-10 flex items-center gap-1 rounded-md bg-black/80 px-2 py-0.5 text-[11px] font-bold text-white shadow-md backdrop-blur-xs">
-        <span>{lang === "vi" ? `Khung ${panel.panel_index || slot}` : `Panel ${panel.panel_index || slot}`}</span>
-      </div>
-
-      <div className={`manga-artwork${imageFailed ? " has-error" : ""}`}>
-        {imageUrl && (
+      <div className={`manga-artwork ${imageFailed ? "has-error" : ""}`}>
+        {imageUrl && !error ? (
           <img
-            key={retryKey}
-            src={`${imageUrl}${imageUrl.includes("?") ? "&" : "?"}retry=${retryKey}`}
-            alt={panel.image_prompt || (lang === "vi" ? "Khung truyện manga" : "Manga panel")}
+            src={imageUrl}
+            alt={dialogueText || `Manga panel ${panel.panel_index}`}
             loading={eager ? "eager" : "lazy"}
             decoding="async"
+            className={loaded ? "is-loaded" : "is-loading"}
             onLoad={() => {
               setLoaded(true);
               setError(false);
             }}
             onError={() => {
-              setLoaded(false);
-              setError(true);
+              if (retryKey < 3) {
+                setTimeout(() => setRetryKey((k) => k + 1), 2500);
+              } else {
+                setError(true);
+              }
             }}
-            className={loaded ? "is-loaded" : "is-loading"}
           />
+        ) : null}
+
+        {imageFailed && (
+          <div className="flex flex-col items-center justify-center p-6 text-center font-mono">
+            <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">
+              {lang === "vi" ? "[Chưa có hình ảnh]" : "[Image not loaded]"}
+            </span>
+            <p className="mt-2 text-[11px] text-neutral-400 max-w-xs">
+              {lang === "vi" 
+                ? "Máy chủ hình ảnh hoặc ComfyUI chưa sẵn sàng." 
+                : "Image renderer or ComfyUI is not ready."}
+            </p>
+            {imageUrl && (
+              <button
+                type="button"
+                onClick={() => {
+                  setError(false);
+                  setRetryKey((k) => k + 1);
+                }}
+                className="mt-3 px-3 py-1 text-xs font-mono font-bold uppercase rounded border border-neutral-400 bg-white text-black hover:bg-neutral-100 dark:border-neutral-700 dark:bg-black dark:text-white dark:hover:bg-neutral-900 transition-colors"
+              >
+                [Thử lại]
+              </button>
+            )}
+          </div>
         )}
       </div>
 
-      {(imageFailed || !loaded || parsed.text) && (
-        <figcaption className="manga-caption" aria-live={imageFailed ? "polite" : undefined}>
-          {parsed.text && (
-            <div className="mb-1.5">
-              {parsed.isDialogue ? (
-                <div className="flex flex-col gap-1">
-                  {parsed.speaker && (
-                    <div className="flex items-center gap-1">
-                      <span className="inline-flex items-center rounded-sm bg-red-600 px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-white uppercase shadow-xs dark:bg-red-700">
-                        💬 {parsed.speaker}
-                      </span>
-                    </div>
-                  )}
-                  <p className="rounded-md border border-slate-200 bg-slate-50 p-2 text-xs font-semibold leading-relaxed text-slate-900 shadow-xs dark:border-slate-800 dark:bg-slate-900/90 dark:text-slate-100">
-                    &ldquo;{parsed.text}&rdquo;
-                  </p>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center gap-1">
-                    <span className="inline-flex items-center rounded-sm bg-slate-700 px-1.5 py-0.5 text-[9px] font-bold tracking-wide text-white uppercase dark:bg-slate-700">
-                      📖 {lang === "vi" ? "Bối cảnh / Diễn biến" : "Scene / Beat"}
-                    </span>
-                  </div>
-                  <p className="rounded-md border border-slate-200/80 bg-slate-50/70 p-2 text-xs italic leading-relaxed text-slate-700 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-300">
-                    {parsed.text}
-                  </p>
-                </div>
-              )}
-            </div>
+      {dialogueText && (
+        <figcaption className="manga-caption">
+          {speakerName ? (
+            <p className="font-sans text-xs leading-relaxed text-black dark:text-neutral-900">
+              <strong className="font-bold uppercase tracking-wide mr-1.5 font-mono">{speakerName}:</strong>
+              <span>{dialogueText}</span>
+            </p>
+          ) : isDialogue ? (
+            <p className="font-sans text-xs italic leading-relaxed text-black dark:text-neutral-900">
+              &ldquo;{dialogueText}&rdquo;
+            </p>
+          ) : (
+            <p className="font-sans text-xs leading-relaxed text-neutral-800 dark:text-neutral-800">
+              {dialogueText}
+            </p>
           )}
 
           {imageFailed ? (
-            <div className="manga-image-error">
-              <span>
-                {error && retryKey < 25
-                  ? (lang === "vi" 
-                      ? `Đang xếp hàng vẽ qua GPU ComfyUI... (Lượt ${retryKey + 1}/25)` 
-                      : `ComfyUI GPU rendering in progress... (Attempt ${retryKey + 1}/25)`)
-                  : (t.panel_load_error || (lang === "vi" ? "Chưa tạo được ảnh. Hãy bấm thử lại để yêu cầu ảnh mới." : "Image generation failed. Click retry."))}
+            <div className="manga-image-error mt-2 pt-1 border-t border-neutral-200">
+              <span className="text-[11px] font-mono text-neutral-500">
+                {lang === "vi" ? "Chưa tải được ảnh." : "Failed to load image."}
               </span>
               {imageUrl && (
                 <button
                   type="button"
                   onClick={() => {
                     setError(false);
-                    setRetryKey(0);
+                    setRetryKey((k) => k + 1);
                   }}
-                  className="manga-image-retry"
+                  className="text-xs font-mono font-bold underline text-black dark:text-neutral-900"
                 >
-                  <RefreshCw className="h-3.5 w-3.5" />
-                  <span>{t.retry_btn || (lang === "vi" ? "Thử lại ngay" : "Retry now")}</span>
+                  [Thử lại]
                 </button>
               )}
             </div>
           ) : !loaded ? (
-            <span className="manga-image-status">{t.loading_comic}</span>
+            <span className="manga-image-status block mt-1 text-[11px] font-mono text-neutral-400">
+              {t.loading_comic}
+            </span>
           ) : null}
         </figcaption>
       )}
@@ -203,55 +188,56 @@ export function ComicViewer({
   lang,
   onBackToEditor,
   onContinueComic,
+  onAdaptToComic,
   loadingMore,
-  coinBalance = 0,
+  coinBalance = 100,
   onOpenCoinModal,
 }: Props) {
   const t = translations[lang];
   const pages = splitIntoPages(panels, 4);
 
   const totalPanels = panels.length;
-  const completedBatches = Math.floor(totalPanels / 4);
   const isFreeTier = totalPanels < 12;
-  const currentBatchNumber = Math.min(3, completedBatches + 1);
-  const remainingFreeBatches = Math.max(0, 3 - completedBatches);
+  const remainingFreeBatches = Math.max(0, 3 - Math.floor(totalPanels / 4));
+  const currentBatchNumber = Math.min(3, Math.floor(totalPanels / 4) + 1);
 
   const handleContinueClick = () => {
     if (!isFreeTier && coinBalance < 100) {
-      if (onOpenCoinModal) onOpenCoinModal();
-      return;
+      if (onOpenCoinModal) {
+        onOpenCoinModal();
+        return;
+      }
     }
     onContinueComic();
   };
 
   return (
-    <div className="flex h-screen flex-1 flex-col overflow-hidden bg-[#e5e5e5] dark:bg-slate-950">
-      {/* Navigation & Action Header */}
-      <header className="z-10 flex h-16 shrink-0 items-center justify-between border-b border-slate-300 bg-white px-3 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:px-6">
-        <div className="flex items-center gap-2 sm:gap-3">
+    <div className="flex h-screen flex-col overflow-hidden bg-neutral-100 text-black dark:bg-black dark:text-white font-sans select-none">
+      {/* Top Bar Header */}
+      <header className="z-10 flex h-16 shrink-0 items-center justify-between border-b border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 px-3 shadow-sm sm:px-6">
+        <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={onBackToEditor}
-            className="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-2 text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:bg-slate-800"
+            className="flex items-center rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-900 dark:hover:bg-neutral-800 px-3 py-1.5 text-xs font-mono font-bold uppercase tracking-wider text-black dark:text-white transition-colors"
             title={t.back_to_editor}
             aria-label={t.back_to_editor}
           >
-            <ArrowLeft className="h-4 w-4" />
-            <span className="hidden text-xs font-semibold sm:inline">{lang === "vi" ? "Bản thảo chữ" : "Manuscript"}</span>
+            [Bản thảo chữ]
           </button>
 
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-600 text-white shadow-sm dark:bg-red-500">
-              <Layers className="h-4 w-4" />
-            </div>
+            <span className="px-2 py-0.5 rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-200 dark:bg-neutral-800 text-xs font-mono font-bold">
+              MANGA
+            </span>
             <div>
-              <h2 className="text-sm font-bold text-slate-900 dark:text-white sm:text-base">
+              <h2 className="text-sm font-bold text-black dark:text-white font-mono sm:text-base">
                 {t.comic_view_title}
               </h2>
-              <p className="hidden text-[11px] text-slate-500 dark:text-slate-400 sm:block">
+              <p className="hidden text-[11px] font-mono text-neutral-500 sm:block">
                 {lang === "vi" 
-                  ? `Đã tạo ${totalPanels} khung tranh manga (4 khung/đợt đồng bộ phong cách)` 
-                  : `${totalPanels} manga panels rendered (4 panels/batch, unified art)`}
+                  ? `Đã tạo ${totalPanels} khung tranh manga (4 khung/đợt)` 
+                  : `${totalPanels} manga panels rendered (4 panels/batch)`}
               </p>
             </div>
           </div>
@@ -261,13 +247,12 @@ export function ComicViewer({
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Free / Paid Progress Badge */}
           {isFreeTier ? (
-            <span className="hidden items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300 md:inline-flex">
-              🎁 {lang === "vi" ? `Miễn phí: ${totalPanels}/12 khung (Đợt ${currentBatchNumber}/3)` : `Free: ${totalPanels}/12 panels (Batch ${currentBatchNumber}/3)`}
+            <span className="hidden items-center rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 px-2.5 py-1 text-xs font-mono font-bold text-black dark:text-white md:inline-flex">
+              {lang === "vi" ? `[MIỄN PHÍ: ${totalPanels}/12 KHUNG]` : `[FREE: ${totalPanels}/12 PANELS]`}
             </span>
           ) : (
-            <span className="hidden items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-300 md:inline-flex">
-              <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-              {lang === "vi" ? `100 xu / 4 khung tiếp theo` : `100 coins / next 4 panels`}
+            <span className="hidden items-center rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 px-2.5 py-1 text-xs font-mono font-bold text-black dark:text-white md:inline-flex">
+              {lang === "vi" ? `[100 XU / 4 KHUNG TIẾP THEO]` : `[100 COINS / NEXT 4 PANELS]`}
             </span>
           )}
 
@@ -276,12 +261,10 @@ export function ComicViewer({
             <button
               type="button"
               onClick={onOpenCoinModal}
-              className="flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50/80 px-2.5 py-1.5 text-xs font-bold text-amber-800 shadow-sm transition-all hover:bg-amber-100 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-300 dark:hover:bg-amber-900/50"
+              className="flex items-center gap-1.5 rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-900 dark:hover:bg-neutral-800 px-2.5 py-1.5 text-xs font-mono font-bold text-black dark:text-white transition-colors"
               title={lang === "vi" ? "Nạp thêm xu" : "Top up coins"}
             >
-              <Coins className="h-4 w-4 text-amber-500" />
-              <span>{coinBalance}</span>
-              <span className="text-[10px] text-amber-600 dark:text-amber-400">{lang === "vi" ? "xu" : "coins"}</span>
+              <span>{coinBalance} XU</span>
             </button>
           )}
 
@@ -291,17 +274,14 @@ export function ComicViewer({
               type="button"
               onClick={handleContinueClick}
               disabled={loadingMore}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold text-white shadow transition-all disabled:opacity-50 ${
-                isFreeTier
-                  ? "bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700"
-                  : "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-amber-500/20"
-              }`}
+              className="flex items-center rounded px-3.5 py-1.5 text-xs font-mono font-bold uppercase tracking-wider bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-colors shadow disabled:opacity-50"
             >
-              <RefreshCw className={`h-3.5 w-3.5 ${loadingMore ? "animate-spin" : ""}`} />
               <span>
-                {isFreeTier
-                  ? (lang === "vi" ? `➕ Tạo tiếp 4 khung (Lần ${currentBatchNumber}/3 Free)` : `➕ Next 4 panels (Batch ${currentBatchNumber}/3 Free)`)
-                  : (lang === "vi" ? "💎 Tạo tiếp 4 khung (100 xu)" : "💎 Next 4 panels (100 coins)")}
+                {loadingMore
+                  ? (lang === "vi" ? "[ĐANG VẼ TRANH...]" : "[RENDERING...]")
+                  : isFreeTier
+                    ? (lang === "vi" ? `[TẠO TIẾP 4 KHUNG - LẦN ${currentBatchNumber}/3 FREE]` : `[NEXT 4 PANELS - BATCH ${currentBatchNumber}/3 FREE]`)
+                    : (lang === "vi" ? "[TẠO TIẾP 4 KHUNG - 100 XU]" : "[NEXT 4 PANELS - 100 COINS]")}
               </span>
             </button>
           )}
@@ -313,12 +293,12 @@ export function ComicViewer({
         <div className="manga-pages">
           {pages.map((page, pageIndex) => (
             <section className="manga-page" key={`page-${pageIndex + 1}`} aria-label={`Trang ${pageIndex + 1}`}>
-              <div className="col-span-full mb-1 flex items-center justify-between border-b border-slate-700 pb-1.5 text-[11px] font-semibold text-slate-400">
-                <span className="flex items-center gap-1.5 text-white">
-                  <span className="flex h-2 w-2 rounded-full bg-red-500"></span>
-                  {lang === "vi" ? `Trang ${pageIndex + 1} (Khung ${pageIndex * 4 + 1} - ${pageIndex * 4 + page.length})` : `Page ${pageIndex + 1} (Panels ${pageIndex * 4 + 1} - ${pageIndex * 4 + page.length})`}
+              <div className="col-span-full mb-1 flex items-center justify-between border-b border-neutral-800 pb-1.5 text-[11px] font-mono text-neutral-400">
+                <span className="flex items-center gap-2 text-white font-bold">
+                  <span>[TRANG {pageIndex + 1}]</span>
+                  <span>(Khung {pageIndex * 4 + 1} - {pageIndex * 4 + page.length})</span>
                 </span>
-                <span className="text-slate-400">NarrAI 2D Manga Studio</span>
+                <span className="text-neutral-500">NarrAI 2D Manga Studio</span>
               </div>
               {page.map((panel, panelIndex) => (
                 <ComicPanelFrame
@@ -336,19 +316,15 @@ export function ComicViewer({
 
         {/* Loading Indicator */}
         {loadingMore && (
-          <div className="my-8 flex flex-col items-center justify-center gap-3 rounded-2xl border border-emerald-200 bg-white/90 p-8 text-center shadow-lg backdrop-blur-sm dark:border-emerald-800 dark:bg-slate-900/90" role="status">
-            <div className="relative flex h-12 w-12 items-center justify-center">
-              <div className="absolute h-full w-full animate-ping rounded-full bg-emerald-400 opacity-20"></div>
-              <RefreshCw className="h-8 w-8 animate-spin text-emerald-600 dark:text-emerald-400" />
-            </div>
-            <div>
-              <p className="text-base font-bold text-slate-800 dark:text-slate-200">
-                {lang === "vi" ? "Đang phân tích kịch bản và vẽ tiếp 4 khung tranh..." : "AI Director is framing and drawing the next 4 panels..."}
-              </p>
-              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                {lang === "vi" ? "GPU đang xuất ảnh từng khung với phong cách Manga 2D sắc nét..." : "Rendering 2D manga panels sequentially..."}
-              </p>
-            </div>
+          <div className="my-8 flex flex-col items-center justify-center gap-3 rounded border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-8 text-center shadow-lg font-mono" role="status">
+            <span className="text-sm font-bold uppercase tracking-widest text-black dark:text-white">
+              [ĐANG PHÂN TÍCH KỊCH BẢN VÀ VẼ TIẾP 4 KHUNG TRANH...]
+            </span>
+            <p className="text-xs text-neutral-500 max-w-md">
+              {lang === "vi" 
+                ? "Hệ thống đang bảo toàn Visual DNA nhân vật và bối cảnh lịch sử qua ComfyUI GPU..." 
+                : "Rendering sequential manga panels with consistent Visual DNA..."}
+            </p>
           </div>
         )}
 
@@ -356,68 +332,61 @@ export function ComicViewer({
         {!loadingMore && (
           <div className="mx-auto my-8 max-w-2xl">
             {hasMore ? (
-              <div className={`rounded-2xl border p-6 text-center shadow-md backdrop-blur-sm ${
-                isFreeTier 
-                  ? "border-emerald-200 bg-gradient-to-b from-white to-emerald-50/50 dark:border-emerald-800/80 dark:from-slate-900 dark:to-emerald-950/30" 
-                  : "border-amber-200 bg-gradient-to-b from-white to-amber-50/50 dark:border-amber-800/80 dark:from-slate-900 dark:to-amber-950/30"
-              }`}>
+              <div className="rounded border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-950 p-6 text-center shadow font-mono">
                 {isFreeTier ? (
                   <>
-                    <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
-                      <Sparkles className="h-6 w-6" />
+                    <div className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2">
+                      [QUYỀN LỢI MIỄN PHÍ]
                     </div>
-                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                    <h3 className="text-base font-bold text-black dark:text-white">
                       {lang === "vi" 
-                        ? `🎉 Bạn còn ${remainingFreeBatches} lần tạo tranh MIỄN PHÍ!` 
-                        : `🎉 You have ${remainingFreeBatches} FREE panel batches remaining!`}
+                        ? `Còn ${remainingFreeBatches} đợt tạo tranh MIỄN PHÍ!` 
+                        : `You have ${remainingFreeBatches} FREE panel batches remaining!`}
                     </h3>
-                    <p className="mt-1.5 text-xs text-slate-600 dark:text-slate-400">
+                    <p className="mt-1.5 text-xs text-neutral-600 dark:text-neutral-400">
                       {lang === "vi" 
-                        ? `Đã tạo ${totalPanels}/12 khung miễn phí. Sau 12 khung (3 đợt x 4 khung), mỗi đợt 4 khung tiếp theo sẽ có phí 100 xu.` 
-                        : `${totalPanels}/12 free panels generated. After 12 panels, each 4-panel batch costs 100 coins.`}
+                        ? `Đã tạo ${totalPanels}/12 khung miễn phí. Sau 12 khung, mỗi đợt 4 khung tiếp theo sẽ có phí 100 xu.` 
+                        : `${totalPanels}/12 free panels generated. After 12 panels, each batch costs 100 coins.`}
                     </p>
                     <div className="mt-5 flex justify-center">
                       <button
                         type="button"
                         onClick={handleContinueClick}
-                        className="flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:bg-emerald-700 hover:shadow-lg"
+                        className="rounded px-6 py-2.5 text-xs font-mono font-bold uppercase tracking-wider bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-colors shadow"
                       >
-                        <PlusCircle className="h-4 w-4" />
-                        <span>{lang === "vi" ? `Tạo tiếp 4 khung tranh (Miễn phí: Lần ${currentBatchNumber}/3)` : `Generate next 4 panels (Free: Batch ${currentBatchNumber}/3)`}</span>
+                        <span>{lang === "vi" ? `[TẠO TIẾP 4 KHUNG TRANH - ĐỢT ${currentBatchNumber}/3 FREE]` : `[GENERATE NEXT 4 PANELS - BATCH ${currentBatchNumber}/3 FREE]`}</span>
                       </button>
                     </div>
                   </>
                 ) : (
                   <>
-                    <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300">
-                      <Coins className="h-6 w-6" />
+                    <div className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2">
+                      [GIA HẠN MANGA]
                     </div>
-                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                      {lang === "vi" ? "💎 Tiếp tục sáng tác 4 khung tranh Manga" : "💎 Continue Manga with 4 Next Panels"}
+                    <h3 className="text-base font-bold text-black dark:text-white">
+                      {lang === "vi" ? "Tiếp tục sáng tác 4 khung tranh Manga" : "Continue Manga with 4 Next Panels"}
                     </h3>
-                    <p className="mt-1.5 text-xs text-slate-600 dark:text-slate-400">
+                    <p className="mt-1.5 text-xs text-neutral-600 dark:text-neutral-400">
                       {lang === "vi" 
-                        ? `Bạn đã hoàn thành 12 khung tranh miễn phí. Chi phí cho 4 khung tiếp theo là 100 xu (Số dư hiện tại: ${coinBalance} xu).` 
-                        : `You have completed 12 free panels. Next 4 panels cost 100 coins (Your balance: ${coinBalance} coins).`}
+                        ? `Đã hoàn thành 12 khung miễn phí. Chi phí cho 4 khung tiếp theo: 100 xu (Số dư hiện tại: ${coinBalance} xu).` 
+                        : `Free tier completed. Next 4 panels cost 100 coins (Your balance: ${coinBalance} coins).`}
                     </p>
                     <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
                       {coinBalance < 100 ? (
                         <button
                           type="button"
                           onClick={onOpenCoinModal}
-                          className="flex items-center gap-2 rounded-xl bg-amber-600 px-6 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:bg-amber-700 hover:shadow-lg"
+                          className="rounded px-6 py-2.5 text-xs font-mono font-bold uppercase tracking-wider bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-colors shadow"
                         >
-                          <Coins className="h-4 w-4" />
-                          <span>{lang === "vi" ? `Nạp thêm xu (Hiện có ${coinBalance}/100 xu)` : `Top up coins (Have ${coinBalance}/100 coins)`}</span>
+                          <span>{lang === "vi" ? `[NẠP THÊM XU - HIỆN CÓ ${coinBalance}/100 XU]` : `[TOP UP COINS - HAVE ${coinBalance}/100 COINS]`}</span>
                         </button>
                       ) : (
                         <button
                           type="button"
                           onClick={handleContinueClick}
-                          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:from-amber-600 hover:to-amber-700 hover:shadow-lg"
+                          className="rounded px-6 py-2.5 text-xs font-mono font-bold uppercase tracking-wider bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-colors shadow"
                         >
-                          <Sparkles className="h-4 w-4" />
-                          <span>{lang === "vi" ? "Dùng 100 xu để tạo tiếp 4 khung tranh" : "Spend 100 coins to create next 4 panels"}</span>
+                          <span>{lang === "vi" ? "[DÙNG 100 XU ĐỂ TẠO TIẾP 4 KHUNG TRANH]" : "[SPEND 100 COINS TO CREATE NEXT 4 PANELS]"}</span>
                         </button>
                       )}
                     </div>
@@ -425,26 +394,25 @@ export function ComicViewer({
                 )}
               </div>
             ) : (
-              <div className="rounded-2xl border border-slate-200 bg-white/90 p-6 text-center shadow-md dark:border-slate-800 dark:bg-slate-900/90">
-                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                  <CheckCircle2 className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+              <div className="rounded border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-950 p-6 text-center shadow font-mono">
+                <div className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2">
+                  [HOÀN TẤT CHUYỂN THỂ]
                 </div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                  {lang === "vi" ? "✨ Đã chuyển thể toàn bộ nội dung bản thảo!" : "✨ All current manuscript text has been adapted!"}
+                <h3 className="text-base font-bold text-black dark:text-white">
+                  {lang === "vi" ? "Đã chuyển thể toàn bộ nội dung bản thảo hiện tại!" : "All current manuscript text has been adapted!"}
                 </h3>
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                <p className="mt-1 text-xs text-neutral-600 dark:text-neutral-400">
                   {lang === "vi" 
-                    ? "Hãy quay lại Bản thảo chữ để viết tiếp chương tiếp theo hoặc chỉ đạo Copilot trước khi vẽ thêm tranh." 
-                    : "Return to the text editor to draft the next chapter or direct Copilot before rendering more panels."}
+                    ? "Hãy quay lại Bản thảo chữ để viết tiếp chương tiếp theo trước khi vẽ thêm tranh." 
+                    : "Return to the text editor to draft the next chapter before rendering more panels."}
                 </p>
                 <div className="mt-4 flex justify-center">
                   <button
                     type="button"
                     onClick={onBackToEditor}
-                    className="flex items-center gap-2 rounded-xl bg-slate-800 px-5 py-2 text-xs font-bold text-white transition-colors hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600"
+                    className="rounded px-5 py-2 text-xs font-mono font-bold uppercase tracking-wider bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-colors shadow"
                   >
-                    <PenTool className="h-3.5 w-3.5" />
-                    <span>{lang === "vi" ? "Quay lại Sáng tác Bản thảo" : "Back to Manuscript Editor"}</span>
+                    <span>{lang === "vi" ? "[QUAY LẠI SÁNG TÁC BẢN THẢO]" : "[BACK TO MANUSCRIPT EDITOR]"}</span>
                   </button>
                 </div>
               </div>

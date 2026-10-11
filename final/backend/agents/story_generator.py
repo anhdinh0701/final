@@ -40,42 +40,39 @@ except ImportError:
 
 
 # ==============================================================================
-# MODERN LIGHT NOVEL & WEB NOVEL WRITING ENGINE RULES (VIETNAMESE EDITION)
+# MODERN ADAPTIVE NOVEL & WEB NOVEL WRITING ENGINE RULES (VIETNAMESE EDITION)
 # ==============================================================================
-LIGHT_NOVEL_ENGINE_RULES = """QUY TẮC ĐỘNG CƠ SÁNG TÁC LIGHT NOVEL & WEB NOVEL THỊNH HÀNH:
+LIGHT_NOVEL_ENGINE_RULES = """QUY TẮC ĐỘNG CƠ SÁNG TÁC TIỂU THUYẾT & WEB NOVEL LINH HOẠT:
 
-1. ĐIỂM NHÌN BÁM SÁT (TIGHT POV) & KHỞI ĐẦU BÙNG NỔ (IN MEDIAS RES):
+1. ĐIỂM NHÌN BÁM SÁT (TIGHT POV) & MỞ ĐẦU HẤP DẪN PHÙ HỢP THỂ LOẠI:
    - Sử dụng Ngôi thứ nhất ("Tôi") hoặc Ngôi thứ ba bám sát (Tight 3rd-Person Limited) gắn chặt vào giác quan, nhận thức và lăng kính cảm xúc của nhân vật chính.
-   - HOOK ĐỘC GIẢ NGAY TỪ CÂU ĐẦU TIÊN (In Medias Res): Quăng người đọc thẳng vào tâm điểm hành động, xung đột bùng nổ, tình thế nan giải hoặc khoảnh khắc bất thường.
-   - TUYỆT ĐỐI CẤM 0% tả thời tiết mây gió dông dài ("trời thu se lạnh", "ánh nắng le lói chiếu qua kẽ lá"), bình minh/hoàng hôn sáo rỗng hoặc thuyết minh lịch sử bối cảnh dài dòng ở mở đầu.
+   - Mở đầu tự nhiên, bám sát bối cảnh và thể loại: Nếu là trinh thám/hành động thì khởi đầu dồn dập, nếu là lịch sử/chiêm nghiệm thì mở đầu giàu không khí và chi tiết chân thực.
+   - Tránh miêu tả sáo rỗng hoặc thuyết minh giáo điều; hãy để không gian và nhân vật tương tác sinh động ngay từ đầu.
 
 2. HỆ THỐNG ĐỘC THOẠI NỘI TÂM ĐA TẦNG (RICH INTERIOR MONOLOGUE):
-   - Đan xen dày đặc dòng độc thoại nội tâm sắc bén: phản ứng tâm lý tức thời, nỗi lo âu, toan tính chiến thuật, suy luận logic hoặc những câu tự giễu cợt, mỉa mai ngầm (dry wit).
-   - Thể hiện sự giằng xé nội tâm, áp lực sinh tồn hoặc xung đột xã hội, tạo chiều sâu đồng cảm tột độ cho độc giả trẻ.
+   - Đan xen dòng độc thoại nội tâm sắc bén: phản ứng tâm lý tức thời, nỗi lo âu, toan tính, suy luận hoặc những cảm xúc giằng xé.
+   - Thể hiện chiều sâu tâm lý, áp lực hoàn cảnh và xung đột nhân vật, tạo sự đồng cảm sâu sắc cho độc giả.
 
-3. ĐỐI THOẠI SẮC BÉN, GÃY GỌN & KHẨU NGỮ GIỚI TRẺ HIỆN ĐẠI (SHARP YOUTH DIALOGUE):
-   - Đối thoại tự nhiên, gãy gọn, đanh thép, mang hơi thở ngôn ngữ giới trẻ đương đại, giàu subtext (thao túng, thăm dò, che giấu hoặc mỉa mai).
-   - TUYỆT ĐỐI CẤM ngữ điệu dịch thuật gượng gạo, văn dịch Hán Việt sến súa cổ lỗ ("ngươi/ta", "chẳng hay", "nói đoạn", "không khỏi hít vào một ngụm khí lạnh" - trừ khi truyện thuần cổ trang).
+3. ĐỐI THOẠI TỰ NHIÊN, SẮC BÉN & PHÙ HỢP THỜI ĐẠI:
+   - Đối thoại tự nhiên, có cá tính riêng, giàu subtext (thăm dò, che giấu, mỉa mai hoặc thấu hiểu).
+   - Dùng đại từ xưng hô chuẩn xác theo thời đại và bối cảnh (thời phong kiến/cổ trang xưng hô chuẩn mực, thời hiện đại tự nhiên chân thực).
    - Đan xen vi hành động và biểu hiện sinh lý trong đối thoại: siết chặt ngón tay, khựng lại nửa nhịp, nuốt khan, nhếch khóe môi.
 
-4. NHỊP ĐIỆU CÂU VĂN CO GIÃN & ĐOẠN VĂN THÔNG THOÁNG (FAST-PACED STACCATO PACING):
-   - Lược bỏ mọi đoạn chuyển cảnh rườm rà (thức dậy, ăn sáng, di chuyển không mục đích).
-   - Cảnh căng thẳng/hành động: Câu ngắn (3-7 từ), ngắt nhịp dồn dập, tạo nhịp tim đập nhanh.
-   - Trình bày đoạn văn ngắn gọn (2-4 câu/đoạn), xuống dòng dứt khoát, tối ưu cho trải nghiệm đọc web novel lôi cuốn.
+4. NHỊP ĐIỆU CÂU VĂN CO GIÃN THEO DIỄN BIẾN (ADAPTIVE PACING):
+   - Cảnh căng thẳng/hành động: Câu ngắn gọn, dứt khoạt, ngắt nhịp dồn dập.
+   - Cảnh cảm xúc/quan sát/suy ngẫm: Câu văn mượt mà, gợi hình, giàu nhạc điệu.
+   - Trình bày đoạn văn thoáng đãng, ngắt dòng hợp lý, tối ưu trải nghiệm đọc.
 
-5. CẤU TRÚC 5 NHỊP KỊCH TÍNH (5 DRAMATIC NARRATIVE BEATS):
-   - Beat 1: Hook (0-15%): Xung đột bùng nổ ngay lập tức, cuốn độc giả vào tình thế nan giải.
-   - Beat 2: Rising Friction / Complication (15-40%): Trở ngại leo thang, phản ứng tâm lý và đối thoại va chạm dồn dập.
-   - Beat 3: Turning Point (40-70%): Biến cố đảo chiều nhận thức hoặc kế hoạch phá sản, nhân vật buộc phải ra quyết định mạo hiểm.
-   - Beat 4: Visceral Climax (70-90%): Đỉnh điểm cảm xúc hoặc hành động quyết định nghẹt thở.
-   - Beat 5: Lingering Cliffhanger (90-100%): Nút thắt chưa gỡ, kích thích tột độ muốn đọc chương tiếp.
+5. CẤU TRÚC KỊCH TÍNH HÀI HÒA THEO CỐT TRUYỆN:
+   - Phát triển câu chuyện mạch lạc theo diễn biến logic: Mở ra tình huống -> Phát triển xung đột/bí ẩn -> Đột phá bước ngoặt -> Cao trào cảm xúc/hành động -> Dư ba lắng đọng hoặc nút thắt hấp dẫn.
+   - Luôn tôn trọng ý tưởng, phong cách và định hướng sáng tác của tác giả.
 
 6. DANH MỤC CẤM KỴ (ANTI-CLICHÉ BANLIST):
-   - CẤM sáo ngữ mở đầu và miêu tả sáo rỗng: "vầng trăng vằng vặc", "thời gian thấm thoắt thoi đưa", "hắn cười khẩy / cười lạnh", "mắt phượng mày ngài", "trời quang mây tạnh lòng người u sầu", "bỗng nhiên một chuyện bất ngờ xảy ra".
+   - CẤM sáo ngữ mở đầu và miêu tả sáo rỗng: "vầng trăng vằng vặc", "thời gian thấm thoắt thoi đưa", "mắt phượng mày ngài", "trời quang mây tạnh lòng người u sầu", "bỗng nhiên một chuyện bất ngờ xảy ra".
    - CẤM liệt kê tính từ trừu tượng chung chung ("cô ấy rất buồn", "hắn vô cùng tức giận"). Hãy thể hiện bằng hành vi thực tế và phản ứng sinh lý (Show, don't tell).
    - CẤM lặp từ dẫn thoại đơn điệu ("hắn nói", "cô ấy nói"). Hãy để hành động và biểu cảm dẫn dắt câu thoại.
-   - CẤM TUYỆT ĐỐI sáo ngữ AI điển hình: "nhanh như nhịp tim chậm rãi", "khoảng trống trong lòng", "nỗi lo đè nặng lên vai", "thở dài giọng nhẹ", "trái tim đập thình thịch", "nụ cười bí ẩn nở trên môi", "đôi mắt sáng rực lên", "cảm xúc trào dâng trong lồng ngực", "lòng tôi chợt nặng trĩu", "một cảm giác kỳ lạ lan tỏa", "thế giới dường như dừng lại", "thời gian như ngừng trôi", "tim tôi nhói đau", "giọng nói ấm áp như nắng", "nỗi buồn man mác", "lòng nhẹ nhõm như trút được gánh nặng".
-   - CẤM đoạn triết lý suông không phục vụ cốt truyện, tuyên ngôn đạo đức sáo rỗng cuối chương. Mọi suy ngẫm phải bật ra từ hành động cụ thể và tình huống kịch tính.
+   - CẤM sáo ngữ AI điển hình: "nhanh như nhịp tim chậm rãi", "khoảng trống trong lòng", "nỗi lo đè nặng lên vai", "thở dài giọng nhẹ", "trái tim đập thình thịch", "nụ cười bí ẩn nở trên môi", "đôi mắt sáng rực lên", "cảm xúc trào dâng trong lồng ngực", "lòng tôi chợt nặng trĩu", "một cảm giác kỳ lạ lan tỏa", "thế giới dường như dừng lại", "thời gian như ngừng trôi", "tim tôi nhói đau", "giọng nói ấm áp như nắng", "nỗi buồn man mác", "lòng nhẹ nhõm như trút được gánh nặng".
+   - Mọi suy ngẫm phải bật ra từ tình huống cụ thể, không giáo điều sáo rỗng.
 
 7. QUY TẮC SHOW, DON'T TELL - 4 TRỤ CỘT (4-PILLAR SHOW DON'T TELL):
    - TRỤ 1 - CẢM GIÁC THỂ XÁC CỤ THỂ (Visceral Physical Sensations): Thay vì "anh ấy sợ" → "lưng áo ướt đẫm mồ hôi lạnh, cổ họng siết lại, móng tay cào vào lòng bàn tay". Luôn gắn cảm xúc với phản ứng sinh lý thực tế.

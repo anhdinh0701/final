@@ -28,6 +28,7 @@ export interface StoryDetail {
 }
 
 export interface ComicPanel {
+  id?: number;
   panel_id?: number;
   panel_index: number;
   image_url: string;

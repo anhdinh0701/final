@@ -394,9 +394,14 @@ export const api = {
 
   getComicImageUrl(imageUrl: string): string {
     if (!imageUrl) return '';
-    if (imageUrl.startsWith('http')) return imageUrl;
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://') || imageUrl.startsWith('data:')) return imageUrl;
     const apiOrigin = API_BASE_URL.replace(/\/api\/?$/, '');
-    return new URL(imageUrl, `${apiOrigin}/`).toString();
+    try {
+      const cleanPath = imageUrl.startsWith('/') ? imageUrl : `/${imageUrl}`;
+      return `${apiOrigin}${cleanPath}`;
+    } catch {
+      return imageUrl;
+    }
   },
 
   // Coins & Banking

@@ -581,9 +581,12 @@ def seed_database_and_pipeline():
                         image_prompt=p["image_prompt"],
                         dialogue_text=p["dialogue_text"],
                         layout_type=p.get("layout_type", "square"),
-                        image_url=None
+                        image_url=""
                     )
                     db.add(panel)
+                    db.commit()
+                    db.refresh(panel)
+                    panel.image_url = f"/api/comic/image/{panel.id}"
                 db.commit()
 
             # Ensure SocialPost for Community Feed / Discovery

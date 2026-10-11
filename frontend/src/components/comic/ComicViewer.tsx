@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Coins, Sparkles, RefreshCw } from "lucide-react";
 import { translations, Language } from "@/lib/i18n";
 import { ComicPanel } from "@/lib/types";
+import { api } from "@/lib/api";
 
 interface Props {
   panels: ComicPanel[];
@@ -55,27 +56,50 @@ function ComicPanelFrame({ panel, t, lang, slot, eager }: {
   const speakerName = parsed.speaker;
   const isDialogue = parsed.isDialogue;
 
-  const rawUrl = panel.image_url;
-  const imageUrl = rawUrl ? `${rawUrl}${rawUrl.includes("?") ? "&" : "?"}v=${retryKey}&t=${retryKey}` : "";
+  const panelIdentifier = panel.id || panel.panel_id;
+  const rawUrl = panel.image_url || (panelIdentifier ? `/api/comic/image/${panelIdentifier}` : "");
+  const fullUrl = rawUrl ? api.getComicImageUrl(rawUrl) : "";
+  const imageUrl = fullUrl
+    ? `${fullUrl}${fullUrl.includes("?") ? "&" : "?"}v=${retryKey}&retry=${retryKey}&t=${retryKey}&refresh=${retryKey > 0 ? "true" : "false"}`
+    : "";
   const imageFailed = !imageUrl || error;
 
   return (
-    <figure className="manga-panel" data-slot={slot}>
-      <div className={`manga-artwork ${imageFailed ? "has-error" : ""}`}>
+    <figure className="manga-panel relative" data-slot={slot}>
+      <div className={`manga-artwork relative overflow-hidden ${imageFailed ? "has-error" : ""}`}>
+        {/* Loading overlay when waiting for ComfyUI GPU generation */}
+        {imageUrl && !loaded && !error && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-neutral-100/90 dark:bg-neutral-900/90 backdrop-blur-xs font-mono z-10 animate-fadeIn">
+            <RefreshCw className="w-5 h-5 animate-spin text-black dark:text-white mb-2" />
+            <span className="text-xs font-bold text-black dark:text-white uppercase tracking-wider">
+              {lang === "vi" ? "Đang tạo tranh ComfyUI..." : "Generating Manga..."}
+            </span>
+            <p className="mt-1 text-[11px] text-neutral-500 max-w-xs">
+              {lang === "vi"
+                ? "Mô hình AI đang kết xuất tranh manga qua GPU..."
+                : "AI model is rendering high-fidelity artwork via GPU..."}
+            </p>
+          </div>
+        )}
+
         {imageUrl && !error ? (
           <img
             src={imageUrl}
             alt={dialogueText || `Manga panel ${panel.panel_index}`}
             loading={eager ? "eager" : "lazy"}
             decoding="async"
-            className={loaded ? "is-loaded" : "is-loading"}
+            className={loaded ? "is-loaded" : "is-loading opacity-0"}
             onLoad={() => {
               setLoaded(true);
               setError(false);
             }}
             onError={() => {
-              if (retryKey < 3) {
-                setTimeout(() => setRetryKey((k) => k + 1), 2500);
+              if (retryKey < 5) {
+                // Auto-retry after 5s to allow queued GPU jobs to complete
+                setTimeout(() => {
+                  setError(false);
+                  setRetryKey((k) => k + 1);
+                }, 5000);
               } else {
                 setError(true);
               }
@@ -98,12 +122,13 @@ function ComicPanelFrame({ panel, t, lang, slot, eager }: {
                 type="button"
                 onClick={() => {
                   setError(false);
+                  setLoaded(false);
                   setRetryKey((k) => k + 1);
                 }}
-                className="mt-3 flex items-center gap-1.5 px-3 py-1 text-xs font-mono font-bold uppercase rounded border border-neutral-400 bg-white text-black hover:bg-neutral-100 dark:border-neutral-700 dark:bg-black dark:text-white dark:hover:bg-neutral-900 transition-colors"
+                className="mt-3 flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-bold uppercase rounded border border-neutral-400 bg-white text-black hover:bg-neutral-100 dark:border-neutral-700 dark:bg-black dark:text-white dark:hover:bg-neutral-900 transition-colors cursor-pointer active:scale-95 shadow-xs"
               >
-                <RefreshCw className="w-3 h-3" />
-                <span>{lang === "vi" ? "Thử lại" : "Retry"}</span>
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>{lang === "vi" ? "Thử lại kết nối tranh" : "Retry render"}</span>
               </button>
             )}
           </div>
@@ -137,17 +162,18 @@ function ComicPanelFrame({ panel, t, lang, slot, eager }: {
                   type="button"
                   onClick={() => {
                     setError(false);
+                    setLoaded(false);
                     setRetryKey((k) => k + 1);
                   }}
-                  className="text-xs font-mono font-bold underline text-black dark:text-neutral-900"
+                  className="text-xs font-mono font-bold underline text-black dark:text-neutral-900 cursor-pointer ml-1.5"
                 >
-                  [Thử lại]
+                  [{lang === "vi" ? "Thử lại" : "Retry"}]
                 </button>
               )}
             </div>
           ) : !loaded ? (
-            <span className="manga-image-status block mt-1 text-[11px] font-mono text-neutral-400">
-              {t.loading_comic}
+            <span className="manga-image-status block mt-1 text-[11px] font-mono text-neutral-400 animate-pulse">
+              {lang === "vi" ? "Đang kết nối ComfyUI & tạo tranh..." : t.loading_comic}
             </span>
           ) : null}
         </figcaption>
@@ -203,6 +229,18 @@ export function ComicViewer({
   const remainingFreeBatches = Math.max(0, 3 - Math.floor(totalPanels / 4));
   const currentBatchNumber = Math.min(3, Math.floor(totalPanels / 4) + 1);
 
+  const [comfyStatus, setComfyStatus] = useState<{ available: boolean } | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    api.getComfyUIStatus().then((res) => {
+      if (active) setComfyStatus({ available: !!res.available });
+    }).catch(() => {
+      if (active) setComfyStatus({ available: false });
+    });
+    return () => { active = false; };
+  }, []);
+
   const handleContinueClick = () => {
     if (!isFreeTier && coinBalance < 100) {
       if (onOpenCoinModal) {
@@ -248,6 +286,14 @@ export function ComicViewer({
 
         {/* Status Badges & Continue Button */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* ComfyUI GPU Status Badge */}
+          <div
+            className="hidden items-center gap-1.5 rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 px-2.5 py-1 text-xs font-mono font-bold lg:inline-flex"
+            title={comfyStatus?.available ? "ComfyUI GPU đang kết nối qua ngrok" : "Đang kết nối ComfyUI qua ngrok"}
+          >
+            <span className={`w-2 h-2 rounded-full ${comfyStatus?.available ? "bg-black dark:bg-white" : "bg-neutral-400 animate-pulse"}`} />
+            <span>{comfyStatus?.available ? "COMFYUI GPU: SẴN SÀNG" : "COMFYUI GPU: ĐANG KẾT NỐI"}</span>
+          </div>
           {/* Free / Paid Progress Badge */}
           {isFreeTier ? (
             <span className="hidden items-center rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 px-2.5 py-1 text-xs font-mono font-bold text-black dark:text-white md:inline-flex">

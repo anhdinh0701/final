@@ -243,7 +243,7 @@ def get_cached_or_generate_image(
         # 2. Primary Provider: ComfyUI with GPU Acceleration & Dynamic LoRA Chaining
         try:
             from services.comfyui_service import is_comfyui_enabled, is_comfyui_available, generate_image_comfyui
-            if is_comfyui_enabled() and is_comfyui_available():
+            if is_comfyui_enabled() and is_comfyui_available(timeout=6.0, force_check=True):
                 try:
                     active_loras = loras
                     if active_loras is None:

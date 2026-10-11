@@ -145,32 +145,43 @@ export const api = {
   },
 
   // Setup Flow
-  async chatInterview(history: Array<{role: string; content: string}>): Promise<InterviewResponse> {
-    try {
-      const res = await fetch(`${API_BASE_URL}/chat-interview`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({ chat_history: history }),
-      });
-      if (!res.ok) {
-        const errorText = await res.text();
-        let message = `Lỗi máy chủ (${res.status})`;
-        try {
-          const parsed = JSON.parse(errorText);
-          message = parsed.message || parsed.detail || message;
-        } catch {}
-        if (res.status === 503) {
-          message = "Máy chủ AI đang khởi động (Render cold-boot, mất khoảng 30s). Hãy bấm Thử lại sau giây lát.";
+  async chatInterview(history: Array<{role: string; content: string}>, maxRetries = 2): Promise<InterviewResponse> {
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const res = await fetch(`${API_BASE_URL}/chat-interview`, {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({ chat_history: history }),
+        });
+        if (!res.ok) {
+          const errorText = await res.text();
+          let message = `Lỗi máy chủ (${res.status})`;
+          try {
+            const parsed = JSON.parse(errorText);
+            message = parsed.message || parsed.detail || message;
+          } catch {}
+          if (res.status === 503 && attempt < maxRetries) {
+            await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)));
+            continue;
+          }
+          if (res.status === 503) {
+            message = "Máy chủ AI đang khởi động (Render cold-boot). Hãy bấm Thử lại sau giây lát.";
+          }
+          return { status: 'error', message };
         }
-        return { status: 'error', message };
+        return await res.json();
+      } catch (err: any) {
+        if (attempt < maxRetries) {
+          await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)));
+          continue;
+        }
+        return {
+          status: 'error',
+          message: err?.message || 'Không thể kết nối với máy chủ AI (Lỗi mạng hoặc máy chủ ngoại tuyến)',
+        };
       }
-      return await res.json();
-    } catch (err: any) {
-      return {
-        status: 'error',
-        message: err?.message || 'Không thể kết nối với máy chủ AI (Lỗi mạng hoặc máy chủ ngoại tuyến)',
-      };
     }
+    return { status: 'error', message: 'Không thể kết nối với máy chủ AI sau nhiều lần thử.' };
   },
 
   async refinePrompt(history: Array<{role: string; content: string}>): Promise<RefineResponse> {

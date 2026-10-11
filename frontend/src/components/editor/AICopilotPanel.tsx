@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Bot, Send, Undo2, X, Check, ArrowRight, CheckSquare } from "lucide-react";
 import { translations, Language } from "@/lib/i18n";
 import { ChatMessage } from "@/lib/types";
 import type { ModelTier } from "@/components/morphicons/ModelSelectorMorphicon";
@@ -94,9 +95,9 @@ export function AICopilotPanel({
       {/* Copilot Header */}
       <div className="flex items-center justify-between pb-3 border-b border-neutral-200 dark:border-neutral-800 shrink-0">
         <div className="flex items-center gap-2">
-          <span className="px-2 py-0.5 rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 text-xs font-mono font-bold text-black dark:text-white">
-            [AI]
-          </span>
+          <div className="w-7 h-7 rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 text-black dark:text-white flex items-center justify-center shrink-0">
+            <Bot className="w-4 h-4" />
+          </div>
           <div className="min-w-0">
             <h3 className="font-bold text-sm text-black dark:text-white leading-tight">
               {t.ai_copilot}
@@ -111,10 +112,11 @@ export function AICopilotPanel({
           {canUndo && onUndo && (
             <button
               onClick={onUndo}
-              className="px-2 py-1 rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-900 dark:hover:bg-neutral-800 text-black dark:text-white transition-colors"
+              className="px-2 py-1 rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-900 dark:hover:bg-neutral-800 text-black dark:text-white transition-colors flex items-center gap-1"
               title={t.undo_tooltip}
             >
-              [{t.undo_btn}]
+              <Undo2 className="w-3 h-3" />
+              <span>{t.undo_btn}</span>
             </button>
           )}
           {onCloseMobile && (
@@ -122,9 +124,10 @@ export function AICopilotPanel({
               type="button"
               onClick={onCloseMobile}
               aria-label={lang === "vi" ? "Đóng trợ lý" : "Close assistant"}
-              className="lg:hidden px-2 py-1 rounded border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-900 text-black dark:text-white"
+              className="lg:hidden px-2 py-1 rounded border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-900 text-black dark:text-white flex items-center gap-1"
             >
-              [Đóng]
+              <X className="w-3.5 h-3.5" />
+              <span>{lang === "vi" ? "Đóng" : "Close"}</span>
             </button>
           )}
         </div>
@@ -205,15 +208,17 @@ export function AICopilotPanel({
             <div className="flex gap-2 pt-1 font-mono text-xs">
               <button
                 onClick={onAcceptEdit}
-                className="flex-1 py-1.5 rounded font-bold text-white bg-black hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-colors"
+                className="flex-1 py-1.5 rounded font-bold text-white bg-black hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-colors flex items-center justify-center gap-1.5"
               >
-                [{t.accept_btn}]
+                <Check className="w-3.5 h-3.5" />
+                <span>{t.accept_btn}</span>
               </button>
               <button
                 onClick={onRejectEdit}
-                className="px-3 py-1.5 rounded font-semibold text-black dark:text-white border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors"
+                className="px-3 py-1.5 rounded font-semibold text-black dark:text-white border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors flex items-center justify-center gap-1.5"
               >
-                [{t.reject_btn}]
+                <X className="w-3.5 h-3.5" />
+                <span>{t.reject_btn}</span>
               </button>
             </div>
           </div>
@@ -287,9 +292,10 @@ export function AICopilotPanel({
           <button
             onClick={handleChatSubmit}
             disabled={loading || streaming || !chatInput.trim()}
-            className="absolute right-2 top-2 px-2 py-1 rounded text-[11px] font-mono font-bold bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 disabled:opacity-40 transition-all"
+            className="absolute right-2 top-2 px-2 py-1 rounded text-[11px] font-mono font-bold bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 disabled:opacity-40 transition-all flex items-center gap-1"
           >
-            [Gửi]
+            <Send className="w-3 h-3" />
+            <span>{lang === "vi" ? "Gửi" : "Send"}</span>
           </button>
         </div>
       </div>
@@ -301,7 +307,8 @@ export function AICopilotPanel({
           disabled={loading || streaming}
           className="w-full py-2 rounded font-bold text-white bg-black hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 flex items-center justify-center gap-1.5 transition-all disabled:opacity-50"
         >
-          <span>[{t.continue_chapter_btn}]</span>
+          <span>{t.continue_chapter_btn}</span>
+          <ArrowRight className="w-3.5 h-3.5" />
         </button>
 
         <button
@@ -309,7 +316,8 @@ export function AICopilotPanel({
           disabled={loading || streaming}
           className="w-full py-2 rounded font-semibold text-neutral-600 dark:text-neutral-400 border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-900 flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
         >
-          <span>[{t.end_story_btn}]</span>
+          <CheckSquare className="w-3.5 h-3.5" />
+          <span>{t.end_story_btn}</span>
         </button>
       </div>
     </aside>

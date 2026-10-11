@@ -1,6 +1,17 @@
 "use client";
 
 import Image from "next/image";
+import {
+  PenTool,
+  FileText,
+  Image as ImageIcon,
+  Globe,
+  BookOpen,
+  History,
+  MessageSquare,
+  Coins,
+  LogOut,
+} from "lucide-react";
 import { translations, Language } from "@/lib/i18n";
 import { ThemeToggle } from "./ThemeToggle";
 import { LanguageSwitcher } from "./LanguageSwitcher";
@@ -81,28 +92,32 @@ export function Sidebar({
               <button
                 type="button"
                 onClick={onLogout}
-                className="text-[10px] font-mono text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white uppercase px-1.5 py-0.5 rounded border border-neutral-300 dark:border-neutral-800 hover:border-black dark:hover:border-neutral-600 transition-colors"
+                className="flex items-center gap-1 text-[10px] font-mono text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white uppercase px-1.5 py-0.5 rounded border border-neutral-300 dark:border-neutral-800 hover:border-black dark:hover:border-neutral-600 transition-colors"
                 title={t.logout}
               >
-                Thoát
+                <LogOut className="w-3 h-3" />
+                <span>Thoát</span>
               </button>
             )}
           </div>
 
-          {/* Coin Badge (Typography Badge) */}
+          {/* Coin Badge (Monochrome Badge) */}
           <div className="mt-3 pt-2.5 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
             <button
               type="button"
               onClick={onOpenCoinTopup}
               className="w-full flex items-center justify-between px-2.5 py-1.5 rounded bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-900 dark:hover:bg-neutral-800 border border-neutral-200 dark:border-neutral-800 text-[11px] font-mono transition-colors"
             >
-              <span className="text-neutral-500 uppercase tracking-wider">Số dư xu</span>
+              <div className="flex items-center gap-1.5 text-neutral-500 uppercase tracking-wider">
+                <Coins className="w-3.5 h-3.5" />
+                <span>Số dư xu</span>
+              </div>
               <span className="font-bold text-black dark:text-white font-mono">{coinBalance} XU</span>
             </button>
           </div>
         </div>
 
-        {/* Menu Navigation (Zero Icons, Pure Typography) */}
+        {/* Menu Navigation (Monochrome Icons Matching Features) */}
         <div className="space-y-1.5">
           {/* Sáng tác mới */}
           <button
@@ -117,7 +132,10 @@ export function Sidebar({
                 : "text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white hover:bg-neutral-200 dark:hover:bg-neutral-900"
             }`}
           >
-            <span>{t.tab_create || t.new_story}</span>
+            <div className="flex items-center gap-2.5">
+              <PenTool className="w-4 h-4" />
+              <span>{t.tab_create || t.new_story}</span>
+            </div>
             {activeTab === "setup" && <span className="text-[10px] font-mono">[•]</span>}
           </button>
 
@@ -132,7 +150,10 @@ export function Sidebar({
                   : "text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white hover:bg-neutral-200 dark:hover:bg-neutral-900"
               }`}
             >
-              <span>{t.tab_editor}</span>
+              <div className="flex items-center gap-2.5">
+                <FileText className="w-4 h-4" />
+                <span>{t.tab_editor}</span>
+              </div>
               {activeTab === "editor" && <span className="text-[10px] font-mono">[•]</span>}
             </button>
           )}
@@ -148,7 +169,10 @@ export function Sidebar({
                   : "text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white hover:bg-neutral-200 dark:hover:bg-neutral-900"
               }`}
             >
-              <span>{t.tab_comic}</span>
+              <div className="flex items-center gap-2.5">
+                <ImageIcon className="w-4 h-4" />
+                <span>{t.tab_comic}</span>
+              </div>
               {activeTab === "comic" && <span className="text-[10px] font-mono">[•]</span>}
             </button>
           )}
@@ -163,7 +187,10 @@ export function Sidebar({
                 : "text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white hover:bg-neutral-200 dark:hover:bg-neutral-900"
             }`}
           >
-            <span>{lang === "vi" ? "Mạng xã hội" : "Community"}</span>
+            <div className="flex items-center gap-2.5">
+              <Globe className="w-4 h-4" />
+              <span>{lang === "vi" ? "Mạng xã hội" : "Community"}</span>
+            </div>
             {activeTab === "posts" && <span className="text-[10px] font-mono">[•]</span>}
           </button>
 
@@ -177,7 +204,10 @@ export function Sidebar({
                 : "text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white hover:bg-neutral-200 dark:hover:bg-neutral-900"
             }`}
           >
-            <span>{lang === "vi" ? "Câu chuyện" : "Stories"}</span>
+            <div className="flex items-center gap-2.5">
+              <BookOpen className="w-4 h-4" />
+              <span>{lang === "vi" ? "Câu chuyện" : "Stories"}</span>
+            </div>
             {activeTab === "pipeline" && <span className="text-[10px] font-mono">[•]</span>}
           </button>
 
@@ -187,7 +217,10 @@ export function Sidebar({
             onClick={onOpenHistory}
             className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs tracking-wider uppercase text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white hover:bg-neutral-200 dark:hover:bg-neutral-900 transition-colors"
           >
-            <span>{t.story_history}</span>
+            <div className="flex items-center gap-2.5">
+              <History className="w-4 h-4" />
+              <span>{t.story_history}</span>
+            </div>
           </button>
 
           {/* Open Messenger */}
@@ -196,7 +229,10 @@ export function Sidebar({
             onClick={onOpenMessenger}
             className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs tracking-wider uppercase text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white hover:bg-neutral-200 dark:hover:bg-neutral-900 transition-colors"
           >
-            <span>{lang === "vi" ? "Hộp thư Messenger" : "Messenger"}</span>
+            <div className="flex items-center gap-2.5">
+              <MessageSquare className="w-4 h-4" />
+              <span>{lang === "vi" ? "Hộp thư Messenger" : "Messenger"}</span>
+            </div>
             {unreadCount > 0 ? (
               <span className="px-1.5 py-0.2 text-[10px] font-mono font-bold bg-black text-white dark:bg-white dark:text-black rounded">
                 {unreadCount}

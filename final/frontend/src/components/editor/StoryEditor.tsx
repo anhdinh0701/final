@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Sparkles, Share2, Image as ImageIcon, Download } from "lucide-react";
 import { translations, Language } from "@/lib/i18n";
 
 interface Props {
@@ -251,36 +252,40 @@ export function StoryEditor({
             <button
               type="button"
               onClick={onToggleCopilot}
-              className="lg:hidden px-2.5 py-1.5 rounded text-xs font-bold uppercase tracking-wider text-black dark:text-white border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors"
+              className="lg:hidden flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-bold uppercase tracking-wider text-black dark:text-white border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors"
             >
-              <span>{lang === "vi" ? "[Trợ lý]" : "[Assistant]"}</span>
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>{lang === "vi" ? "Trợ lý" : "Assistant"}</span>
             </button>
           )}
           {onPublish && (
             <button
               type="button"
               onClick={onPublish}
-              className="px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider text-black dark:text-white border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider text-black dark:text-white border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors"
               title={lang === "vi" ? "Lưu bản thảo và xuất bản lên Bảng tin cộng đồng" : "Save and publish to community feed"}
             >
-              <span>[{t.btn_publish}]</span>
+              <Share2 className="w-3.5 h-3.5" />
+              <span>{t.btn_publish}</span>
             </button>
           )}
 
           <button
             type="button"
             onClick={onAdaptToComic}
-            className="px-3.5 py-1.5 rounded text-xs font-bold uppercase tracking-wider bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-colors shadow-sm"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded text-xs font-bold uppercase tracking-wider bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-colors shadow-sm"
           >
-            <span>[{t.comic_btn}]</span>
+            <ImageIcon className="w-3.5 h-3.5" />
+            <span>{t.comic_btn}</span>
           </button>
 
           <button
             type="button"
             onClick={onDownload}
-            className="px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider text-black dark:text-white border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider text-black dark:text-white border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors"
           >
-            <span>[{t.download_btn}]</span>
+            <Download className="w-3.5 h-3.5" />
+            <span>{t.download_btn}</span>
           </button>
         </div>
       </div>

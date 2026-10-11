@@ -1,6 +1,21 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo } from "react";
+import {
+  Bot,
+  User,
+  RotateCcw,
+  PenTool,
+  RefreshCw,
+  Send,
+  ArrowRight,
+  Sparkles,
+  ScrollText,
+  Cpu,
+  Flame,
+  BookOpen,
+  CheckCircle2,
+} from "lucide-react";
 import { Language, translations } from "@/lib/i18n";
 import { ChatMessage, StoryLength } from "@/lib/types";
 import { api } from "@/lib/api";
@@ -333,7 +348,7 @@ export function UnifiedIntakeChat({
       prompt: t.starter_history_prompt || (lang === "vi"
         ? "Một nghĩa sĩ áo vải thời Hậu Lê mang gươm báu bảo vệ bến sông lịch sử, đứng trước ngã rẽ giữa đại cục quốc gia và nghĩa tình riêng biệt."
         : "A peasant warrior during the Later Le dynasty guarding a historic river port, torn between national destiny and personal affection."),
-      iconColor: "text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/30",
+      icon: ScrollText,
     },
     {
       id: "scifi",
@@ -342,7 +357,7 @@ export function UnifiedIntakeChat({
       prompt: t.starter_scifi_prompt || (lang === "vi"
         ? "Một thám tử tư trong khu ổ chuột ngầm Sài Gòn năm 2099, chuyên điều tra các vụ đánh cắp ký ức và nhân dạng số bất hợp pháp."
         : "A private eye in the subterranean districts of Saigon 2099, investigating illegal synthetic memory theft and cybernetic identity fraud."),
-      iconColor: "text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 border-cyan-500/30",
+      icon: Cpu,
     },
     {
       id: "xianxia",
@@ -351,7 +366,7 @@ export function UnifiedIntakeChat({
       prompt: t.starter_xianxia_prompt || (lang === "vi"
         ? "Thiếu niên vô danh sở hữu thần hồn dị biến, từng bước phá giải cổ trận nghìn năm chôn vùi dưới cấm địa phong ấn đan điền."
         : "An unassuming youth with an anomalous soul core unravels a thousand-year-old array hidden beneath a forbidden realm."),
-      iconColor: "text-purple-600 dark:text-purple-400 bg-purple-500/10 border-purple-500/30",
+      icon: Flame,
     },
     {
       id: "life",
@@ -360,7 +375,7 @@ export function UnifiedIntakeChat({
       prompt: t.starter_life_prompt || (lang === "vi"
         ? "Hai tâm hồn cô đơn tình cờ gặp gỡ tại một quán cà phê sách mở thâu đêm ở phố cổ Hà Nội vào một đêm mưa lạnh, tìm thấy sự an ủi diệu kỳ."
         : "Two lonely souls meet by chance at an all-night book café in the Hanoi Old Quarter on a cold, rainy evening, discovering unexpected solace."),
-      iconColor: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
+      icon: BookOpen,
     },
   ], [lang, t]);
 
@@ -565,8 +580,8 @@ export function UnifiedIntakeChat({
     <div className="flex flex-col h-full w-full bg-neutral-50 dark:bg-black text-black dark:text-white relative font-sans">
       <header className="h-14 border-b border-neutral-200 dark:border-neutral-800 px-4 sm:px-6 flex items-center justify-between shrink-0 bg-white dark:bg-black z-10">
         <div className="flex items-center gap-3">
-          <div className="px-2 py-1 rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 text-black dark:text-white font-mono text-xs font-bold">
-            [AI]
+          <div className="w-8 h-8 rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 text-black dark:text-white flex items-center justify-center shrink-0">
+            <Bot className="w-4 h-4" />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -574,7 +589,7 @@ export function UnifiedIntakeChat({
                 {t.intake_header_title || "NarrAI Co-creator"}
               </h2>
               <span className="hidden text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 text-black dark:text-white sm:inline-flex">
-                [Q&A]
+                Q&A
               </span>
             </div>
             <p className="text-[11px] text-neutral-500 dark:text-neutral-400 hidden md:block">
@@ -592,10 +607,11 @@ export function UnifiedIntakeChat({
             <button
               onClick={handleResetChat}
               disabled={loading || isFinalizing}
-              className="px-2.5 py-1.5 rounded border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-900 text-black dark:text-white transition-colors disabled:opacity-40"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-900 text-black dark:text-white transition-colors disabled:opacity-40"
               title={t.intake_clear_chat || (lang === "vi" ? "Làm mới trò chuyện" : "Reset intake chat")}
             >
-              [Làm mới]
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>{lang === "vi" ? "Làm mới" : "Reset"}</span>
             </button>
           )}
 
@@ -603,7 +619,7 @@ export function UnifiedIntakeChat({
           <button
             onClick={triggerFinalize}
             disabled={(messages.length === 0 && !input.trim()) || isFinalizing || isGenerating}
-            className="px-3 py-1.5 rounded text-xs font-bold bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-colors flex items-center gap-1.5 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="px-3.5 py-1.5 rounded text-xs font-bold bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-colors flex items-center gap-1.5 disabled:opacity-30 disabled:cursor-not-allowed"
             title={
               isReady
                 ? (lang === "vi" ? "AI đã sẵn sàng! Chốt cốt truyện và chuyển thẳng sang chấp bút bản thảo" : "Ready! Finalize plot and start drafting manuscript")
@@ -614,15 +630,17 @@ export function UnifiedIntakeChat({
               <span>[Đang xử lý...]</span>
             ) : isReady ? (
               <>
-                <span className="hidden sm:inline">[Bắt đầu viết ngay]</span>
-                <span className="sm:hidden">[Viết ngay]</span>
-                <span>-&gt;</span>
+                <PenTool className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Bắt đầu viết ngay</span>
+                <span className="sm:hidden">Viết ngay</span>
+                <ArrowRight className="w-3.5 h-3.5 ml-0.5" />
               </>
             ) : (
               <>
-                <span className="hidden sm:inline">[{t.intake_finalize_plot || (lang === "vi" ? "Chốt cốt truyện" : "Finalize plot")}]</span>
-                <span className="sm:hidden">[Chốt]</span>
-                <span>-&gt;</span>
+                <PenTool className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{t.intake_finalize_plot || (lang === "vi" ? "Chốt cốt truyện" : "Finalize plot")}</span>
+                <span className="sm:hidden">Chốt</span>
+                <ArrowRight className="w-3.5 h-3.5 ml-0.5" />
               </>
             )}
           </button>
@@ -650,30 +668,35 @@ export function UnifiedIntakeChat({
 
               {/* Starter Prompt Suggestion Pills */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 w-full text-left font-mono">
-                {starterIdeas.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => handleSend(item.prompt)}
-                    className="p-5 rounded min-h-[140px] border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:border-black dark:hover:border-white transition-colors text-left group shadow-xs flex flex-col justify-between"
-                  >
-                    <div>
-                      <div className="flex items-center justify-between gap-2 mb-2 font-sans">
-                        <span className="text-xs sm:text-sm font-bold text-black dark:text-white">
-                          {item.title}
+                {starterIdeas.map((item) => {
+                  const IconComp = item.icon;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => handleSend(item.prompt)}
+                      className="p-5 rounded min-h-[140px] border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:border-black dark:hover:border-white transition-colors text-left group shadow-xs flex flex-col justify-between"
+                    >
+                      <div>
+                        <div className="flex items-center gap-2 mb-2 font-sans">
+                          <IconComp className="w-4 h-4 text-black dark:text-white shrink-0" />
+                          <span className="text-xs sm:text-sm font-bold text-black dark:text-white">
+                            {item.title}
+                          </span>
+                        </div>
+                        <span className="inline-block text-[10px] font-mono px-2 py-0.5 rounded mb-2.5 border border-neutral-300 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800">
+                          {item.badge}
                         </span>
+                        <p className="text-xs font-sans text-neutral-600 dark:text-neutral-400 line-clamp-3 leading-relaxed">
+                          {item.prompt}
+                        </p>
                       </div>
-                      <span className="inline-block text-[10px] font-mono px-2 py-0.5 rounded mb-2.5 border border-neutral-300 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800">
-                        [{item.badge}]
-                      </span>
-                      <p className="text-xs font-sans text-neutral-600 dark:text-neutral-400 line-clamp-3 leading-relaxed">
-                        {item.prompt}
-                      </p>
-                    </div>
-                    <div className="mt-3 flex items-center gap-1.5 text-xs font-mono font-bold text-black dark:text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                      <span>[{lang === "vi" ? "Bắt đầu khám phá" : "Explore concept"}] -&gt;</span>
-                    </div>
-                  </button>
-                ))}
+                      <div className="mt-3 flex items-center gap-1.5 text-xs font-mono font-bold text-black dark:text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span>{lang === "vi" ? "Bắt đầu khám phá" : "Explore concept"}</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -696,7 +719,7 @@ export function UnifiedIntakeChat({
                           : "bg-neutral-100 dark:bg-neutral-900 text-black dark:text-white border-neutral-300 dark:border-neutral-700"
                       }`}
                     >
-                      {isUser ? "[BẠN]" : "[AI]"}
+                      {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
                     </div>
 
                     {/* Bubble Content */}
@@ -713,16 +736,17 @@ export function UnifiedIntakeChat({
                       {!isUser && msg.is_offline_fallback && (
                         <div className="mt-3 pt-2.5 border-t border-neutral-200 dark:border-neutral-800 flex flex-wrap items-center justify-between gap-2 font-mono text-xs">
                           <div className="flex items-center gap-1.5 font-bold text-neutral-600 dark:text-neutral-400">
-                            <span>[MẤT KẾT NỐI AI]</span>
-                            <span>{lang === "vi" ? "(Gợi ý dự phòng)" : "(Fallback preview)"}</span>
+                            <RefreshCw className="w-3.5 h-3.5" />
+                            <span>{lang === "vi" ? "Mất kết nối AI (Gợi ý dự phòng)" : "Lost AI connection (Fallback preview)"}</span>
                           </div>
                           <button
                             onClick={() => handleRetry(index, msg.failed_prompt)}
                             disabled={loading || isFinalizing}
-                            className="px-2.5 py-1 rounded text-xs font-bold bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 text-black dark:text-white transition-all disabled:opacity-40"
+                            className="px-2.5 py-1 rounded text-xs font-bold bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 text-black dark:text-white transition-all disabled:opacity-40 flex items-center gap-1"
                             title={lang === "vi" ? "Thử lại kết nối đến máy chủ AI" : "Retry connection to AI server"}
                           >
-                            <span>[{lang === "vi" ? "Thử lại" : "Retry"}]</span>
+                            <RefreshCw className="w-3 h-3" />
+                            <span>{lang === "vi" ? "Thử lại" : "Retry"}</span>
                           </button>
                         </div>
                       )}
@@ -731,13 +755,15 @@ export function UnifiedIntakeChat({
                       {!isUser && msg.is_ready && (
                         <div className="mt-3 pt-2.5 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-between font-mono text-xs">
                           <div className="flex items-center gap-1.5 font-bold text-black dark:text-white">
-                            <span>[CỐT TRUYỆN ĐÃ ĐỊNH HÌNH]</span>
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span>{lang === "vi" ? "Cốt truyện đã định hình" : "Plot formed"}</span>
                           </div>
                           <button
                             onClick={triggerFinalize}
-                            className="px-2.5 py-1 rounded text-xs font-bold bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-all"
+                            className="px-2.5 py-1 rounded text-xs font-bold bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-all flex items-center gap-1"
                           >
-                            <span>[{t.intake_start_writing_now || (lang === "vi" ? "Viết ngay" : "Write now")}] -&gt;</span>
+                            <span>{t.intake_start_writing_now || (lang === "vi" ? "Viết ngay" : "Write now")}</span>
+                            <ArrowRight className="w-3 h-3" />
                           </button>
                         </div>
                       )}
@@ -749,11 +775,11 @@ export function UnifiedIntakeChat({
               {/* Typing State */}
               {loading && (
                 <div className="flex items-start gap-3.5 animate-fadeIn">
-                  <div className="w-9 h-9 rounded bg-neutral-100 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-black dark:text-white flex items-center justify-center shrink-0 font-mono text-xs font-bold">
-                    [AI]
+                  <div className="w-9 h-9 rounded bg-neutral-100 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-black dark:text-white flex items-center justify-center shrink-0">
+                    <Bot className="w-4 h-4" />
                   </div>
                   <div className="px-4.5 py-3.5 rounded bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 flex items-center gap-2 font-mono text-xs text-neutral-600 dark:text-neutral-400">
-                    <span className="animate-pulse">[•••]</span>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                     <span>
                       {lang === "vi" ? "NarrAI đang suy nghĩ..." : "NarrAI is formulating..."}
                     </span>
@@ -776,7 +802,7 @@ export function UnifiedIntakeChat({
           {isReady && messages.length > 0 && !isFinalizing && (
             <div className="mb-2 px-3 py-1.5 rounded bg-neutral-100 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 flex items-center justify-between text-xs text-black dark:text-white animate-fadeIn font-mono">
               <div className="flex items-center gap-1.5 font-bold">
-                <span>[SẴN SÀNG]</span>
+                <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
                 <span className="font-sans font-normal">
                   {lang === "vi"
                     ? "Cốt truyện đã đủ độ chín! Bạn có thể bấm 'Bắt đầu viết truyện ngay' bất cứ lúc nào."
@@ -785,9 +811,10 @@ export function UnifiedIntakeChat({
               </div>
               <button
                 onClick={triggerFinalize}
-                className="font-bold underline hover:text-neutral-600 dark:hover:text-neutral-400 flex items-center gap-0.5 ml-2 shrink-0"
+                className="font-bold underline hover:text-neutral-600 dark:hover:text-neutral-400 flex items-center gap-1 ml-2 shrink-0"
               >
-                <span>{t.intake_jump_to_manuscript || (lang === "vi" ? "Chấp bút ngay ->" : "Draft now ->")}</span>
+                <span>{t.intake_jump_to_manuscript || (lang === "vi" ? "Chấp bút ngay" : "Draft now")}</span>
+                <ArrowRight className="w-3 h-3" />
               </button>
             </div>
           )}
@@ -808,9 +835,9 @@ export function UnifiedIntakeChat({
                   className="text-[11px] font-mono bg-neutral-100 dark:bg-neutral-900 text-black dark:text-white border border-neutral-300 dark:border-neutral-700 rounded px-2 py-1 outline-none cursor-pointer max-w-[120px] sm:max-w-[150px]"
                   title={lang === "vi" ? "Chọn cấp độ mô hình AI" : "Select AI model tier"}
                 >
-                  <option value="fast">{lang === "vi" ? "[Nhanh]" : "[Fast]"}</option>
-                  <option value="versatile">{lang === "vi" ? "[Linh hoạt]" : "[Versatile]"}</option>
-                  <option value="premium">{lang === "vi" ? "[Cao cấp]" : "[Premium]"}</option>
+                  <option value="fast">{lang === "vi" ? "Nhanh" : "Fast"}</option>
+                  <option value="versatile">{lang === "vi" ? "Linh hoạt" : "Versatile"}</option>
+                  <option value="premium">{lang === "vi" ? "Cao cấp" : "Premium"}</option>
                 </select>
               </div>
 
@@ -864,10 +891,11 @@ export function UnifiedIntakeChat({
               <button
                 onClick={() => handleSend()}
                 disabled={!input.trim() || loading || isFinalizing}
-                className="px-4 h-10 rounded bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 flex items-center justify-center shrink-0 transition-colors disabled:opacity-30 disabled:cursor-not-allowed font-mono text-xs font-bold"
+                className="px-4 h-10 rounded bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 flex items-center justify-center gap-1.5 shrink-0 transition-colors disabled:opacity-30 disabled:cursor-not-allowed font-mono text-xs font-bold"
                 title={t.intake_send || (lang === "vi" ? "Gửi ý tưởng" : "Send idea")}
               >
-                [Gửi]
+                <Send className="w-3.5 h-3.5" />
+                <span>{lang === "vi" ? "Gửi" : "Send"}</span>
               </button>
             </div>
           </div>

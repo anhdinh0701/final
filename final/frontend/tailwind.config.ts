@@ -34,8 +34,8 @@ const config: Config = {
         }
       },
       fontFamily: {
-        sans: ['"Be Vietnam Pro"', 'system-ui', '-apple-system', 'sans-serif'],
-        serif: ['"Merriweather"', '"Lora"', 'Georgia', 'serif'],
+        sans: ['Arial', 'Helvetica', 'sans-serif'],
+        serif: ['Arial', 'Helvetica', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'monospace'],
       },
     },

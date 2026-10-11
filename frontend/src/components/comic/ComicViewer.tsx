@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ArrowLeft, Coins, Sparkles, RefreshCw } from "lucide-react";
 import { translations, Language } from "@/lib/i18n";
 import { ComicPanel } from "@/lib/types";
 
@@ -99,9 +100,10 @@ function ComicPanelFrame({ panel, t, lang, slot, eager }: {
                   setError(false);
                   setRetryKey((k) => k + 1);
                 }}
-                className="mt-3 px-3 py-1 text-xs font-mono font-bold uppercase rounded border border-neutral-400 bg-white text-black hover:bg-neutral-100 dark:border-neutral-700 dark:bg-black dark:text-white dark:hover:bg-neutral-900 transition-colors"
+                className="mt-3 flex items-center gap-1.5 px-3 py-1 text-xs font-mono font-bold uppercase rounded border border-neutral-400 bg-white text-black hover:bg-neutral-100 dark:border-neutral-700 dark:bg-black dark:text-white dark:hover:bg-neutral-900 transition-colors"
               >
-                [Thử lại]
+                <RefreshCw className="w-3 h-3" />
+                <span>{lang === "vi" ? "Thử lại" : "Retry"}</span>
               </button>
             )}
           </div>
@@ -219,11 +221,12 @@ export function ComicViewer({
           <button
             type="button"
             onClick={onBackToEditor}
-            className="flex items-center rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-900 dark:hover:bg-neutral-800 px-3 py-1.5 text-xs font-mono font-bold uppercase tracking-wider text-black dark:text-white transition-colors"
+            className="flex items-center gap-1.5 rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-900 dark:hover:bg-neutral-800 px-3 py-1.5 text-xs font-mono font-bold uppercase tracking-wider text-black dark:text-white transition-colors"
             title={t.back_to_editor}
             aria-label={t.back_to_editor}
           >
-            [Bản thảo chữ]
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>{t.back_to_editor || (lang === "vi" ? "Bản thảo chữ" : "Editor")}</span>
           </button>
 
           <div className="flex items-center gap-2">
@@ -264,6 +267,7 @@ export function ComicViewer({
               className="flex items-center gap-1.5 rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-900 dark:hover:bg-neutral-800 px-2.5 py-1.5 text-xs font-mono font-bold text-black dark:text-white transition-colors"
               title={lang === "vi" ? "Nạp thêm xu" : "Top up coins"}
             >
+              <Coins className="w-3.5 h-3.5" />
               <span>{coinBalance} XU</span>
             </button>
           )}
@@ -274,14 +278,15 @@ export function ComicViewer({
               type="button"
               onClick={handleContinueClick}
               disabled={loadingMore}
-              className="flex items-center rounded px-3.5 py-1.5 text-xs font-mono font-bold uppercase tracking-wider bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-colors shadow disabled:opacity-50"
+              className="flex items-center gap-1.5 rounded px-3.5 py-1.5 text-xs font-mono font-bold uppercase tracking-wider bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-colors shadow disabled:opacity-50"
             >
+              <Sparkles className="w-3.5 h-3.5" />
               <span>
                 {loadingMore
-                  ? (lang === "vi" ? "[ĐANG VẼ TRANH...]" : "[RENDERING...]")
+                  ? (lang === "vi" ? "Đang vẽ tranh..." : "Rendering...")
                   : isFreeTier
-                    ? (lang === "vi" ? `[TẠO TIẾP 4 KHUNG - LẦN ${currentBatchNumber}/3 FREE]` : `[NEXT 4 PANELS - BATCH ${currentBatchNumber}/3 FREE]`)
-                    : (lang === "vi" ? "[TẠO TIẾP 4 KHUNG - 100 XU]" : "[NEXT 4 PANELS - 100 COINS]")}
+                    ? (lang === "vi" ? `Tạo tiếp 4 khung (Lần ${currentBatchNumber}/3 Free)` : `Next 4 Panels (Batch ${currentBatchNumber}/3 Free)`)
+                    : (lang === "vi" ? "Tạo tiếp 4 khung (100 Xu)" : "Next 4 Panels (100 Coins)")}
               </span>
             </button>
           )}

@@ -592,8 +592,8 @@ def get_comfyui_service() -> ComfyUIService:
     return _comfyui_service
 
 
-def is_comfyui_available() -> bool:
-    return get_comfyui_service().is_available()
+def is_comfyui_available(timeout: float = 6.0, force_check: bool = False) -> bool:
+    return get_comfyui_service().is_available(timeout=timeout, force_check=force_check)
 
 
 def is_comfyui_enabled() -> bool:

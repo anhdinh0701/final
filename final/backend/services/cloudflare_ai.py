@@ -268,9 +268,9 @@ def get_cached_or_generate_image(
                         print(f"[Comic Image] Panel {panel_id} generated successfully via ComfyUI!")
                 except Exception as comfy_err:
                     print(f"[Comic Image] ComfyUI generation error: {comfy_err}")
-                    img_bytes = None
-        except ImportError:
-            pass
+        except Exception as comfy_wrapper_err:
+            print(f"[Comic Image] ComfyUI provider error: {comfy_wrapper_err}")
+            img_bytes = None
 
         # 3. Fallback to Cloudflare Workers AI only if token is configured
         if not img_bytes or not _is_valid_image_payload(img_bytes):

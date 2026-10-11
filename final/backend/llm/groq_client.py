@@ -1,6 +1,7 @@
 from groq import Groq
 import os
 import time
+import re
 
 class GroqClient:
     # Leave headroom below Groq's 8000 TPM limit for estimation variance.
@@ -8,28 +9,60 @@ class GroqClient:
     MIN_COMPLETION_TOKENS = 256
     MAX_STREAM_CONTINUATIONS = 2
 
+    MODEL_LIMITS = {
+        "qwen/qwen3.8-27b": 8192,
+        "openai/gpt-oss-20b": 8192,
+        "openai/gpt-oss-120b": 8192,
+        "allam-2-7b": 4096,
+    }
+
+    FALLBACK_MODELS = [
+        "qwen/qwen3.8-27b",
+        "openai/gpt-oss-20b",
+        "openai/gpt-oss-120b",
+    ]
+
+    MODEL_CONTEXT_WINDOWS = {
+        "qwen/qwen3.8-27b": 8192,
+        "openai/gpt-oss-120b": 8192,
+        "openai/gpt-oss-20b": 8192,
+        "allam-2-7b": 4096,
+    }
+
     @staticmethod
     def _estimate_prompt_tokens(messages):
         text = "\n".join(str(message.get("content", "")) for message in messages)
         # Vietnamese prose can tokenize more densely than English; /3 is conservative.
         return max(1, (len(text) + 2) // 3)
 
-    def _safe_max_tokens(self, messages, requested):
+    def _safe_max_tokens(self, messages, requested, model_name: str = None):
         prompt_tokens = self._estimate_prompt_tokens(messages)
-        available = self.MAX_REQUEST_TOKENS - prompt_tokens
+        context_limit = self.MODEL_CONTEXT_WINDOWS.get(model_name, self.MAX_REQUEST_TOKENS) if model_name else self.MAX_REQUEST_TOKENS
+        available = context_limit - prompt_tokens - 100
         if available < self.MIN_COMPLETION_TOKENS:
-            raise ValueError("Nội dung yêu cầu quá dài, hãy rút gọn bản phác thảo hoặc lịch sử truyện rồi thử lại.")
-        return min(requested, available)
+            raise ValueError(f"Nội dung yêu cầu ({prompt_tokens} tokens) vượt quá dung lượng xử lý của mô hình {model_name or 'Groq'}.")
+        model_cap = self.MODEL_LIMITS.get(model_name, 4096) if model_name else 4096
+        return max(self.MIN_COMPLETION_TOKENS, min(requested, available, model_cap))
 
     @staticmethod
     def _is_request_too_large(error):
-        message = str(error)
-        return "413" in message or "rate_limit_exceeded" in message or "Request too large" in message
+        message = str(error).lower()
+        return (
+            "413" in message
+            or "rate_limit" in message
+            or "request too large" in message
+            or "must be less than or equal" in message
+            or "max_tokens" in message
+            or "context_length_exceeded" in message
+            or "reduce the length" in message
+            or "maximum value" in message
+        )
 
     @staticmethod
-    def _retry_budgets(initial):
-        budgets = [initial, max(256, int(initial * 0.75)), max(256, int(initial * 0.5))]
-        return list(dict.fromkeys(budgets))
+    def _retry_budgets(initial, model_cap=4096):
+        capped = min(initial, model_cap)
+        budgets = [capped, max(256, int(capped * 0.75)), max(256, int(capped * 0.5)), 1024, 512, 256]
+        return [b for b in dict.fromkeys(budgets) if b <= capped]
 
     def __init__(self, model_name: str = "qwen/qwen3.8-27b", api_key: str = None):
         self.api_key = api_key or os.environ.get("GROQ_API_KEY")
@@ -47,21 +80,15 @@ class GroqClient:
         messages.append({"role": "user", "content": prompt})
         return self.chat(messages, temperature=temperature, max_tokens=max_tokens, response_format=response_format)
 
-    FALLBACK_MODELS = [
-        "qwen/qwen3.8-27b",
-        "openai/gpt-oss-120b",
-        "openai/gpt-oss-20b",
-        "allam-2-7b",
-    ]
-
     def chat(self, messages, temperature=0.7, max_tokens=2000, response_format=None):
         """Send message to Groq LLM with multi-model rate-limit resilience"""
         models_to_try = [self.model] + [m for m in self.FALLBACK_MODELS if m != self.model]
         last_error = None
 
         for model_candidate in models_to_try:
-            safe_max_tokens = self._safe_max_tokens(messages, max_tokens)
-            budgets = self._retry_budgets(safe_max_tokens)
+            model_cap = self.MODEL_LIMITS.get(model_candidate, 4096)
+            safe_max_tokens = self._safe_max_tokens(messages, max_tokens, model_name=model_candidate)
+            budgets = self._retry_budgets(safe_max_tokens, model_cap=model_cap)
             
             for index, budget in enumerate(budgets):
                 params = {
@@ -78,13 +105,17 @@ class GroqClient:
                 except Exception as error:
                     last_error = error
                     err_msg = str(error).lower()
-                    if "rate_limit" in err_msg or "429" in err_msg or "tokens per day" in err_msg or "request too large" in err_msg or "413" in err_msg:
-                        # Break budget loop to immediately switch to next model candidate
+                    if ("rate_limit" in err_msg or "429" in err_msg or "tokens per day" in err_msg or "tpd" in err_msg or "tpm" in err_msg or self._is_request_too_large(error)):
+                        if index < len(budgets) - 1:
+                            time.sleep(0.25)
+                            continue
                         break
-                    if not self._is_request_too_large(error) or index == len(budgets) - 1:
+                    if index == len(budgets) - 1:
                         break
-                    time.sleep(0.25)
-        raise last_error
+                    time.sleep(0.2)
+        if last_error:
+            raise last_error
+        raise RuntimeError("Không thể kết nối đến bất kỳ mô hình AI nào.")
 
     def chat_stream(self, messages, temperature=0.7, max_tokens=2000):
         """Stream the completion with multi-model fallback resilience and resume once or twice if needed."""
@@ -98,10 +129,12 @@ class GroqClient:
             continuation_count = 0
             candidate_emitted_anything = False
 
+            model_cap = self.MODEL_LIMITS.get(model_candidate, 4096)
+
             try:
                 while True:
-                    safe_max_tokens = self._safe_max_tokens(request_messages, max_tokens)
-                    budgets = self._retry_budgets(safe_max_tokens)
+                    safe_max_tokens = self._safe_max_tokens(request_messages, max_tokens, model_name=model_candidate)
+                    budgets = self._retry_budgets(safe_max_tokens, model_cap=model_cap)
                     should_continue = False
                     finish_reason = None
 
@@ -116,6 +149,8 @@ class GroqClient:
                                 stream=True
                             )
                             for chunk in response:
+                                if not chunk.choices:
+                                    continue
                                 choice = chunk.choices[0]
                                 finish_reason = getattr(choice, "finish_reason", None) or finish_reason
                                 content = getattr(choice.delta, "content", None)
@@ -126,13 +161,22 @@ class GroqClient:
                                     yield content
                             break
                         except Exception as error:
-                            # If nothing emitted yet for this candidate, check if we can retry with smaller budget or try next model
+                            last_error = error
+                            err_msg = str(error).lower()
+                            is_quota_or_rate = (
+                                "rate_limit" in err_msg
+                                or "429" in err_msg
+                                or "tokens per day" in err_msg
+                                or "tpd" in err_msg
+                                or "tpm" in err_msg
+                            )
+
                             if not emitted_this_request:
-                                if self._is_request_too_large(error) and index < len(budgets) - 1:
+                                # If request hit rate limit or size limit, try smaller budget if available
+                                if (self._is_request_too_large(error) or is_quota_or_rate) and index < len(budgets) - 1:
                                     time.sleep(0.25)
                                     continue
-                                # Let outer loop try next candidate model
-                                raise error
+                                break
 
                             if generated_text and continuation_count < self.MAX_STREAM_CONTINUATIONS:
                                 continuation_count += 1
@@ -140,9 +184,11 @@ class GroqClient:
                                 break
                             raise error
 
+                    if not candidate_emitted_anything:
+                        # Candidate failed on first request without yielding anything; try next model
+                        break
+
                     if finish_reason == "length":
-                        if not generated_text:
-                            raise RuntimeError("The language model reached its output limit before producing story text.")
                         if continuation_count < self.MAX_STREAM_CONTINUATIONS:
                             continuation_count += 1
                             should_continue = True
@@ -168,12 +214,14 @@ class GroqClient:
                     ]
             except Exception as candidate_err:
                 last_error = candidate_err
-                # If we already yielded chunks to the caller, we cannot switch to another model without duplicating
                 if candidate_emitted_anything:
                     raise candidate_err
-                # If no chunks were emitted yet, smoothly try the next fallback model candidate
                 time.sleep(0.2)
                 continue
 
+            if candidate_emitted_anything:
+                return
+
         if last_error:
             raise last_error
+        raise RuntimeError("Tất cả các mô hình AI đều không thể phản hồi.")

@@ -169,7 +169,13 @@ def validate_anti_cliche_compliance(text: str, genre: str = "", narrative_mode: 
 
 class StoryGenerator:
     def __init__(self):
-        self.llm = GroqClient(model_name="qwen/qwen3.8-27b")
+        import os
+        story_key = os.environ.get("GROQ_API_KEY_STORY") or os.environ.get("GROQ_API_KEY")
+        bible_key = os.environ.get("GROQ_API_KEY_BIBLE") or story_key
+        story_model = os.environ.get("GROQ_MODEL_STORY", "qwen/qwen3.8-27b")
+        bible_model = os.environ.get("GROQ_MODEL_BIBLE", "qwen/qwen3.8-27b")
+        self.llm = GroqClient(model_name=story_model, api_key=story_key)
+        self.bible_llm = GroqClient(model_name=bible_model, api_key=bible_key)
 
     def _extract_narrative_ontology(self, refined_prompt: str, narrative_mode: Any = None, genre: str = "") -> str:
         """
@@ -205,13 +211,13 @@ Yêu cầu xuất ra cấu trúc chính xác sau:
   + Beat 5: Lingering Cliffhanger (90-100%): Nút thắt chưa gỡ, kích thích tột độ muốn đọc chương tiếp.
 """
         try:
-            ontology_text = self.llm.chat(
+            ontology_text = self.bible_llm.chat(
                 messages=[
                     {"role": "system", "content": "Bạn là Kiến trúc sư Dynamic Scene-Graph Ontology kiêm Chuyên gia Light Novel. Trích xuất Bộ khung Narrative Ontology 3 chiều và Cấu trúc 5 Nhịp Kịch Tính ngắn gọn, chính xác."},
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.2,
-                max_tokens=950
+                max_tokens=600
             )
             if ontology_text and ontology_text.strip():
                 return ontology_text.strip()
@@ -260,9 +266,9 @@ Yêu cầu xuất ra cấu trúc chính xác sau:
 
     def _get_config(self, story_length: str):
         config = {
-            "short": {"word_range": "Khoảng 1200 đến 2200 từ", "max_tokens": 5500, "chapter_mode": False},
-            "medium": {"word_range": "Khoảng 2500 đến 4000 từ", "max_tokens": 6000, "chapter_mode": False},
-            "long": {"word_range": "Khoảng 1800 đến 2500 từ cho CHƯƠNG NÀY", "max_tokens": 6000, "chapter_mode": True}
+            "short": {"word_range": "Khoảng 1200 đến 2200 từ", "max_tokens": 2048, "chapter_mode": False},
+            "medium": {"word_range": "Khoảng 2500 đến 4000 từ", "max_tokens": 3072, "chapter_mode": False},
+            "long": {"word_range": "Khoảng 1800 đến 2500 từ cho CHƯƠNG NÀY", "max_tokens": 4096, "chapter_mode": True}
         }
         return config.get(story_length, config["medium"])
 
@@ -461,7 +467,7 @@ YÊU CẦU BẮT BUỘC CHO CHƯƠNG {next_chapter}:
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_msg}
         ]
-        return self.llm.chat_stream(messages, temperature=0.8, max_tokens=6000)
+        return self.llm.chat_stream(messages, temperature=0.8, max_tokens=4096)
 
     def generate_ending_stream(self, memory: StoryMemory):
         """Viết đoạn kết thúc truyện dựa trên Memory & chuẩn Light Novel."""
@@ -492,7 +498,7 @@ NHIỆM VỤ: Viết ĐOẠN KẾT THÚC cho câu chuyện theo chuẩn Light No
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_msg}
         ]
-        return self.llm.chat_stream(messages, temperature=0.8, max_tokens=6000)
+        return self.llm.chat_stream(messages, temperature=0.8, max_tokens=4096)
 
     # ===== LEGACY: Chat instruction (giữ tương thích) =====
     def handle_chat_instruction(self, current_story: str, user_message: str):

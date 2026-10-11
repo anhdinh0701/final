@@ -78,7 +78,8 @@ class ComicPromptAgent:
                 or os.environ.get("GROQ_API_KEY")
             )
             try:
-                self.groq_client = GroqClient(api_key=api_key) if api_key else None
+                comic_model = os.environ.get("GROQ_MODEL_COMIC", "qwen/qwen3.8-27b")
+                self.groq_client = GroqClient(model_name=comic_model, api_key=api_key) if api_key else None
             except Exception:
                 self.groq_client = None
 

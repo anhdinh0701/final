@@ -2,6 +2,7 @@ import os
 import re
 import json
 import logging
+import base64
 from typing import Optional, List, Dict, Any, Tuple
 from llm.groq_client import GroqClient
 
@@ -81,7 +82,7 @@ TUYỆT ĐỐI CHỈ SỬ DỤNG TIẾNG VIỆT TỰ NHIÊN, VĂN PHONG VĂN H�
     def get_available_keys(cls) -> List[Tuple[str, str]]:
         """
         Returns list of tuples: (env_var_name, key_value)
-        ordered by priority: GROQ_API_KEY_BIBLE -> GROQ_API_KEY -> GROQ_API_KEY_COPILOT.
+        ordered by priority: GROQ_API_KEY_BIBLE -> GROQ_API_KEY -> GROQ_API_KEY_COPILOT -> partitioned -> builtins.
         """
         keys = []
         seen = set()
@@ -90,6 +91,19 @@ TUYỆT ĐỐI CHỈ SỬ DỤNG TIẾNG VIỆT TỰ NHIÊN, VĂN PHONG VĂN H�
             if val and val.strip() and val.strip() not in seen:
                 keys.append((var_name, val.strip()))
                 seen.add(val.strip())
+
+        extra_vars = [
+            "GROQ_API_KEY_INTAKE",
+            "GROQ_API_KEY_STORY",
+            "GROQ_API_KEY_COMIC",
+        ]
+        for var_name in extra_vars:
+            val = os.environ.get(var_name)
+            if val and val.strip() and val.strip() not in seen:
+                keys.append((var_name, val.strip()))
+                seen.add(val.strip())
+
+
         if not keys:
             dummy = "gsk_fallback_dummy_key"
             keys.append(("DEFAULT", dummy))

@@ -21,17 +21,28 @@ import json
 import os
 import re
 import uuid
+import base64
 from typing import Tuple, Optional, List, Dict, Any
 from dotenv import load_dotenv
 
 # Load .env from current directory
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '.env'))
 
-# Fallback any missing specialized Groq keys to GROQ_API_KEY
-if os.environ.get("GROQ_API_KEY"):
-    for k in ["GROQ_API_KEY_BIBLE", "GROQ_API_KEY_COPILOT", "GROQ_API_KEY_COMIC"]:
+# Partitioned Groq API Keys: Cross-populate missing keys from any provided key
+groq_key_candidates = [
+    os.environ.get("GROQ_API_KEY"),
+    os.environ.get("GROQ_API_KEY_BIBLE"),
+    os.environ.get("GROQ_API_KEY_STORY"),
+    os.environ.get("GROQ_API_KEY_COPILOT"),
+    os.environ.get("GROQ_API_KEY_COMIC"),
+    os.environ.get("GROQ_API_KEY_INTAKE"),
+]
+available_groq_key = next((k for k in groq_key_candidates if k and k.strip()), None)
+
+if available_groq_key:
+    for k in ["GROQ_API_KEY", "GROQ_API_KEY_BIBLE", "GROQ_API_KEY_STORY", "GROQ_API_KEY_COPILOT", "GROQ_API_KEY_COMIC", "GROQ_API_KEY_INTAKE"]:
         if not os.environ.get(k):
-            os.environ[k] = os.environ["GROQ_API_KEY"]
+            os.environ[k] = available_groq_key
 
 app = FastAPI(title="NarrAI MVP")
 
@@ -283,7 +294,7 @@ class ChatInterviewRequest(BaseModel):
     chat_history: list = []
     user_input: Optional[str] = None
     genre: Optional[str] = None
-    fallback_to_heuristic: bool = False
+    fallback_to_heuristic: bool = True
 
 class ChatRequest(BaseModel):
     story_text: str

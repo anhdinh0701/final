@@ -2,6 +2,7 @@ from groq import Groq
 import os
 import time
 import re
+import base64
 
 class GroqClient:
     # Leave headroom below Groq's 8000 TPM limit for estimation variance.
@@ -18,8 +19,9 @@ class GroqClient:
 
     FALLBACK_MODELS = [
         "qwen/qwen3.8-27b",
-        "openai/gpt-oss-20b",
         "openai/gpt-oss-120b",
+        "openai/gpt-oss-20b",
+        "allam-2-7b",
     ]
 
     MODEL_CONTEXT_WINDOWS = {
@@ -64,13 +66,36 @@ class GroqClient:
         budgets = [capped, max(256, int(capped * 0.75)), max(256, int(capped * 0.5)), 1024, 512, 256]
         return [b for b in dict.fromkeys(budgets) if b <= capped]
 
+    def _get_api_keys(self) -> list:
+        keys = []
+        if getattr(self, "api_key", None) and self.api_key.strip():
+            keys.append(self.api_key.strip())
+        env_vars = [
+            "GROQ_API_KEY_BIBLE",
+            "GROQ_API_KEY_INTAKE",
+            "GROQ_API_KEY_STORY",
+            "GROQ_API_KEY",
+            "GROQ_API_KEY_COPILOT",
+            "GROQ_API_KEY_COMIC",
+        ]
+        for var in env_vars:
+            val = os.environ.get(var)
+            if val and val.strip() and val.strip() not in keys:
+                keys.append(val.strip())
+        return keys
+
     def __init__(self, model_name: str = "qwen/qwen3.8-27b", api_key: str = None):
         self.api_key = api_key or os.environ.get("GROQ_API_KEY")
         if not self.api_key:
-            raise ValueError("Thiếu biến môi trường GROQ_API_KEY hoặc key chuyên dụng tương ứng")
-            
+            candidate_keys = self._get_api_keys()
+            if candidate_keys:
+                self.api_key = candidate_keys[0]
+            else:
+                raise ValueError("Thiếu biến môi trường GROQ_API_KEY hoặc key chuyên dụng tương ứng")
+
         self.client = Groq(api_key=self.api_key)
         self.model = model_name
+        self._clients = {self.api_key: self.client}
     
     def generate(self, prompt: str, system_prompt: str = "", temperature: float = 0.7, max_tokens: int = 2000, response_format = None) -> str:
         """Convenience method to generate text from a prompt with optional system prompt."""
@@ -81,38 +106,52 @@ class GroqClient:
         return self.chat(messages, temperature=temperature, max_tokens=max_tokens, response_format=response_format)
 
     def chat(self, messages, temperature=0.7, max_tokens=2000, response_format=None):
-        """Send message to Groq LLM with multi-model rate-limit resilience"""
+        """Send message to Groq LLM with multi-model and multi-key rate-limit resilience"""
         models_to_try = [self.model] + [m for m in self.FALLBACK_MODELS if m != self.model]
+        keys_to_try = self._get_api_keys()
         last_error = None
 
         for model_candidate in models_to_try:
             model_cap = self.MODEL_LIMITS.get(model_candidate, 4096)
             safe_max_tokens = self._safe_max_tokens(messages, max_tokens, model_name=model_candidate)
             budgets = self._retry_budgets(safe_max_tokens, model_cap=model_cap)
-            
-            for index, budget in enumerate(budgets):
-                params = {
-                    "model": model_candidate,
-                    "messages": messages,
-                    "temperature": temperature,
-                    "max_tokens": budget,
-                }
-                if response_format:
-                    params["response_format"] = response_format
-                try:
-                    response = self.client.chat.completions.create(**params)
-                    return response.choices[0].message.content
-                except Exception as error:
-                    last_error = error
-                    err_msg = str(error).lower()
-                    if ("rate_limit" in err_msg or "429" in err_msg or "tokens per day" in err_msg or "tpd" in err_msg or "tpm" in err_msg or self._is_request_too_large(error)):
-                        if index < len(budgets) - 1:
-                            time.sleep(0.25)
-                            continue
-                        break
-                    if index == len(budgets) - 1:
-                        break
-                    time.sleep(0.2)
+
+            for key in keys_to_try:
+                if key == getattr(self, "api_key", None) and hasattr(self, "client"):
+                    groq_client = self.client
+                else:
+                    if not hasattr(self, "_clients"):
+                        self._clients = {}
+                    if key not in self._clients:
+                        self._clients[key] = Groq(api_key=key)
+                    groq_client = self._clients[key]
+
+                for index, budget in enumerate(budgets):
+                    params = {
+                        "model": model_candidate,
+                        "messages": messages,
+                        "temperature": temperature,
+                        "max_tokens": budget,
+                    }
+                    if response_format:
+                        params["response_format"] = response_format
+                    try:
+                        response = groq_client.chat.completions.create(**params)
+                        return response.choices[0].message.content
+                    except Exception as error:
+                        last_error = error
+                        err_msg = str(error).lower()
+                        # If rate limit or token quota exceeded, try next API key immediately!
+                        if ("rate_limit" in err_msg or "429" in err_msg or "tokens per day" in err_msg or "tpd" in err_msg or "tpm" in err_msg):
+                            break
+                        if self._is_request_too_large(error):
+                            if index < len(budgets) - 1:
+                                time.sleep(0.15)
+                                continue
+                            break
+                        if index == len(budgets) - 1:
+                            break
+                        time.sleep(0.15)
         if last_error:
             raise last_error
         raise RuntimeError("Không thể kết nối đến bất kỳ mô hình AI nào.")
@@ -189,9 +228,12 @@ class GroqClient:
                         break
 
                     if finish_reason == "length":
-                        if continuation_count < self.MAX_STREAM_CONTINUATIONS:
-                            continuation_count += 1
-                            should_continue = True
+                        if not generated_text:
+                            raise RuntimeError("The language model reached its output limit before producing story text.")
+                        if continuation_count >= self.MAX_STREAM_CONTINUATIONS:
+                            raise RuntimeError("The language model repeatedly reached its output limit; the partial draft was preserved.")
+                        continuation_count += 1
+                        should_continue = True
 
                     if not should_continue:
                         return

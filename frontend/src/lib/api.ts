@@ -161,7 +161,7 @@ export const api = {
         const res = await fetch(`${API_BASE_URL}/chat-interview`, {
           method: 'POST',
           headers: authHeaders(),
-          body: JSON.stringify({ chat_history: history }),
+          body: JSON.stringify({ chat_history: history, fallback_to_heuristic: true }),
         });
         if (!res.ok) {
           const errorText = await res.text();

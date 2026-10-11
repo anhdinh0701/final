@@ -1229,6 +1229,24 @@ def get_comfyui_loras():
     }
 
 
+class ComfyUISetUrlRequest(BaseModel):
+    url: str
+
+
+@app.post("/api/comic/comfyui/set-url")
+def set_comfyui_url(req: ComfyUISetUrlRequest):
+    """Dynamically updates the ComfyUI URL (e.g. active ngrok or tunnel URL) and tests connection."""
+    from services.comfyui_service import get_comfyui_service
+    service = get_comfyui_service()
+    success = service.set_base_url(req.url)
+    return {
+        "status": "success" if success else "warning",
+        "url": service.base_url,
+        "online": success,
+        "message": "ComfyUI kết nối thành công!" if success else f"Đã lưu URL {service.base_url} nhưng chưa kết nối được tới ComfyUI. Hãy kiểm tra xem ComfyUI và ngrok đã chạy chưa."
+    }
+
+
 class ComicPromptAgentRequest(BaseModel):
     story_text: str
     genre: Optional[str] = ""

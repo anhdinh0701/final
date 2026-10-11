@@ -124,11 +124,28 @@ class ComfyUIService:
             "Accept": "application/json, image/*, */*"
         }
 
+    def set_base_url(self, url: str) -> bool:
+        """
+        Updates the ComfyUI base URL dynamically (e.g. when updating ngrok/Cloudflare tunnel URL).
+        Normalizes protocol and trailing slashes, then immediately verifies connection.
+        """
+        if not url or not isinstance(url, str):
+            return False
+        clean_url = url.strip().rstrip("/")
+        if not clean_url.startswith("http://") and not clean_url.startswith("https://"):
+            if "localhost" in clean_url or "127.0.0.1" in clean_url:
+                clean_url = f"http://{clean_url}"
+            else:
+                clean_url = f"https://{clean_url}"
+        self.base_url = clean_url
+        self._last_avail_check = 0.0
+        return self.is_available(timeout=5.0, force_check=True)
+
     def is_enabled(self) -> bool:
         """Returns True if ComfyUI integration is enabled."""
         return self.enabled
 
-    def is_available(self, timeout: float = 2.5, force_check: bool = False) -> bool:
+    def is_available(self, timeout: float = 4.0, force_check: bool = False) -> bool:
         """
         Fast non-blocking ping to ComfyUI /system_stats with TTL caching
         to determine if ComfyUI server is actively running.

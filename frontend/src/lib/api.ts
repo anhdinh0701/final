@@ -559,4 +559,35 @@ export const api = {
       return { success: false, message: err?.message };
     }
   },
+
+  // ComfyUI Integration Helpers
+  async getComfyUIStatus(): Promise<{
+    enabled: boolean;
+    available: boolean;
+    base_url: string;
+    selected_checkpoint?: string;
+    available_checkpoints?: string[];
+    available_loras?: string[];
+  }> {
+    try {
+      const res = await fetch(`${API_BASE_URL}/comic/comfyui/status`, { headers: authHeaders() });
+      if (res.ok) return res.json();
+      return { enabled: false, available: false, base_url: '' };
+    } catch {
+      return { enabled: false, available: false, base_url: '' };
+    }
+  },
+
+  async setComfyUIUrl(url: string): Promise<{ status: string; url: string; online: boolean; message: string }> {
+    try {
+      const res = await fetch(`${API_BASE_URL}/comic/comfyui/set-url`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ url }),
+      });
+      return res.json();
+    } catch (err: any) {
+      return { status: 'error', url, online: false, message: err.message || 'Không thể kết nối' };
+    }
+  },
 };

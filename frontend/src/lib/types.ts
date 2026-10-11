@@ -54,6 +54,7 @@ export interface ChatMessage {
   is_offline_fallback?: boolean;
   error_message?: string;
   failed_prompt?: string;
+  suggestions?: string[];
 }
 
 export interface IntakeChatOptions {

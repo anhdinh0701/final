@@ -2,6 +2,10 @@ import os
 import json
 import re
 from typing import List, Tuple, Optional, Any
+from dotenv import load_dotenv
+
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"))
+
 from llm.groq_client import GroqClient
 from agents.story_memory import StoryMemory
 
@@ -617,7 +621,8 @@ class ComicDirectorAgent:
         api_key = os.environ.get("GROQ_API_KEY_COMIC") or os.environ.get("GROQ_API_KEY")
         if not api_key:
             raise ValueError("Thiếu GROQ_API_KEY_COMIC hoặc GROQ_API_KEY")
-        self.llm = GroqClient(model_name="qwen/qwen3.8-27b", api_key=api_key)
+        comic_model = os.environ.get("GROQ_MODEL_COMIC", "openai/gpt-oss-120b")
+        self.llm = GroqClient(model_name=comic_model, api_key=api_key)
 
     def sanitize_complete_dialogue(self, text: str) -> str:
         """Instance helper routing to module-level sanitize_complete_dialogue."""
@@ -767,7 +772,9 @@ class ComicDirectorAgent:
                 temperature=0.2,
                 max_tokens=1500
             )
-            cleaned = re.sub(r'```(?:json)?\s*', '', resp).strip()
+            cleaned = re.sub(r'<think>.*?</think>', '', resp, flags=re.DOTALL).strip()
+            cleaned = re.sub(r'```(?:json)?\s*', '', cleaned).strip()
+            cleaned = re.sub(r'```', '', cleaned).strip()
             match = re.search(r'\{.*\}', cleaned, re.DOTALL)
             if match:
                 parsed = json.loads(match.group(0))
@@ -901,7 +908,9 @@ class ComicDirectorAgent:
                 temperature=0.2,
                 max_tokens=800
             )
-            cleaned = re.sub(r'```(?:json)?\s*', '', resp).strip()
+            cleaned = re.sub(r'<think>.*?</think>', '', resp, flags=re.DOTALL).strip()
+            cleaned = re.sub(r'```(?:json)?\s*', '', cleaned).strip()
+            cleaned = re.sub(r'```', '', cleaned).strip()
             match = re.search(r'\{.*\}', cleaned, re.DOTALL)
             if match:
                 parsed = json.loads(match.group(0))
@@ -922,7 +931,12 @@ class ComicDirectorAgent:
 
     def _parse_json_array(self, raw_output):
         """Extract and parse a JSON array from LLM output."""
-        cleaned = re.sub(r'```(?:json)?\s*', '', raw_output).strip()
+        if not raw_output or not isinstance(raw_output, str):
+            raise ValueError("Empty LLM output")
+        # Strip potential reasoning/thinking blocks
+        cleaned = re.sub(r'<think>.*?</think>', '', raw_output, flags=re.DOTALL).strip()
+        cleaned = re.sub(r'```(?:json)?\s*', '', cleaned).strip()
+        cleaned = re.sub(r'```', '', cleaned).strip()
         match = re.search(r'\[.*\]', cleaned, re.DOTALL)
         if match:
             cleaned = match.group(0)

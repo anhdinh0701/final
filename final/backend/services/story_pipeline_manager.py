@@ -354,7 +354,16 @@ class StoryPipelineManager:
         return results
 
     def get_story_preview(self, story_id: str) -> Optional[Dict[str, Any]]:
-        for d in [self.backend_stories_dir, self.root_stories_dir]:
+        candidate_dirs = [
+            self.backend_stories_dir,
+            self.root_stories_dir,
+            os.path.join(self.root_dir, "final", "data", "stories"),
+            os.path.join(self.root_dir, "data", "stories"),
+            os.path.join(self.backend_dir, "data", "stories"),
+        ]
+        for d in candidate_dirs:
+            if not os.path.exists(d):
+                continue
             fpath = os.path.join(d, f"{story_id}.json")
             if os.path.exists(fpath):
                 try:
@@ -368,16 +377,29 @@ class StoryPipelineManager:
         """
         Lists all published / verified stories for the frontend reading view.
         """
+        candidate_dirs = [
+            self.backend_stories_dir,
+            self.root_stories_dir,
+            os.path.join(self.root_dir, "final", "data", "stories"),
+            os.path.join(self.root_dir, "data", "stories"),
+            os.path.join(self.backend_dir, "data", "stories"),
+        ]
         stories = []
-        if os.path.exists(self.backend_stories_dir):
-            for fname in os.listdir(self.backend_stories_dir):
+        seen_ids = set()
+        for d in candidate_dirs:
+            if not os.path.exists(d):
+                continue
+            for fname in os.listdir(d):
                 if fname.endswith(".json"):
-                    fpath = os.path.join(self.backend_stories_dir, fname)
+                    fpath = os.path.join(d, fname)
                     try:
                         with open(fpath, "r", encoding="utf-8") as f:
                             data = json.load(f)
                             if isinstance(data, dict) and data.get("id"):
-                                stories.append(data)
+                                sid = data["id"]
+                                if sid not in seen_ids:
+                                    seen_ids.add(sid)
+                                    stories.append(data)
                     except Exception:
                         pass
         return stories

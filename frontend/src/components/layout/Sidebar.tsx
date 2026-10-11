@@ -155,7 +155,7 @@ export function Sidebar({
             {activeTab === "posts" && <span className="text-[10px] font-mono">[•]</span>}
           </button>
 
-          {/* Trạm biên soạn truyện AI (AI Story Pipeline) */}
+          {/* Câu chuyện (Stories & Lore) */}
           <button
             onClick={() => onTabChange?.("pipeline")}
             className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs tracking-wider uppercase transition-colors ${
@@ -164,7 +164,7 @@ export function Sidebar({
                 : "text-neutral-400 hover:text-white hover:bg-neutral-900"
             }`}
           >
-            <span>{lang === "vi" ? "Trạm biên soạn AI" : "AI Story Pipeline"}</span>
+            <span>{lang === "vi" ? "Câu chuyện" : "Stories"}</span>
             {activeTab === "pipeline" && <span className="text-[10px] font-mono">[•]</span>}
           </button>
 

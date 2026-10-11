@@ -236,6 +236,181 @@
       "prNumber": 10,
       "branchName": "ai-stories/thanh-giong",
       "error": null
+    },
+    {
+      "id": "so-dua",
+      "title": "Sọ Dừa",
+      "topic": "Truyện cổ tích kỳ ảo & Đạo đức dân gian",
+      "category": "Truyện Cổ Tích",
+      "genre": [
+        "Cổ tích",
+        "Dân gian",
+        "Kỳ ảo",
+        "Đạo đức",
+        "Tình yêu"
+      ],
+      "language": "vi",
+      "sourceLanguages": [
+        "vi",
+        "en"
+      ],
+      "status": "merged",
+      "createdAt": "2026-10-11T00:00:00Z",
+      "updatedAt": "2026-10-11T00:00:00Z",
+      "prUrl": null,
+      "prNumber": null,
+      "branchName": "ai-stories/so-dua",
+      "error": null
+    },
+    {
+      "id": "su-tich-trau-cau",
+      "title": "Sự tích Trầu Cau",
+      "topic": "Truyền thuyết đạo nghĩa & Tình cảm gia đình",
+      "category": "Truyện Cổ Tích",
+      "genre": [
+        "Cổ tích",
+        "Truyền thuyết",
+        "Gia đình",
+        "Nghĩa vợ chồng",
+        "Tình anh em"
+      ],
+      "language": "vi",
+      "sourceLanguages": [
+        "vi",
+        "en"
+      ],
+      "status": "merged",
+      "createdAt": "2026-10-11T00:00:00Z",
+      "updatedAt": "2026-10-11T00:00:00Z",
+      "prUrl": null,
+      "prNumber": null,
+      "branchName": "ai-stories/su-tich-trau-cau",
+      "error": null
+    },
+    {
+      "id": "ngo-quyen",
+      "title": "Ngô Quyền & Đại Thắng Bạch Đằng Giang (938)",
+      "topic": "Đại thắng lịch sử chấm dứt ngàn năm Bắc thuộc",
+      "category": "Truyện Lịch Sử",
+      "genre": [
+        "Lịch sử",
+        "Chiến trận",
+        "Bạch Đằng",
+        "Chấm dứt Bắc thuộc",
+        "Anh hùng dân tộc"
+      ],
+      "language": "vi",
+      "sourceLanguages": [
+        "vi",
+        "en"
+      ],
+      "status": "merged",
+      "createdAt": "2026-10-11T00:00:00Z",
+      "updatedAt": "2026-10-11T00:00:00Z",
+      "prUrl": null,
+      "prNumber": null,
+      "branchName": "ai-stories/ngo-quyen",
+      "error": null
+    },
+    {
+      "id": "ly-thuong-kiet",
+      "title": "Lý Thường Kiệt & Bản Tuyên Ngôn Nam Quốc Sơn Hà (1077)",
+      "topic": "Kháng chiến chống Tống & Bản tuyên ngôn độc lập đầu tiên",
+      "category": "Truyện Lịch Sử",
+      "genre": [
+        "Lịch sử",
+        "Quân sự",
+        "Chiến lược",
+        "Nam Quốc Sơn Hà",
+        "Đại Việt"
+      ],
+      "language": "vi",
+      "sourceLanguages": [
+        "vi",
+        "en"
+      ],
+      "status": "merged",
+      "createdAt": "2026-10-11T00:00:00Z",
+      "updatedAt": "2026-10-11T00:00:00Z",
+      "prUrl": null,
+      "prNumber": null,
+      "branchName": "ai-stories/ly-thuong-kiet",
+      "error": null
+    },
+    {
+      "id": "quang-trung",
+      "title": "Quang Trung - Nguyễn Huệ & Đại Thắng Kỷ Dậu (1789)",
+      "topic": "Hành quân thần tốc & Đại phá 29 vạn quân Thanh",
+      "category": "Truyện Lịch Sử",
+      "genre": [
+        "Lịch sử",
+        "Quang Trung",
+        "Tây Sơn",
+        "Ngọc Hồi Đống Đa",
+        "Thần tốc"
+      ],
+      "language": "vi",
+      "sourceLanguages": [
+        "vi",
+        "en"
+      ],
+      "status": "merged",
+      "createdAt": "2026-10-11T00:00:00Z",
+      "updatedAt": "2026-10-11T00:00:00Z",
+      "prUrl": null,
+      "prNumber": null,
+      "branchName": "ai-stories/quang-trung",
+      "error": null
+    },
+    {
+      "id": "dinh-bo-linh",
+      "title": "Đinh Bộ Lĩnh & Cờ Lau Tập Trận Dẹp Loạn 12 Sứ Quân",
+      "topic": "Tuổi thơ cờ lau tập trận & Thống nhất đất nước",
+      "category": "Truyện Lịch Sử",
+      "genre": [
+        "Lịch sử",
+        "Đinh Bộ Lĩnh",
+        "Cờ lau tập trận",
+        "Đại Cồ Việt",
+        "Thống nhất"
+      ],
+      "language": "vi",
+      "sourceLanguages": [
+        "vi",
+        "en"
+      ],
+      "status": "merged",
+      "createdAt": "2026-10-11T00:00:00Z",
+      "updatedAt": "2026-10-11T00:00:00Z",
+      "prUrl": null,
+      "prNumber": null,
+      "branchName": "ai-stories/dinh-bo-linh",
+      "error": null
+    },
+    {
+      "id": "le-loi",
+      "title": "Lê Lợi & Khởi Nghĩa Lam Sơn - Sự Tích Hồ Gươm",
+      "topic": "Khởi nghĩa Lam Sơn & Thanh gươm Thuận Thiên",
+      "category": "Truyện Lịch Sử",
+      "genre": [
+        "Lịch sử",
+        "Lê Lợi",
+        "Lam Sơn",
+        "Hồ Gươm",
+        "Thuận Thiên"
+      ],
+      "language": "vi",
+      "sourceLanguages": [
+        "vi",
+        "en"
+      ],
+      "status": "merged",
+      "createdAt": "2026-10-11T00:00:00Z",
+      "updatedAt": "2026-10-11T00:00:00Z",
+      "prUrl": null,
+      "prNumber": null,
+      "branchName": "ai-stories/le-loi",
+      "error": null
     }
   ]
 }

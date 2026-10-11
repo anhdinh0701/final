@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { api } from "@/lib/api";
 import { useToast } from "@/lib/toast";
 import { Language, translations } from "@/lib/i18n";
@@ -16,9 +16,11 @@ import {
 
 interface Props {
   lang: Language;
+  onLoadStoryToEditor?: (content: string, title?: string, id?: number | null) => void;
+  onAdaptStoryToComic?: (content: string, title?: string, id?: number | null) => void;
 }
 
-export function StoryPipelineView({ lang }: Props) {
+export function StoryPipelineView({ lang, onLoadStoryToEditor, onAdaptStoryToComic }: Props) {
   const { toast } = useToast();
   const t = translations[lang];
 
@@ -26,8 +28,18 @@ export function StoryPipelineView({ lang }: Props) {
   const [loading, setLoading] = useState(true);
   const [executingId, setExecutingId] = useState<string | null>(null);
   const [isBatchRunning, setIsBatchRunning] = useState(false);
-  const [activeSubTab, setActiveSubTab] = useState<"queue" | "prs" | "logs">("queue");
 
+  // Main navigation: "library" (Story collection) vs "pipeline" (Admin pipeline tools)
+  const [viewMode, setViewMode] = useState<"library" | "pipeline">("library");
+
+  // Category Filter for Stories: "all" | "fairy" | "history"
+  const [categoryFilter, setCategoryFilter] = useState<"all" | "fairy" | "history">("all");
+
+  // Sub-tab for Pipeline admin: "queue" | "prs" | "logs"
+  const [pipelineSubTab, setPipelineSubTab] = useState<"queue" | "prs" | "logs">("queue");
+
+  // Data
+  const [publishedStories, setPublishedStories] = useState<PipelineStoryDetail[]>([]);
   const [overview, setOverview] = useState<PipelineOverview | null>(null);
   const [pullRequests, setPullRequests] = useState<PipelinePullRequest[]>([]);
   const [recentLogs, setRecentLogs] = useState<PipelineLogEntry[]>([]);
@@ -37,27 +49,43 @@ export function StoryPipelineView({ lang }: Props) {
   // Modals
   const [showAddModal, setShowAddModal] = useState(false);
   const [showBatchModal, setShowBatchModal] = useState(false);
+  const [readStoryModal, setReadStoryModal] = useState<PipelineStoryDetail | null>(null);
   const [previewStory, setPreviewStory] = useState<PipelineStoryDetail | null>(null);
   const [validationModalData, setValidationModalData] = useState<{ title: string; result: PipelineValidationResult } | null>(null);
 
   // Form State
   const [newTitle, setNewTitle] = useState("");
-  const [newTopic, setNewTopic] = useState("Lịch sử & Văn hóa Việt Nam");
-  const [newCategory, setNewCategory] = useState("Lịch sử Việt Nam");
-  const [newGenre, setNewGenre] = useState("Lịch sử, Anh hùng dân tộc");
+  const [newTopic, setNewTopic] = useState("Truyện Cổ Tích & Lịch Sử Việt Nam");
+  const [newCategory, setNewCategory] = useState("Truyện Cổ Tích");
+  const [newGenre, setNewGenre] = useState("Cổ tích, Dân gian");
   const [newSourceLangs, setNewSourceLangs] = useState("vi, en");
   const [batchRawText, setBatchRawText] = useState("");
+
+  // Helper to categorize stories
+  const isFairyTale = useCallback((item: { category?: string; topic?: string; genre?: string[] }) => {
+    const text = `${item.category || ""} ${item.topic || ""} ${(item.genre || []).join(" ")}`.toLowerCase();
+    return text.includes("cổ tích") || text.includes("truyền thuyết") || text.includes("thần thoại") || text.includes("dân gian") || text.includes("phép màu");
+  }, []);
+
+  const isHistorical = useCallback((item: { category?: string; topic?: string; genre?: string[] }) => {
+    const text = `${item.category || ""} ${item.topic || ""} ${(item.genre || []).join(" ")}`.toLowerCase();
+    return text.includes("lịch sử") || text.includes("kháng chiến") || text.includes("bạch đằng") || text.includes("anh hùng") || text.includes("chiến trận") || text.includes("quân sự") || text.includes("vua") || text.includes("hoàng đế") || text.includes("tuyên ngôn");
+  }, []);
 
   // Fetch Data
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const [queueRes, prRes, jobsRes] = await Promise.allSettled([
+      const [pubRes, queueRes, prRes, jobsRes] = await Promise.allSettled([
+        api.getPublishedStories(),
         api.getPipelineQueue(),
         api.getPipelinePullRequests(),
         api.getPipelineJobs()
       ]);
 
+      if (pubRes.status === "fulfilled" && pubRes.value.data) {
+        setPublishedStories(pubRes.value.data);
+      }
       if (queueRes.status === "fulfilled" && queueRes.value.data) {
         setOverview(queueRes.value.data);
       }
@@ -68,7 +96,7 @@ export function StoryPipelineView({ lang }: Props) {
         setRecentLogs(jobsRes.value.recentLogs);
       }
     } catch (err: any) {
-      toast.error(err?.message || "Không thể tải dữ liệu pipeline");
+      toast.error(err?.message || "Không thể tải dữ liệu câu chuyện");
     } finally {
       setLoading(false);
     }
@@ -82,7 +110,7 @@ export function StoryPipelineView({ lang }: Props) {
   const handleAddStory = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim()) {
-      toast.warning("Vui lòng nhập tên đề bài / nhân vật");
+      toast.warning("Vui lòng nhập tên đề bài / câu chuyện");
       return;
     }
 
@@ -94,7 +122,7 @@ export function StoryPipelineView({ lang }: Props) {
         title: newTitle.trim(),
         topic: newTopic.trim(),
         category: newCategory.trim(),
-        genre: genres.length ? genres : ["Lịch sử"],
+        genre: genres.length ? genres : ["Cổ tích"],
         sourceLanguages: sourceLanguages.length ? sourceLanguages : ["vi", "en"]
       });
 
@@ -103,7 +131,7 @@ export function StoryPipelineView({ lang }: Props) {
       setNewTitle("");
       loadData();
     } catch (err: any) {
-      toast.error(err?.message || "Lỗi khi thêm đề bài");
+      toast.error(err?.message || "Lỗi khi thêm câu chuyện");
     }
   };
 
@@ -123,9 +151,9 @@ export function StoryPipelineView({ lang }: Props) {
           .filter((line) => line.length > 1)
           .map((title) => ({
             title,
-            topic: "Lịch sử & Văn hóa Việt Nam",
-            category: "Lịch sử Việt Nam",
-            genre: ["Lịch sử"],
+            topic: "Kho tàng câu chuyện Việt Nam",
+            category: newCategory || "Truyện Cổ Tích",
+            genre: ["Cổ tích"],
             sourceLanguages: ["vi", "en"]
           }));
       }
@@ -148,17 +176,16 @@ export function StoryPipelineView({ lang }: Props) {
   const handleRunSingle = async (storyId: string) => {
     try {
       setExecutingId(storyId);
-      toast.info(`Đang chạy pipeline cho đề bài '${storyId}'...`);
+      toast.info(`Bắt đầu biên soạn và kiểm định: ${storyId}...`);
       const res = await api.runPipeline({ story_id: storyId });
-
-      if (res.data?.success) {
-        toast.success(`Biên soạn & Tạo PR thành công: '${res.data.title}'`);
+      if (res.status === "success") {
+        toast.success(`Đã biên soạn thành công truyện '${storyId}'!`);
       } else {
-        toast.error(`Thất bại: ${res.data?.error || res.data?.errors?.join("; ") || "Lỗi không xác định"}`);
+        toast.info("Đã gửi yêu cầu biên soạn.");
       }
       loadData();
     } catch (err: any) {
-      toast.error(err?.message || "Lỗi thực thi pipeline");
+      toast.error(err?.message || "Lỗi khi chạy pipeline");
     } finally {
       setExecutingId(null);
     }
@@ -167,9 +194,9 @@ export function StoryPipelineView({ lang }: Props) {
   const handleRunBatch = async () => {
     try {
       setIsBatchRunning(true);
-      toast.info("Bắt đầu chạy pipeline hàng loạt cho các đề bài chờ xử lý...");
-      const res = await api.runPipeline({ limit: 3 });
-      toast.success(`Đã hoàn tất xử lý ${res.data.processedCount} đề bài.`);
+      toast.info("Đang tự động chạy hàng loạt các đề bài chờ xử lý...");
+      await api.runPipeline({ limit: 3 });
+      toast.success("Đã hoàn tất xử lý hàng loạt.");
       loadData();
     } catch (err: any) {
       toast.error(err?.message || "Lỗi khi chạy batch pipeline");
@@ -178,80 +205,72 @@ export function StoryPipelineView({ lang }: Props) {
     }
   };
 
-  const handleDelete = async (storyId: string) => {
-    if (!window.confirm(`Bạn có chắc chắn muốn xóa đề bài '${storyId}' khỏi hàng đợi?`)) return;
-    try {
-      await api.deletePipelinePrompt(storyId);
-      toast.success("Đã xóa đề bài thành công.");
-      loadData();
-    } catch (err: any) {
-      toast.error(err?.message || "Không thể xóa đề bài");
-    }
-  };
-
   const handleOpenPreview = async (storyId: string) => {
     try {
       const res = await api.getPipelineStoryPreview(storyId);
-      setPreviewStory(res.data);
+      if (res.data) {
+        setPreviewStory(res.data);
+      }
     } catch (err: any) {
-      toast.warning(err?.message || "Bản thảo chưa hoàn thành hoặc chưa có sẵn.");
+      toast.error(err?.message || "Chưa có bản thảo xem trước");
     }
   };
 
-  const handleRevalidate = async (storyId: string, title: string) => {
+  const handleValidateStory = async (storyId: string) => {
     try {
       const res = await api.revalidatePipelineStory(storyId);
       setValidationModalData({
-        title,
+        title: res.storyId,
         result: res.validation
       });
     } catch (err: any) {
-      toast.error(err?.message || "Không thể kiểm định lại truyện này");
+      toast.error(err?.message || "Lỗi khi kiểm tra chất lượng");
     }
   };
 
-  // Status Badge Helper: Pure Monochrome Typography (No icons)
+  const handleMergePR = async (prNumber: number, storyId: string) => {
+    try {
+      toast.info(`Đang gửi yêu cầu merge PR #${prNumber}...`);
+      const res = await api.mergePipelinePullRequest(prNumber, storyId);
+      toast.success(res.message || `Đã merge PR #${prNumber} thành công!`);
+      loadData();
+    } catch (err: any) {
+      toast.error(err?.message || "Không thể merge PR tự động");
+    }
+  };
+
+  // Render Status Badge
   const renderStatusBadge = (status: PipelineStatus) => {
     switch (status) {
       case "pending":
         return (
-          <span className="inline-block px-2.5 py-1 rounded text-[11px] font-mono tracking-wider uppercase bg-neutral-900 text-neutral-300 border border-neutral-700">
+          <span className="inline-block px-2 py-0.5 rounded text-[10px] font-mono tracking-wider uppercase bg-neutral-900 text-neutral-400 border border-neutral-800">
             CHỜ XỬ LÝ
           </span>
         );
       case "researching":
-        return (
-          <span className="inline-block px-2.5 py-1 rounded text-[11px] font-mono tracking-wider uppercase bg-neutral-900 text-white border border-neutral-600 animate-pulse">
-            THU THẬP NGUỒN
-          </span>
-        );
       case "writing":
-        return (
-          <span className="inline-block px-2.5 py-1 rounded text-[11px] font-mono tracking-wider uppercase bg-neutral-900 text-white border border-neutral-500 animate-pulse">
-            AI ĐANG VIẾT
-          </span>
-        );
       case "validating":
         return (
-          <span className="inline-block px-2.5 py-1 rounded text-[11px] font-mono tracking-wider uppercase bg-neutral-900 text-white border border-neutral-600 animate-pulse">
-            ĐANG KIỂM ĐỊNH
+          <span className="inline-block px-2 py-0.5 rounded text-[10px] font-mono tracking-wider uppercase bg-white text-black font-bold border border-white animate-pulse">
+            ĐANG BIÊN SOẠN
           </span>
         );
       case "pr_created":
         return (
-          <span className="inline-block px-2.5 py-1 rounded text-[11px] font-mono tracking-wider uppercase bg-white text-black font-bold border border-white">
+          <span className="inline-block px-2 py-0.5 rounded text-[10px] font-mono tracking-wider uppercase bg-neutral-900 text-white border border-neutral-700">
             CHỜ DUYỆT PR
           </span>
         );
       case "merged":
         return (
-          <span className="inline-block px-2.5 py-1 rounded text-[11px] font-mono tracking-wider uppercase bg-neutral-200 text-black font-bold border border-neutral-300">
-            ĐÃ MERGE
+          <span className="inline-block px-2 py-0.5 rounded text-[10px] font-mono tracking-wider uppercase bg-white text-black font-bold">
+            ĐÃ XUẤT BẢN
           </span>
         );
       case "failed":
         return (
-          <span className="inline-block px-2.5 py-1 rounded text-[11px] font-mono tracking-wider uppercase bg-neutral-950 text-neutral-500 border border-neutral-800 line-through">
+          <span className="inline-block px-2 py-0.5 rounded text-[10px] font-mono tracking-wider uppercase bg-neutral-950 text-neutral-500 border border-neutral-800 line-through">
             THẤT BẠI
           </span>
         );
@@ -260,63 +279,100 @@ export function StoryPipelineView({ lang }: Props) {
     }
   };
 
-  // Filtered Stories
+  // Filtered Stories in Library
+  const filteredPublishedStories = useMemo(() => {
+    return publishedStories.filter((s) => {
+      const matchesSearch =
+        s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        s.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (s.summary && s.summary.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (s.topic && s.topic.toLowerCase().includes(searchQuery.toLowerCase()));
+
+      let matchesCategory = true;
+      if (categoryFilter === "fairy") {
+        matchesCategory = isFairyTale(s);
+      } else if (categoryFilter === "history") {
+        matchesCategory = isHistorical(s);
+      }
+
+      return matchesSearch && matchesCategory;
+    });
+  }, [publishedStories, searchQuery, categoryFilter, isFairyTale, isHistorical]);
+
+  // Filtered Pipeline Queue
   const stories = overview?.stories || [];
-  const filteredStories = stories.filter((s) => {
-    const matchesSearch =
-      s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (s.topic && s.topic.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesStatus = statusFilter === "all" || s.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  const filteredQueueStories = useMemo(() => {
+    return stories.filter((s) => {
+      const matchesSearch =
+        s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        s.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (s.topic && s.topic.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchesStatus = statusFilter === "all" || s.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [stories, searchQuery, statusFilter]);
+
+  // Counts
+  const fairyCount = useMemo(() => publishedStories.filter(isFairyTale).length, [publishedStories, isFairyTale]);
+  const historyCount = useMemo(() => publishedStories.filter(isHistorical).length, [publishedStories, isHistorical]);
 
   return (
-    <div className="flex-1 min-h-screen bg-black text-white p-4 lg:p-8 select-none">
+    <div className="flex-1 min-h-screen bg-black text-white p-4 lg:p-8 select-none font-sans">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
+        {/* Header (Black & White Minimalist) */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-neutral-800">
           <div>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-white text-black flex items-center justify-center font-mono font-bold text-base">
-                P
+              <div className="w-10 h-10 rounded-lg bg-white text-black flex items-center justify-center font-mono font-bold text-base shadow">
+                C
               </div>
               <div>
-                <h1 className="text-xl lg:text-2xl font-bold tracking-tight text-white uppercase">
-                  {lang === "vi" ? "Trạm biên soạn truyện AI" : "AI Story Pipeline Station"}
+                <h1 className="text-xl lg:text-2xl font-bold tracking-tight text-white uppercase font-mono">
+                  {lang === "vi" ? "KHO TÀNG CÂU CHUYỆN" : "VIETNAMESE STORY LIBRARY"}
                 </h1>
-                <p className="text-xs lg:text-sm text-neutral-400">
+                <p className="text-xs lg:text-sm text-neutral-400 mt-0.5">
                   {lang === "vi"
-                    ? "Tự động hóa: Thu thập Wikipedia → Claude AI biên soạn → Kiểm định 5 lớp → Tạo GitHub PR"
-                    : "Automated: Wikipedia Research → Claude AI Compilation → 5-Layer Quality Gate → GitHub PR"}
+                    ? "Tuyển tập Truyện Cổ Tích & Truyện Lịch Sử Việt Nam — Sẵn sàng đọc, chỉnh sửa và chuyển thể truyện tranh"
+                    : "Vietnamese Folk Tales & Historical Legends — Ready for reading, editing and manga adaptation"}
                 </p>
               </div>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            {/* View Mode Toggle: Library vs Pipeline Tools */}
+            <div className="flex rounded-lg bg-neutral-950 border border-neutral-800 p-1">
+              <button
+                onClick={() => setViewMode("library")}
+                className={`px-3 py-1.5 rounded-md text-xs font-mono uppercase tracking-wider transition-colors ${
+                  viewMode === "library"
+                    ? "bg-white text-black font-bold shadow"
+                    : "text-neutral-400 hover:text-white"
+                }`}
+              >
+                {lang === "vi" ? "Thư viện câu chuyện" : "Story Library"}
+              </button>
+              <button
+                onClick={() => setViewMode("pipeline")}
+                className={`px-3 py-1.5 rounded-md text-xs font-mono uppercase tracking-wider transition-colors ${
+                  viewMode === "pipeline"
+                    ? "bg-white text-black font-bold shadow"
+                    : "text-neutral-400 hover:text-white"
+                }`}
+              >
+                {lang === "vi" ? "Trạm biên soạn & PR" : "Compilation Station"}
+              </button>
+            </div>
+
             <button
               onClick={() => setShowAddModal(true)}
-              className="px-4 py-2 bg-white text-black hover:bg-neutral-200 text-xs font-bold rounded-lg border border-white transition-colors"
+              className="px-3.5 py-2 bg-white text-black hover:bg-neutral-200 text-xs font-bold rounded-lg border border-white transition-colors uppercase tracking-wider font-mono"
             >
-              {lang === "vi" ? "+ Thêm đề bài" : "+ Add Prompt"}
-            </button>
-            <button
-              onClick={() => setShowBatchModal(true)}
-              className="px-4 py-2 bg-neutral-950 text-white hover:bg-neutral-900 text-xs font-semibold rounded-lg border border-neutral-700 transition-colors"
-            >
-              {lang === "vi" ? "Nhập hàng loạt" : "Batch Import"}
-            </button>
-            <button
-              onClick={handleRunBatch}
-              disabled={isBatchRunning || loading}
-              className="px-4 py-2 bg-white text-black hover:bg-neutral-200 disabled:opacity-50 text-xs font-bold rounded-lg border border-white transition-colors"
-            >
-              {isBatchRunning ? (lang === "vi" ? "Đang chạy..." : "Running...") : (lang === "vi" ? "Chạy Pipeline (Auto)" : "Run Pipeline")}
+              + {lang === "vi" ? "Thêm truyện mới" : "Add Story"}
             </button>
             <button
               onClick={loadData}
-              className="px-3.5 py-2 rounded-lg bg-neutral-950 text-neutral-300 hover:text-white hover:bg-neutral-900 border border-neutral-800 text-xs font-mono transition-colors"
+              className="px-3 py-2 rounded-lg bg-neutral-950 text-neutral-300 hover:text-white hover:bg-neutral-900 border border-neutral-800 text-xs font-mono transition-colors"
               title="Làm mới"
             >
               {loading ? "..." : "Làm mới"}
@@ -324,443 +380,726 @@ export function StoryPipelineView({ lang }: Props) {
           </div>
         </div>
 
-        {/* Overview Metric Cards (Black & White Minimalist) */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          <div className="p-4 rounded-xl bg-neutral-950 border border-neutral-800">
-            <span className="text-[10px] font-mono tracking-wider uppercase text-neutral-400">Tổng đề bài</span>
-            <div className="text-2xl font-bold font-mono mt-1 text-white">
-              {overview?.totalStories ?? 0}
-            </div>
-          </div>
-          <div className="p-4 rounded-xl bg-neutral-950 border border-neutral-800">
-            <span className="text-[10px] font-mono tracking-wider uppercase text-neutral-400">Chờ xử lý</span>
-            <div className="text-2xl font-bold font-mono mt-1 text-white">
-              {overview?.pending ?? 0}
-            </div>
-          </div>
-          <div className="p-4 rounded-xl bg-neutral-950 border border-neutral-800">
-            <span className="text-[10px] font-mono tracking-wider uppercase text-neutral-400">Đang viết</span>
-            <div className="text-2xl font-bold font-mono mt-1 text-white">
-              {overview?.inProgress ?? 0}
-            </div>
-          </div>
-          <div className="p-4 rounded-xl bg-neutral-950 border border-neutral-800">
-            <span className="text-[10px] font-mono tracking-wider uppercase text-neutral-400">Lỗi kiểm định</span>
-            <div className="text-2xl font-bold font-mono mt-1 text-neutral-400">
-              {overview?.failed ?? 0}
-            </div>
-          </div>
-          <div className="p-4 rounded-xl bg-neutral-950 border border-neutral-800">
-            <span className="text-[10px] font-mono tracking-wider uppercase text-neutral-400">Chờ duyệt PR</span>
-            <div className="text-2xl font-bold font-mono mt-1 text-white">
-              {overview?.prCreated ?? 0}
-            </div>
-          </div>
-          <div className="p-4 rounded-xl bg-neutral-950 border border-neutral-800">
-            <span className="text-[10px] font-mono tracking-wider uppercase text-neutral-400">Đã Merge</span>
-            <div className="text-2xl font-bold font-mono mt-1 text-white">
-              {overview?.merged ?? 0}
-            </div>
-          </div>
-        </div>
-
-        {/* Sub-tab Navigation (Pure Typography, No Icons) */}
-        <div className="flex items-center justify-between border-b border-neutral-800 pt-2">
-          <div className="flex gap-6">
-            <button
-              onClick={() => setActiveSubTab("queue")}
-              className={`pb-3 text-xs lg:text-sm tracking-wide uppercase transition-all ${
-                activeSubTab === "queue"
-                  ? "border-b-2 border-white text-white font-bold"
-                  : "border-b-2 border-transparent text-neutral-500 hover:text-white"
-              }`}
-            >
-              Hàng đợi đề bài ({stories.length})
-            </button>
-            <button
-              onClick={() => setActiveSubTab("prs")}
-              className={`pb-3 text-xs lg:text-sm tracking-wide uppercase transition-all ${
-                activeSubTab === "prs"
-                  ? "border-b-2 border-white text-white font-bold"
-                  : "border-b-2 border-transparent text-neutral-500 hover:text-white"
-              }`}
-            >
-              Pull Requests & Duyệt ({pullRequests.length})
-            </button>
-            <button
-              onClick={() => setActiveSubTab("logs")}
-              className={`pb-3 text-xs lg:text-sm tracking-wide uppercase transition-all ${
-                activeSubTab === "logs"
-                  ? "border-b-2 border-white text-white font-bold"
-                  : "border-b-2 border-transparent text-neutral-500 hover:text-white"
-              }`}
-            >
-              Nhật ký thực thi ({recentLogs.length})
-            </button>
-          </div>
-        </div>
-
-        {/* Tab 1: Queue Table */}
-        {activeSubTab === "queue" && (
-          <div className="space-y-4">
-            {/* Filter bar */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-              <div className="w-full sm:w-80">
-                <input
-                  type="text"
-                  placeholder="Tìm theo tên truyện, ID, chủ đề..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full px-3 py-2 text-xs rounded-lg bg-neutral-950 border border-neutral-800 text-white placeholder-neutral-500 focus:outline-none focus:border-white focus:ring-1 focus:ring-white"
-                />
-              </div>
-
-              <div className="flex items-center gap-2 self-end sm:self-auto">
-                <span className="text-[11px] text-neutral-400">Lọc:</span>
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="px-3 py-1.5 text-xs rounded-lg bg-neutral-950 border border-neutral-800 text-white focus:outline-none focus:border-white"
-                >
-                  <option value="all">Tất cả trạng thái</option>
-                  <option value="pending">Chờ xử lý</option>
-                  <option value="researching">Thu thập nguồn</option>
-                  <option value="writing">AI đang viết</option>
-                  <option value="validating">Đang kiểm định</option>
-                  <option value="pr_created">Chờ duyệt PR</option>
-                  <option value="merged">Đã Merge</option>
-                  <option value="failed">Thất bại</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Table */}
-            <div className="bg-neutral-950 rounded-xl border border-neutral-800 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-xs">
-                  <thead>
-                    <tr className="bg-neutral-900 border-b border-neutral-800 text-neutral-400 font-semibold uppercase text-[10px] tracking-wider">
-                      <th className="py-3 px-4">Tên truyện & ID</th>
-                      <th className="py-3 px-4">Chủ đề / Danh mục</th>
-                      <th className="py-3 px-4">Nguồn tham khảo</th>
-                      <th className="py-3 px-4">Trạng thái</th>
-                      <th className="py-3 px-4">Cập nhật</th>
-                      <th className="py-3 px-4 text-right">Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-neutral-900">
-                    {filteredStories.length === 0 ? (
-                      <tr>
-                        <td colSpan={6} className="py-8 text-center text-neutral-500">
-                          Không tìm thấy đề bài nào phù hợp.
-                        </td>
-                      </tr>
-                    ) : (
-                      filteredStories.map((item) => (
-                        <tr key={item.id} className="hover:bg-neutral-900/60 transition-colors">
-                          <td className="py-3 px-4">
-                            <div className="font-semibold text-white">{item.title}</div>
-                            <div className="text-[10px] font-mono text-neutral-500">ID: {item.id}</div>
-                          </td>
-                          <td className="py-3 px-4">
-                            <div className="text-neutral-300">{item.topic || "Lịch sử Việt Nam"}</div>
-                            <div className="text-[10px] text-neutral-400 font-medium">{item.category}</div>
-                          </td>
-                          <td className="py-3 px-4">
-                            <div className="flex gap-1">
-                              {(item.sourceLanguages || ["vi", "en"]).map((l) => (
-                                <span key={l} className="px-1.5 py-0.5 rounded bg-neutral-900 text-[10px] font-mono uppercase text-neutral-300 border border-neutral-800">
-                                  {l}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td className="py-3 px-4">
-                            {renderStatusBadge(item.status)}
-                            {item.error && (
-                              <div className="text-[10px] text-neutral-400 mt-1 truncate max-w-xs font-mono" title={item.error}>
-                                Lỗi: {item.error}
-                              </div>
-                            )}
-                          </td>
-                          <td className="py-3 px-4 text-neutral-400 text-[11px] font-mono">
-                            {item.updatedAt ? new Date(item.updatedAt).toLocaleString("vi-VN") : "---"}
-                          </td>
-                          <td className="py-3 px-4 text-right">
-                            <div className="flex items-center justify-end gap-1.5">
-                              {/* Run Single Button */}
-                              <button
-                                onClick={() => handleRunSingle(item.id)}
-                                disabled={executingId === item.id || isBatchRunning}
-                                className="px-2.5 py-1 rounded bg-white text-black hover:bg-neutral-200 text-[11px] font-bold transition-colors disabled:opacity-50"
-                                title="Chạy pipeline cho đề bài này"
-                              >
-                                {executingId === item.id ? "Đang chạy..." : "Chạy"}
-                              </button>
-
-                              {/* Preview Story Button */}
-                              {(item.status === "pr_created" || item.status === "merged" || item.status === "validating") && (
-                                <button
-                                  onClick={() => handleOpenPreview(item.id)}
-                                  className="px-2.5 py-1 rounded bg-neutral-900 text-white hover:bg-neutral-800 border border-neutral-700 text-[11px] font-semibold transition-colors"
-                                  title="Xem trước bản thảo"
-                                >
-                                  Xem
-                                </button>
-                              )}
-
-                              {/* Re-validate Button */}
-                              <button
-                                onClick={() => handleRevalidate(item.id, item.title)}
-                                className="px-2.5 py-1 rounded bg-neutral-900 text-white hover:bg-neutral-800 border border-neutral-700 text-[11px] font-semibold transition-colors"
-                                title="Kiểm định lại 5 lớp"
-                              >
-                                Kiểm định
-                              </button>
-
-                              {/* Delete Button */}
-                              <button
-                                onClick={() => handleDelete(item.id)}
-                                className="px-2.5 py-1 rounded bg-black text-neutral-400 hover:text-white hover:bg-neutral-900 border border-neutral-800 text-[11px] transition-colors"
-                                title="Xóa khỏi hàng đợi"
-                              >
-                                Xóa
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Tab 2: Pull Requests & Human Review */}
-        {activeSubTab === "prs" && (
-          <div className="space-y-4">
-            <div className="bg-neutral-950 rounded-xl border border-neutral-800 overflow-hidden">
-              <div className="p-4 border-b border-neutral-800 bg-neutral-900/70 flex items-center justify-between">
-                <div>
-                  <h3 className="font-bold text-sm text-white uppercase tracking-wider">Danh sách Pull Request GitHub</h3>
-                  <p className="text-[11px] text-neutral-400">Mỗi tác phẩm vượt qua kiểm định được tự động mở PR để xem xét và duyệt Merge.</p>
-                </div>
+        {/* ============================================================== */}
+        {/* VIEW MODE 1: THƯ VIỆN CÂU CHUYỆN (PRIMARY STORY LIBRARY)       */}
+        {/* ============================================================== */}
+        {viewMode === "library" && (
+          <div className="space-y-6">
+            {/* 2 Primary Category Switchers & Search Bar */}
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 rounded-xl bg-neutral-950 border border-neutral-800">
+              {/* Category Segmented Tabs */}
+              <div className="flex flex-wrap items-center gap-2">
                 <button
-                  onClick={loadData}
-                  className="px-3 py-1.5 text-xs bg-neutral-900 hover:bg-neutral-800 text-white border border-neutral-700 rounded-lg transition-colors font-mono"
+                  onClick={() => setCategoryFilter("all")}
+                  className={`px-4 py-2 rounded-lg text-xs font-mono uppercase tracking-wider transition-all ${
+                    categoryFilter === "all"
+                      ? "bg-white text-black font-bold border border-white shadow"
+                      : "bg-black text-neutral-400 hover:text-white border border-neutral-800"
+                  }`}
                 >
-                  Đồng bộ GitHub
+                  {lang === "vi" ? "Tất cả câu chuyện" : "All Stories"} ({publishedStories.length})
+                </button>
+
+                <button
+                  onClick={() => setCategoryFilter("fairy")}
+                  className={`px-4 py-2 rounded-lg text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 ${
+                    categoryFilter === "fairy"
+                      ? "bg-white text-black font-bold border border-white shadow"
+                      : "bg-black text-neutral-400 hover:text-white border border-neutral-800"
+                  }`}
+                >
+                  <span>{lang === "vi" ? "Truyện Cổ Tích" : "Fairy Tales"}</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
+                    categoryFilter === "fairy" ? "bg-black text-white" : "bg-neutral-900 text-neutral-300"
+                  }`}>
+                    {fairyCount}
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => setCategoryFilter("history")}
+                  className={`px-4 py-2 rounded-lg text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 ${
+                    categoryFilter === "history"
+                      ? "bg-white text-black font-bold border border-white shadow"
+                      : "bg-black text-neutral-400 hover:text-white border border-neutral-800"
+                  }`}
+                >
+                  <span>{lang === "vi" ? "Truyện Lịch Sử" : "Historical Stories"}</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
+                    categoryFilter === "history" ? "bg-black text-white" : "bg-neutral-900 text-neutral-300"
+                  }`}>
+                    {historyCount}
+                  </span>
                 </button>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-xs">
-                  <thead>
-                    <tr className="bg-neutral-900 border-b border-neutral-800 text-neutral-400 font-semibold uppercase text-[10px] tracking-wider">
-                      <th className="py-3 px-4">Tên tác phẩm</th>
-                      <th className="py-3 px-4">Nhánh & PR</th>
-                      <th className="py-3 px-4">Trạng thái PR</th>
-                      <th className="py-3 px-4">Thời gian tạo</th>
-                      <th className="py-3 px-4 text-right">Hành động duyệt</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-neutral-900">
-                    {pullRequests.length === 0 ? (
-                      <tr>
-                        <td colSpan={5} className="py-8 text-center text-neutral-500">
-                          Chưa có Pull Request nào được tạo. Hãy chạy pipeline cho các đề bài chờ xử lý.
-                        </td>
-                      </tr>
-                    ) : (
-                      pullRequests.map((pr) => (
-                        <tr key={pr.id} className="hover:bg-neutral-900/60 transition-colors">
-                          <td className="py-3 px-4">
-                            <div className="font-semibold text-white">{pr.title}</div>
-                            <div className="text-[10px] text-neutral-500 font-mono">Slug: {pr.id}</div>
-                          </td>
-                          <td className="py-3 px-4">
-                            <div className="font-mono text-[11px] text-neutral-300">
-                              {pr.branchName || `ai-stories/${pr.id}`}
-                            </div>
-                            {pr.prUrl && (
-                              <a
-                                href={pr.prUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="block text-[11px] text-neutral-400 hover:text-white underline mt-0.5 font-mono"
-                              >
-                                [GitHub PR Link]
-                              </a>
-                            )}
-                          </td>
-                          <td className="py-3 px-4">
-                            {pr.isMerged ? (
-                              <span className="inline-block px-2.5 py-1 rounded text-[11px] font-mono tracking-wider uppercase bg-neutral-200 text-black font-bold">
-                                ĐÃ MERGE & XUẤT BẢN
-                              </span>
-                            ) : (
-                              <span className="inline-block px-2.5 py-1 rounded text-[11px] font-mono tracking-wider uppercase bg-white text-black font-bold">
-                                ĐANG MỞ (OPEN)
-                              </span>
-                            )}
-                          </td>
-                          <td className="py-3 px-4 text-neutral-400 text-[11px] font-mono">
-                            {pr.updatedAt ? new Date(pr.updatedAt).toLocaleString("vi-VN") : "---"}
-                          </td>
-                          <td className="py-3 px-4 text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              <button
-                                onClick={() => handleOpenPreview(pr.id)}
-                                className="px-3 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-white border border-neutral-700 text-xs font-semibold transition-colors"
-                              >
-                                Xem trước truyện
-                              </button>
-                              {pr.prUrl && (
-                                <a
-                                  href={pr.prUrl}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="px-3 py-1.5 rounded-lg bg-white text-black hover:bg-neutral-200 text-xs font-bold transition-colors"
-                                >
-                                  Duyệt trên GitHub
-                                </a>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+              {/* Search Box */}
+              <div className="w-full lg:w-72">
+                <input
+                  type="text"
+                  placeholder={lang === "vi" ? "Tìm theo tên truyện, nhân vật..." : "Search stories, characters..."}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full px-3.5 py-2 rounded-lg bg-black border border-neutral-800 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-white transition-colors font-mono"
+                />
               </div>
             </div>
+
+            {/* Stories Grid */}
+            {loading && publishedStories.length === 0 ? (
+              <div className="p-12 text-center text-neutral-500 font-mono text-xs">
+                Đang tải kho câu chuyện...
+              </div>
+            ) : filteredPublishedStories.length === 0 ? (
+              <div className="p-12 text-center border border-neutral-800 rounded-2xl bg-neutral-950 space-y-3">
+                <p className="text-neutral-400 text-xs font-mono">
+                  Không tìm thấy câu chuyện nào phù hợp với bộ lọc hiện tại.
+                </p>
+                <button
+                  onClick={() => { setCategoryFilter("all"); setSearchQuery(""); }}
+                  className="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg text-xs font-mono uppercase border border-neutral-700 transition-colors"
+                >
+                  Đặt lại bộ lọc
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {filteredPublishedStories.map((story) => {
+                  const isFairy = isFairyTale(story);
+                  return (
+                    <div
+                      key={story.id}
+                      className="rounded-2xl bg-neutral-950 border border-neutral-800 hover:border-neutral-700 transition-all p-5 flex flex-col justify-between space-y-4 group"
+                    >
+                      {/* Top Meta */}
+                      <div className="space-y-2.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className={`px-2.5 py-0.5 rounded text-[10px] font-mono tracking-wider uppercase border font-bold ${
+                            isFairy
+                              ? "bg-neutral-900 text-neutral-200 border-neutral-700"
+                              : "bg-white text-black border-white"
+                          }`}>
+                            {isFairy ? "TRUYỆN CỔ TÍCH" : "LỊCH SỬ VIỆT NAM"}
+                          </span>
+
+                          <span className="text-[10px] font-mono text-neutral-500">
+                            {story.panels?.length ? `${story.panels.length} KHUNG TRANH AI` : "VĂN XUÔI"}
+                          </span>
+                        </div>
+
+                        {/* Story Title */}
+                        <h3 className="text-base font-bold text-white group-hover:text-neutral-200 transition-colors line-clamp-2">
+                          {story.title}
+                        </h3>
+
+                        {/* Topic / Setting */}
+                        {story.topic && (
+                          <p className="text-[11px] font-mono text-neutral-400 truncate">
+                            {story.topic}
+                          </p>
+                        )}
+
+                        {/* Summary */}
+                        <p className="text-xs text-neutral-300 leading-relaxed line-clamp-3">
+                          {story.summary || (story.content ? story.content.substring(0, 160) + "..." : "")}
+                        </p>
+
+                        {/* Character Pills */}
+                        {story.characters && story.characters.length > 0 && (
+                          <div className="pt-1 flex flex-wrap gap-1.5">
+                            {story.characters.slice(0, 3).map((c, idx) => (
+                              <span
+                                key={idx}
+                                className="px-2 py-0.5 rounded bg-black border border-neutral-800 text-[10px] font-mono text-neutral-400"
+                              >
+                                {c.name}
+                              </span>
+                            ))}
+                            {story.characters.length > 3 && (
+                              <span className="text-[10px] font-mono text-neutral-600 self-center">
+                                +{story.characters.length - 3}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="pt-3 border-t border-neutral-900 space-y-2">
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            onClick={() => setReadStoryModal(story)}
+                            className="px-3 py-2 bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg text-xs font-mono uppercase tracking-wider border border-neutral-800 hover:border-neutral-700 transition-colors text-center"
+                          >
+                            Đọc truyện
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              if (onAdaptStoryToComic) {
+                                onAdaptStoryToComic(story.content || story.summary, story.title);
+                              } else {
+                                toast.info("Đang mở trình chuyển thể truyện tranh...");
+                              }
+                            }}
+                            className="px-3 py-2 bg-white hover:bg-neutral-200 text-black rounded-lg text-xs font-mono font-bold uppercase tracking-wider transition-colors text-center shadow"
+                          >
+                            Tạo tranh AI
+                          </button>
+                        </div>
+
+                        {onLoadStoryToEditor && (
+                          <button
+                            onClick={() => onLoadStoryToEditor(story.content || story.summary, story.title)}
+                            className="w-full py-1.5 text-[11px] font-mono text-neutral-500 hover:text-white uppercase tracking-wider text-center transition-colors"
+                          >
+                            [Mở trong Bản thảo để biên tập]
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 
-        {/* Tab 3: System Logs */}
-        {activeSubTab === "logs" && (
-          <div className="bg-neutral-950 text-neutral-200 rounded-xl p-4 font-mono text-xs border border-neutral-800 shadow-inner space-y-2 max-h-[600px] overflow-y-auto">
-            <div className="flex items-center justify-between pb-2 border-b border-neutral-800 text-neutral-400 uppercase tracking-wider text-[11px]">
-              <span>Live Pipeline Execution Logs</span>
-              <button
-                onClick={loadData}
-                className="text-neutral-400 hover:text-white underline font-mono"
-              >
-                Làm mới
-              </button>
+        {/* ============================================================== */}
+        {/* VIEW MODE 2: TRẠM BIÊN SOẠN & PR (ADMIN PIPELINE DASHBOARD)    */}
+        {/* ============================================================== */}
+        {viewMode === "pipeline" && (
+          <div className="space-y-6">
+            {/* Controls Bar */}
+            <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-xl bg-neutral-950 border border-neutral-800">
+              <div className="text-xs text-neutral-400 font-mono">
+                Pipeline tự động: Wikipedia Research → LLM Biên soạn → Kiểm định 5 lớp → GitHub PR
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={() => setShowBatchModal(true)}
+                  className="px-3.5 py-1.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg text-xs font-mono uppercase border border-neutral-700 transition-colors"
+                >
+                  Nhập hàng loạt
+                </button>
+                <button
+                  onClick={handleRunBatch}
+                  disabled={isBatchRunning || loading}
+                  className="px-4 py-1.5 bg-white text-black hover:bg-neutral-200 disabled:opacity-50 text-xs font-bold rounded-lg uppercase font-mono transition-colors shadow"
+                >
+                  {isBatchRunning ? "Đang chạy..." : "Chạy tự động (Batch)"}
+                </button>
+              </div>
             </div>
-            {recentLogs.length === 0 ? (
-              <div className="text-neutral-500 py-6 text-center">Chưa có nhật ký hoạt động gần đây.</div>
-            ) : (
-              recentLogs.slice().reverse().map((log, idx) => (
-                <div key={idx} className="flex items-start gap-2 py-1 border-b border-neutral-900">
-                  <span className="text-neutral-500 shrink-0 font-mono">{new Date(log.timestamp).toLocaleTimeString()}</span>
-                  <span
-                    className={`px-1.5 py-0.2 rounded text-[10px] font-bold uppercase shrink-0 font-mono ${
-                      log.level === "error"
-                        ? "bg-neutral-900 text-neutral-400 border border-neutral-700"
-                        : log.level === "success"
-                        ? "bg-white text-black font-bold"
-                        : "bg-neutral-900 text-neutral-300 border border-neutral-800"
-                    }`}
-                  >
-                    {log.level}
-                  </span>
-                  <span className="text-white font-semibold shrink-0">[{log.storyId}]</span>
-                  <span className="text-neutral-300">{log.message}</span>
+
+            {/* Overview Metric Cards (Black & White Minimalist) */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+              <div className="p-4 rounded-xl bg-neutral-950 border border-neutral-800">
+                <span className="text-[10px] font-mono tracking-wider uppercase text-neutral-400">Tổng đề bài</span>
+                <div className="text-2xl font-bold font-mono mt-1 text-white">
+                  {overview?.totalStories ?? 0}
                 </div>
-              ))
+              </div>
+              <div className="p-4 rounded-xl bg-neutral-950 border border-neutral-800">
+                <span className="text-[10px] font-mono tracking-wider uppercase text-neutral-400">Chờ xử lý</span>
+                <div className="text-2xl font-bold font-mono mt-1 text-white">
+                  {overview?.pending ?? 0}
+                </div>
+              </div>
+              <div className="p-4 rounded-xl bg-neutral-950 border border-neutral-800">
+                <span className="text-[10px] font-mono tracking-wider uppercase text-neutral-400">Đang viết</span>
+                <div className="text-2xl font-bold font-mono mt-1 text-white">
+                  {overview?.inProgress ?? 0}
+                </div>
+              </div>
+              <div className="p-4 rounded-xl bg-neutral-950 border border-neutral-800">
+                <span className="text-[10px] font-mono tracking-wider uppercase text-neutral-400">Lỗi kiểm định</span>
+                <div className="text-2xl font-bold font-mono mt-1 text-neutral-400">
+                  {overview?.failed ?? 0}
+                </div>
+              </div>
+              <div className="p-4 rounded-xl bg-neutral-950 border border-neutral-800">
+                <span className="text-[10px] font-mono tracking-wider uppercase text-neutral-400">Chờ duyệt PR</span>
+                <div className="text-2xl font-bold font-mono mt-1 text-white">
+                  {overview?.prCreated ?? 0}
+                </div>
+              </div>
+              <div className="p-4 rounded-xl bg-neutral-950 border border-neutral-800">
+                <span className="text-[10px] font-mono tracking-wider uppercase text-neutral-400">Đã Merge</span>
+                <div className="text-2xl font-bold font-mono mt-1 text-white">
+                  {overview?.merged ?? 0}
+                </div>
+              </div>
+            </div>
+
+            {/* Sub-tab Navigation (Pure Typography, No Icons) */}
+            <div className="flex items-center justify-between border-b border-neutral-800 pt-2">
+              <div className="flex gap-6">
+                <button
+                  onClick={() => setPipelineSubTab("queue")}
+                  className={`pb-3 text-xs lg:text-sm tracking-wide uppercase transition-all font-mono ${
+                    pipelineSubTab === "queue"
+                      ? "border-b-2 border-white text-white font-bold"
+                      : "border-b-2 border-transparent text-neutral-500 hover:text-white"
+                  }`}
+                >
+                  Hàng đợi đề bài ({stories.length})
+                </button>
+                <button
+                  onClick={() => setPipelineSubTab("prs")}
+                  className={`pb-3 text-xs lg:text-sm tracking-wide uppercase transition-all font-mono ${
+                    pipelineSubTab === "prs"
+                      ? "border-b-2 border-white text-white font-bold"
+                      : "border-b-2 border-transparent text-neutral-500 hover:text-white"
+                  }`}
+                >
+                  Pull Requests & Duyệt ({pullRequests.length})
+                </button>
+                <button
+                  onClick={() => setPipelineSubTab("logs")}
+                  className={`pb-3 text-xs lg:text-sm tracking-wide uppercase transition-all font-mono ${
+                    pipelineSubTab === "logs"
+                      ? "border-b-2 border-white text-white font-bold"
+                      : "border-b-2 border-transparent text-neutral-500 hover:text-white"
+                  }`}
+                >
+                  Nhật ký thực thi ({recentLogs.length})
+                </button>
+              </div>
+            </div>
+
+            {/* TAB: QUEUE TABLE */}
+            {pipelineSubTab === "queue" && (
+              <div className="space-y-4">
+                {/* Search & Status Filter */}
+                <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
+                  <div className="w-full sm:w-80">
+                    <input
+                      type="text"
+                      placeholder="Tìm kiếm đề bài theo tên, ID, chủ đề..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full px-3.5 py-2 rounded-lg bg-neutral-950 border border-neutral-800 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-white font-mono"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-2 self-start sm:self-auto">
+                    <span className="text-xs font-mono text-neutral-400">Trạng thái:</span>
+                    <select
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                      className="px-3 py-1.5 rounded-lg bg-neutral-950 border border-neutral-800 text-xs font-mono text-white focus:outline-none"
+                    >
+                      <option value="all">Tất cả ({stories.length})</option>
+                      <option value="pending">Chờ xử lý</option>
+                      <option value="pr_created">Chờ duyệt PR</option>
+                      <option value="merged">Đã Merge</option>
+                      <option value="failed">Thất bại</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Table */}
+                <div className="border border-neutral-800 rounded-xl overflow-hidden bg-neutral-950">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="border-b border-neutral-800 bg-neutral-900/60 text-[11px] font-mono uppercase text-neutral-400">
+                          <th className="py-3 px-4">Tên đề bài / Nhân vật</th>
+                          <th className="py-3 px-4">Chủ đề & Thể loại</th>
+                          <th className="py-3 px-4">Ngôn ngữ</th>
+                          <th className="py-3 px-4">Trạng thái</th>
+                          <th className="py-3 px-4">Thời gian</th>
+                          <th className="py-3 px-4 text-right">Thao tác</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-neutral-900 text-xs">
+                        {loading && stories.length === 0 ? (
+                          <tr>
+                            <td colSpan={6} className="py-8 text-center text-neutral-500 font-mono">
+                              Đang tải dữ liệu hàng đợi...
+                            </td>
+                          </tr>
+                        ) : filteredQueueStories.length === 0 ? (
+                          <tr>
+                            <td colSpan={6} className="py-8 text-center text-neutral-500 font-mono">
+                              Không tìm thấy đề bài nào phù hợp.
+                            </td>
+                          </tr>
+                        ) : (
+                          filteredQueueStories.map((item) => (
+                            <tr key={item.id} className="hover:bg-neutral-900/40 transition-colors">
+                              <td className="py-3.5 px-4">
+                                <div className="font-semibold text-white">{item.title}</div>
+                                <div className="text-[10px] text-neutral-500 font-mono">ID: {item.id}</div>
+                              </td>
+                              <td className="py-3.5 px-4">
+                                <div className="text-neutral-300">{item.topic || "Lịch sử Việt Nam"}</div>
+                                <div className="text-[10px] text-neutral-500 font-mono">
+                                  {item.category || "Truyền thuyết"}
+                                </div>
+                              </td>
+                              <td className="py-3.5 px-4 font-mono text-[11px] text-neutral-400">
+                                {item.sourceLanguages?.join(", ") || "vi, en"}
+                              </td>
+                              <td className="py-3.5 px-4">{renderStatusBadge(item.status)}</td>
+                              <td className="py-3.5 px-4 font-mono text-[11px] text-neutral-500">
+                                {item.updatedAt ? new Date(item.updatedAt).toLocaleTimeString() : "--"}
+                              </td>
+                              <td className="py-3.5 px-4 text-right">
+                                <div className="flex items-center justify-end gap-1.5">
+                                  <button
+                                    onClick={() => handleRunSingle(item.id)}
+                                    disabled={executingId === item.id}
+                                    className="px-2.5 py-1 bg-white text-black hover:bg-neutral-200 disabled:opacity-50 text-[11px] font-bold rounded font-mono transition-colors"
+                                  >
+                                    {executingId === item.id ? "Đang chạy..." : "Chạy thử"}
+                                  </button>
+
+                                  <button
+                                    onClick={() => handleOpenPreview(item.id)}
+                                    className="px-2.5 py-1 bg-neutral-900 text-neutral-300 hover:text-white text-[11px] font-mono rounded border border-neutral-800 transition-colors"
+                                  >
+                                    Xem trước
+                                  </button>
+
+                                  <button
+                                    onClick={() => handleValidateStory(item.id)}
+                                    className="px-2.5 py-1 bg-neutral-900 text-neutral-300 hover:text-white text-[11px] font-mono rounded border border-neutral-800 transition-colors"
+                                  >
+                                    Kiểm định
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB: PULL REQUESTS */}
+            {pipelineSubTab === "prs" && (
+              <div className="space-y-4">
+                <div className="border border-neutral-800 rounded-xl overflow-hidden bg-neutral-950">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="border-b border-neutral-800 bg-neutral-900/60 text-[11px] font-mono uppercase text-neutral-400">
+                          <th className="py-3 px-4">Tác phẩm & Nhánh PR</th>
+                          <th className="py-3 px-4">Chủ đề</th>
+                          <th className="py-3 px-4">Trạng thái PR</th>
+                          <th className="py-3 px-4">Đường dẫn GitHub</th>
+                          <th className="py-3 px-4 text-right">Thao tác duyệt</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-neutral-900 text-xs">
+                        {pullRequests.length === 0 ? (
+                          <tr>
+                            <td colSpan={5} className="py-8 text-center text-neutral-500 font-mono">
+                              Chưa có Pull Request nào trong hệ thống.
+                            </td>
+                          </tr>
+                        ) : (
+                          pullRequests.map((pr) => (
+                            <tr key={pr.id} className="hover:bg-neutral-900/40 transition-colors">
+                              <td className="py-3.5 px-4">
+                                <div className="font-semibold text-white">{pr.title}</div>
+                                <div className="text-[10px] text-neutral-500 font-mono">
+                                  {pr.branchName || `ai-stories/${pr.id}`}
+                                </div>
+                              </td>
+                              <td className="py-3.5 px-4 text-neutral-300">{pr.topic || pr.category || "Lịch sử"}</td>
+                              <td className="py-3.5 px-4 font-mono">
+                                {pr.isMerged ? (
+                                  <span className="px-2 py-0.5 rounded text-[10px] bg-white text-black font-bold">
+                                    MERGED
+                                  </span>
+                                ) : (
+                                  <span className="px-2 py-0.5 rounded text-[10px] bg-neutral-900 text-neutral-300 border border-neutral-700">
+                                    OPEN (CHỜ DUYỆT)
+                                  </span>
+                                )}
+                              </td>
+                              <td className="py-3.5 px-4 font-mono text-[11px]">
+                                {pr.prUrl ? (
+                                  <a
+                                    href={pr.prUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-white hover:underline truncate max-w-xs block font-bold"
+                                  >
+                                    PR #{pr.prNumber || pr.id} [Mở GitHub]
+                                  </a>
+                                ) : (
+                                  <span className="text-neutral-600">--</span>
+                                )}
+                              </td>
+                              <td className="py-3.5 px-4 text-right">
+                                {!pr.isMerged && pr.prNumber ? (
+                                  <button
+                                    onClick={() => handleMergePR(pr.prNumber!, pr.id)}
+                                    className="px-3 py-1 bg-white text-black hover:bg-neutral-200 font-bold rounded text-[11px] font-mono transition-colors"
+                                  >
+                                    Merge PR
+                                  </button>
+                                ) : (
+                                  <span className="text-[11px] font-mono text-neutral-500">Đã hoàn tất</span>
+                                )}
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB: LOGS */}
+            {pipelineSubTab === "logs" && (
+              <div className="border border-neutral-800 rounded-xl bg-neutral-950 p-4 font-mono text-xs max-h-[500px] overflow-y-auto space-y-2">
+                {recentLogs.length === 0 ? (
+                  <div className="text-neutral-500 text-center py-6">Chưa có nhật ký hoạt động nào.</div>
+                ) : (
+                  recentLogs.map((log, idx) => (
+                    <div key={idx} className="flex items-start gap-3 py-1 border-b border-neutral-900 text-neutral-300">
+                      <span className="text-neutral-600 shrink-0">
+                        {new Date(log.timestamp).toLocaleTimeString()}
+                      </span>
+                      <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold shrink-0 uppercase ${
+                        log.level === "error" ? "bg-neutral-900 text-neutral-400 border border-neutral-700" :
+                        log.level === "success" ? "bg-white text-black font-bold" : "bg-neutral-900 text-neutral-400"
+                      }`}>
+                        {log.level}
+                      </span>
+                      <span className="text-neutral-400 shrink-0">[{log.storyId}]</span>
+                      <span className="text-white flex-1">{log.message}</span>
+                    </div>
+                  ))
+                )}
+              </div>
             )}
           </div>
         )}
       </div>
 
-      {/* Modal: Thêm đề bài mới */}
+      {/* ============================================================== */}
+      {/* MODAL 1: ĐỌC TRUYỆN CHI TIẾT (FULL STORY READING MODAL)         */}
+      {/* ============================================================== */}
+      {readStoryModal && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-neutral-950 rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col border border-neutral-800 shadow-2xl overflow-hidden text-white font-sans">
+            {/* Header */}
+            <div className="p-6 border-b border-neutral-800 flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono tracking-wider uppercase bg-white text-black font-bold">
+                    {isFairyTale(readStoryModal) ? "TRUYỆN CỔ TÍCH" : "LỊCH SỬ VIỆT NAM"}
+                  </span>
+                  <span className="text-xs font-mono text-neutral-500">
+                    {readStoryModal.topic}
+                  </span>
+                </div>
+                <h2 className="text-xl font-bold text-white font-mono">{readStoryModal.title}</h2>
+              </div>
+              <button
+                onClick={() => setReadStoryModal(null)}
+                className="text-neutral-400 hover:text-white font-bold text-base font-mono p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-6 overflow-y-auto space-y-6">
+              {/* Summary */}
+              {readStoryModal.summary && (
+                <div className="p-4 rounded-xl bg-neutral-900 border border-neutral-800">
+                  <h4 className="font-bold text-white text-xs mb-1 uppercase tracking-wider font-mono">
+                    Tóm tắt tác phẩm
+                  </h4>
+                  <p className="text-xs leading-relaxed text-neutral-300">{readStoryModal.summary}</p>
+                </div>
+              )}
+
+              {/* Characters */}
+              {readStoryModal.characters && readStoryModal.characters.length > 0 && (
+                <div>
+                  <h4 className="font-bold text-white text-xs mb-2.5 uppercase tracking-wider font-mono">
+                    Hệ thống nhân vật & Visual DNA
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                    {readStoryModal.characters.map((char, idx) => (
+                      <div key={idx} className="p-3 rounded-lg bg-black border border-neutral-800 space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-white text-xs">{char.name}</span>
+                          <span className="text-[10px] font-mono text-neutral-500 uppercase">{char.role || "Tuyến nhân vật"}</span>
+                        </div>
+                        {char.dna && (
+                          <p className="text-[11px] text-neutral-400 leading-normal line-clamp-3 font-mono">
+                            {char.dna}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Full Content */}
+              <div>
+                <h4 className="font-bold text-white text-xs mb-3 uppercase tracking-wider font-mono">
+                  Nội dung tác phẩm hoàn chỉnh
+                </h4>
+                <div className="prose prose-invert max-w-none text-neutral-200 text-sm leading-relaxed whitespace-pre-line font-serif bg-black p-6 rounded-xl border border-neutral-800">
+                  {readStoryModal.content}
+                </div>
+              </div>
+
+              {/* Comic Panels Outline */}
+              {readStoryModal.panels && readStoryModal.panels.length > 0 && (
+                <div>
+                  <h4 className="font-bold text-white text-xs mb-2.5 uppercase tracking-wider font-mono">
+                    Kịch bản phân cảnh truyện tranh (4 Khung hình AI)
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {readStoryModal.panels.map((p, idx) => (
+                      <div key={idx} className="p-3.5 rounded-lg bg-black border border-neutral-800 space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-mono font-bold bg-neutral-900 px-2 py-0.5 rounded text-neutral-300">
+                            KHUNG {p.panel_index || idx + 1}
+                          </span>
+                          <span className="text-[10px] font-mono text-neutral-500 uppercase">{p.layout_type || "square"}</span>
+                        </div>
+                        <p className="text-xs text-neutral-200 font-medium">{p.dialogue_text}</p>
+                        <p className="text-[10px] text-neutral-500 font-mono line-clamp-2">{p.image_prompt}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer Actions */}
+            <div className="p-4 border-t border-neutral-800 bg-neutral-900 flex flex-wrap items-center justify-between gap-3">
+              <div className="text-[11px] font-mono text-neutral-500">
+                Sẵn sàng chuyển thể truyện tranh ComfyUI
+              </div>
+
+              <div className="flex items-center gap-2">
+                {onLoadStoryToEditor && (
+                  <button
+                    onClick={() => {
+                      onLoadStoryToEditor(readStoryModal.content, readStoryModal.title);
+                      setReadStoryModal(null);
+                    }}
+                    className="px-4 py-2 rounded-lg bg-neutral-950 text-white border border-neutral-700 text-xs font-mono uppercase tracking-wider hover:bg-black transition-colors"
+                  >
+                    Mở trong Bản thảo
+                  </button>
+                )}
+
+                {onAdaptStoryToComic && (
+                  <button
+                    onClick={() => {
+                      onAdaptStoryToComic(readStoryModal.content, readStoryModal.title);
+                      setReadStoryModal(null);
+                    }}
+                    className="px-4 py-2 rounded-lg bg-white text-black font-bold text-xs font-mono uppercase tracking-wider hover:bg-neutral-200 transition-colors shadow"
+                  >
+                    Chuyển thể truyện tranh ngay
+                  </button>
+                )}
+
+                <button
+                  onClick={() => setReadStoryModal(null)}
+                  className="px-3 py-2 rounded-lg bg-neutral-800 text-neutral-300 text-xs font-mono hover:text-white transition-colors"
+                >
+                  Đóng
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* MODAL 2: THÊM ĐỀ BÀI MỚI                                        */}
+      {/* ============================================================== */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-neutral-950 rounded-2xl max-w-lg w-full p-6 border border-neutral-800 shadow-2xl space-y-4 text-white">
+          <div className="bg-neutral-950 rounded-2xl max-w-md w-full p-6 border border-neutral-800 shadow-2xl space-y-4 text-white">
             <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
-              <h3 className="font-bold text-base uppercase tracking-wider">Thêm đề bài mới vào hàng đợi</h3>
+              <h3 className="font-bold text-base uppercase tracking-wider font-mono">Thêm câu chuyện mới</h3>
               <button onClick={() => setShowAddModal(false)} className="text-neutral-400 hover:text-white font-bold text-sm">✕</button>
             </div>
 
             <form onSubmit={handleAddStory} className="space-y-3 text-xs">
               <div>
-                <label className="block font-semibold mb-1 text-neutral-300">Tên truyện / Nhân vật *</label>
+                <label className="block text-neutral-400 font-mono mb-1">Tên tác phẩm / Nhân vật (*)</label>
                 <input
                   type="text"
                   required
-                  placeholder="VD: Lý Thường Kiệt, Bà Triệu, Thánh Gióng..."
+                  placeholder="Ví dụ: Thánh Gióng, Tấm Cám, Lê Lợi..."
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
-                  className="w-full p-2.5 rounded-lg bg-black border border-neutral-800 text-white placeholder-neutral-600 focus:border-white focus:ring-1 focus:ring-white"
+                  className="w-full px-3 py-2 rounded-lg bg-black border border-neutral-800 text-white focus:outline-none focus:border-white font-mono"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold mb-1 text-neutral-300">Chủ đề (Topic)</label>
+                <label className="block text-neutral-400 font-mono mb-1">Phân loại thể loại</label>
+                <select
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg bg-black border border-neutral-800 text-white focus:outline-none font-mono"
+                >
+                  <option value="Truyện Cổ Tích">Truyện Cổ Tích & Truyền Thuyết Dân Gian</option>
+                  <option value="Truyện Lịch Sử">Truyện Lịch Sử & Anh Hùng Dân Tộc</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-neutral-400 font-mono mb-1">Chủ đề câu chuyện</label>
                 <input
                   type="text"
-                  placeholder="VD: Anh hùng dân tộc, Kháng chiến Tống, v.v."
+                  placeholder="Ví dụ: Đạo đức, Kháng chiến, Lòng dũng cảm..."
                   value={newTopic}
                   onChange={(e) => setNewTopic(e.target.value)}
-                  className="w-full p-2.5 rounded-lg bg-black border border-neutral-800 text-white placeholder-neutral-600 focus:border-white focus:ring-1 focus:ring-white"
+                  className="w-full px-3 py-2 rounded-lg bg-black border border-neutral-800 text-white focus:outline-none font-mono"
                 />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold mb-1 text-neutral-300">Danh mục</label>
-                  <select
-                    value={newCategory}
-                    onChange={(e) => setNewCategory(e.target.value)}
-                    className="w-full p-2.5 rounded-lg bg-black border border-neutral-800 text-white focus:border-white"
-                  >
-                    <option value="Lịch sử Việt Nam">Lịch sử Việt Nam</option>
-                    <option value="Truyền thuyết & Thần thoại">Truyền thuyết & Thần thoại</option>
-                    <option value="Truyện cổ tích & Thần thoại">Truyện cổ tích & Thần thoại</option>
-                    <option value="Văn hóa Dân gian">Văn hóa Dân gian</option>
-                    <option value="Danh nhân & Danh tướng">Danh nhân & Danh tướng</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block font-semibold mb-1 text-neutral-300">Thể loại (Genres)</label>
-                  <input
-                    type="text"
-                    value={newGenre}
-                    onChange={(e) => setNewGenre(e.target.value)}
-                    className="w-full p-2.5 rounded-lg bg-black border border-neutral-800 text-white placeholder-neutral-600 focus:border-white focus:ring-1 focus:ring-white"
-                  />
-                </div>
               </div>
 
               <div>
-                <label className="block font-semibold mb-1 text-neutral-300">Ngôn ngữ nguồn Wikipedia</label>
+                <label className="block text-neutral-400 font-mono mb-1">Thể loại / Từ khóa</label>
                 <input
                   type="text"
-                  value={newSourceLangs}
-                  onChange={(e) => setNewSourceLangs(e.target.value)}
-                  className="w-full p-2.5 rounded-lg bg-black border border-neutral-800 text-white placeholder-neutral-600 focus:border-white focus:ring-1 focus:ring-white"
+                  placeholder="Cổ tích, Dân gian, Diệt ác..."
+                  value={newGenre}
+                  onChange={(e) => setNewGenre(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg bg-black border border-neutral-800 text-white focus:outline-none font-mono"
                 />
-                <span className="text-[10px] text-neutral-500">Mặc định: 'vi, en' (Ưu tiên tiếng Việt, bổ trợ tiếng Anh).</span>
               </div>
 
               <div className="flex justify-end gap-2 pt-3 border-t border-neutral-800">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 rounded-lg bg-neutral-900 text-neutral-300 hover:bg-neutral-800 border border-neutral-800 font-semibold"
+                  className="px-4 py-2 rounded-lg bg-neutral-900 text-neutral-300 font-mono hover:text-white"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-lg bg-white text-black font-bold border border-white hover:bg-neutral-200"
+                  className="px-4 py-2 rounded-lg bg-white text-black font-bold font-mono hover:bg-neutral-200 uppercase tracking-wider"
                 >
-                  Thêm vào hàng đợi
+                  Lưu vào hàng đợi
                 </button>
               </div>
             </form>
@@ -768,38 +1107,40 @@ export function StoryPipelineView({ lang }: Props) {
         </div>
       )}
 
-      {/* Modal: Nhập hàng loạt */}
+      {/* ============================================================== */}
+      {/* MODAL 3: NHẬP HÀNG LOẠT                                         */}
+      {/* ============================================================== */}
       {showBatchModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-neutral-950 rounded-2xl max-w-lg w-full p-6 border border-neutral-800 shadow-2xl space-y-4 text-white">
             <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
-              <h3 className="font-bold text-base uppercase tracking-wider">Nhập đề bài hàng loạt (Batch Import)</h3>
+              <h3 className="font-bold text-base uppercase tracking-wider font-mono">Nhập hàng loạt đề bài</h3>
               <button onClick={() => setShowBatchModal(false)} className="text-neutral-400 hover:text-white font-bold text-sm">✕</button>
             </div>
 
             <form onSubmit={handleBatchAdd} className="space-y-3 text-xs">
-              <div>
-                <label className="block font-semibold mb-1 text-neutral-300">Danh sách đề bài (Mỗi dòng một tên truyện hoặc JSON Array)</label>
-                <textarea
-                  rows={8}
-                  placeholder={`Quang Trung - Nguyễn Huệ\nNgô Quyền & Trận Bạch Đằng 938\nLê Lợi & Khởi nghĩa Lam Sơn\nThánh Gióng`}
-                  value={batchRawText}
-                  onChange={(e) => setBatchRawText(e.target.value)}
-                  className="w-full p-3 rounded-lg bg-black border border-neutral-800 text-white font-mono text-xs focus:border-white focus:ring-1 focus:ring-white"
-                />
-              </div>
+              <p className="text-neutral-400">
+                Nhập danh sách tên truyện (mỗi dòng một câu chuyện), hoặc dán mảng JSON:
+              </p>
+              <textarea
+                rows={6}
+                value={batchRawText}
+                onChange={(e) => setBatchRawText(e.target.value)}
+                placeholder={"Thạch Sanh\nTấm Cám\nĂn Khế Trả Vàng\nTrần Hưng Đạo"}
+                className="w-full p-3 rounded-lg bg-black border border-neutral-800 text-white font-mono text-xs focus:outline-none focus:border-white"
+              />
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-neutral-800">
+              <div className="flex justify-end gap-2 pt-2 border-t border-neutral-800">
                 <button
                   type="button"
                   onClick={() => setShowBatchModal(false)}
-                  className="px-4 py-2 rounded-lg bg-neutral-900 text-neutral-300 hover:bg-neutral-800 border border-neutral-800 font-semibold"
+                  className="px-4 py-2 rounded-lg bg-neutral-900 text-neutral-300 font-mono hover:text-white"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-lg bg-white text-black font-bold border border-white hover:bg-neutral-200"
+                  className="px-4 py-2 rounded-lg bg-white text-black font-bold font-mono hover:bg-neutral-200 uppercase"
                 >
                   Nhập danh sách
                 </button>
@@ -809,154 +1150,40 @@ export function StoryPipelineView({ lang }: Props) {
         </div>
       )}
 
-      {/* Modal: Xem trước bản thảo hoàn chỉnh */}
-      {previewStory && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-neutral-950 rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col border border-neutral-800 shadow-2xl overflow-hidden text-white">
-            {/* Modal Header */}
-            <div className="p-5 border-b border-neutral-800 flex items-center justify-between bg-neutral-900">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded bg-white text-black text-[10px] font-bold font-mono">
-                    {previewStory.category}
-                  </span>
-                  <h3 className="font-bold text-lg">{previewStory.title}</h3>
-                </div>
-                <p className="text-xs text-neutral-400 mt-0.5 font-mono">
-                  Số từ: ~{previewStory.metadata?.wordCount || 0} từ • Model: {previewStory.metadata?.aiModel || "Claude / Groq"}
-                </p>
-              </div>
-              <button onClick={() => setPreviewStory(null)} className="text-neutral-400 hover:text-white font-bold text-lg p-1">✕</button>
-            </div>
-
-            {/* Modal Content */}
-            <div className="p-6 overflow-y-auto space-y-6 text-sm">
-              {/* Summary */}
-              <div className="p-4 rounded-xl bg-neutral-900 border border-neutral-800">
-                <h4 className="font-bold text-white text-xs mb-1 uppercase tracking-wider">
-                  Tóm tắt tác phẩm
-                </h4>
-                <p className="text-xs leading-relaxed text-neutral-300">{previewStory.summary}</p>
-              </div>
-
-              {/* Prose Content */}
-              <div>
-                <h4 className="font-bold text-white text-sm mb-3 uppercase tracking-wider">Nội dung truyện hoàn chỉnh</h4>
-                <div className="max-w-none text-xs leading-relaxed whitespace-pre-line bg-black p-5 rounded-xl border border-neutral-800 text-neutral-200">
-                  {previewStory.content}
-                </div>
-              </div>
-
-              {/* Lesson */}
-              {previewStory.lesson && (
-                <div className="p-4 rounded-xl bg-neutral-900 border border-neutral-800">
-                  <h4 className="font-bold text-white text-xs mb-1 uppercase tracking-wider">
-                    Bài học lịch sử / nhân văn
-                  </h4>
-                  <p className="text-xs leading-relaxed text-neutral-300">{previewStory.lesson}</p>
-                </div>
-              )}
-
-              {/* Historical Notes & Fact/Folklore Classification */}
-              {previewStory.historicalNotes && previewStory.historicalNotes.length > 0 && (
-                <div>
-                  <h4 className="font-bold text-white text-xs mb-2 uppercase tracking-wider">
-                    Ghi chú dữ kiện & Phân loại
-                  </h4>
-                  <div className="space-y-2">
-                    {previewStory.historicalNotes.map((note, idx) => (
-                      <div key={idx} className="p-3 rounded-lg bg-black border border-neutral-800 flex items-start gap-2">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-neutral-800 text-neutral-300 shrink-0">
-                          {note.type === "historical_fact" ? "Chính sử" : "Truyền thuyết / Cổ tích"}
-                        </span>
-                        <div className="text-xs text-neutral-300">{note.claim}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Verified Sources */}
-              {previewStory.sources && previewStory.sources.length > 0 && (
-                <div>
-                  <h4 className="font-bold text-white text-xs mb-2 uppercase tracking-wider">
-                    Nguồn tư liệu tham khảo xác thực
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {previewStory.sources.map((src, idx) => (
-                      <a
-                        key={idx}
-                        href={src.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="p-2.5 rounded-lg bg-black border border-neutral-800 hover:border-white flex items-center justify-between text-xs transition-colors"
-                      >
-                        <div className="truncate">
-                          <span className="font-semibold text-white block truncate">{src.title}</span>
-                          <span className="text-[10px] text-neutral-500 font-mono block truncate">{src.url}</span>
-                        </div>
-                        <span className="text-[10px] text-neutral-400 font-mono shrink-0 ml-2">[Xem]</span>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Modal Footer */}
-            <div className="p-4 border-t border-neutral-800 bg-neutral-900 flex justify-end">
-              <button
-                onClick={() => setPreviewStory(null)}
-                className="px-4 py-2 rounded-lg bg-white text-black font-bold text-xs hover:bg-neutral-200 transition-colors"
-              >
-                Đóng xem trước
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal: Kết quả kiểm định 5 lớp */}
+      {/* ============================================================== */}
+      {/* MODAL 4: KIỂM ĐỊNH 5 LỚP                                       */}
+      {/* ============================================================== */}
       {validationModalData && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-neutral-950 rounded-2xl max-w-lg w-full p-6 border border-neutral-800 shadow-2xl space-y-4 text-white">
+          <div className="bg-neutral-950 rounded-2xl max-w-lg w-full p-6 border border-neutral-800 shadow-2xl space-y-4 text-white font-mono text-xs">
             <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
-              <h3 className="font-bold text-base uppercase tracking-wider">Kết quả kiểm định: {validationModalData.title}</h3>
-              <button onClick={() => setValidationModalData(null)} className="text-neutral-400 hover:text-white font-bold text-sm">✕</button>
+              <h3 className="font-bold text-sm uppercase tracking-wider text-white">
+                Kiểm định 5 lớp: {validationModalData.title}
+              </h3>
+              <button onClick={() => setValidationModalData(null)} className="text-neutral-400 hover:text-white font-bold">✕</button>
             </div>
 
-            <div className="space-y-3 text-xs font-mono">
+            <div className="space-y-3">
               <div className="p-3 rounded-lg flex items-center justify-between bg-black border border-neutral-800">
-                <span className="text-neutral-400">Trạng thái tổng thể:</span>
+                <span className="text-neutral-400">Kết quả tổng thể:</span>
                 {validationModalData.result.passed ? (
-                  <span className="text-white font-bold uppercase tracking-wider bg-neutral-800 px-2 py-0.5 rounded">ĐẠT YÊU CẦU</span>
+                  <span className="text-white font-bold uppercase bg-neutral-800 px-2 py-0.5 rounded">ĐẠT CHUẨN</span>
                 ) : (
-                  <span className="text-neutral-400 font-bold uppercase tracking-wider bg-neutral-900 px-2 py-0.5 rounded">CHƯA ĐẠT</span>
+                  <span className="text-neutral-400 font-bold uppercase bg-neutral-900 px-2 py-0.5 rounded">CHƯA ĐẠT</span>
                 )}
               </div>
 
               <div className="p-3 rounded-lg flex items-center justify-between bg-black border border-neutral-800">
-                <span className="text-neutral-400">Số từ thực tế:</span>
+                <span className="text-neutral-400">Dung lượng thực tế:</span>
                 <span className="text-white font-bold">{validationModalData.result.wordCount} từ</span>
               </div>
 
               {validationModalData.result.errors.length > 0 && (
                 <div className="p-3 rounded-lg bg-black border border-neutral-800">
-                  <span className="font-bold text-white block mb-1 uppercase tracking-wider">Lỗi cần khắc phục:</span>
+                  <span className="font-bold text-white block mb-1">Lỗi cần khắc phục:</span>
                   <ul className="list-disc pl-4 space-y-1 text-neutral-400">
                     {validationModalData.result.errors.map((e, idx) => (
                       <li key={idx}>{e}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {validationModalData.result.warnings.length > 0 && (
-                <div className="p-3 rounded-lg bg-black border border-neutral-800">
-                  <span className="font-bold text-white block mb-1 uppercase tracking-wider">Cảnh báo chất lượng:</span>
-                  <ul className="list-disc pl-4 space-y-1 text-neutral-400">
-                    {validationModalData.result.warnings.map((w, idx) => (
-                      <li key={idx}>{w}</li>
                     ))}
                   </ul>
                 </div>
@@ -967,6 +1194,35 @@ export function StoryPipelineView({ lang }: Props) {
               <button
                 onClick={() => setValidationModalData(null)}
                 className="px-4 py-2 rounded-lg bg-white text-black font-bold text-xs hover:bg-neutral-200 transition-colors"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* MODAL 5: XEM TRƯỚC BẢN THẢO (PIPELINE PREVIEW)                  */}
+      {/* ============================================================== */}
+      {previewStory && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-neutral-950 rounded-2xl max-w-3xl w-full max-h-[85vh] flex flex-col border border-neutral-800 shadow-2xl overflow-hidden text-white font-mono text-xs">
+            <div className="p-4 border-b border-neutral-800 flex items-center justify-between bg-neutral-900">
+              <h3 className="font-bold text-sm uppercase tracking-wider">{previewStory.title}</h3>
+              <button onClick={() => setPreviewStory(null)} className="text-neutral-400 hover:text-white font-bold">✕</button>
+            </div>
+
+            <div className="p-4 overflow-y-auto space-y-4">
+              <div className="bg-black p-4 rounded-xl border border-neutral-800 font-serif whitespace-pre-line text-neutral-200 leading-relaxed text-sm">
+                {previewStory.content}
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-neutral-800 bg-neutral-900 flex justify-end">
+              <button
+                onClick={() => setPreviewStory(null)}
+                className="px-4 py-2 rounded-lg bg-white text-black font-bold hover:bg-neutral-200"
               >
                 Đóng
               </button>

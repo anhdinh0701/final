@@ -271,6 +271,20 @@ export interface PipelineSource {
   retrievedAt?: string;
 }
 
+export interface PipelineStoryCharacter {
+  name: string;
+  role?: string;
+  gender?: string;
+  dna?: string;
+}
+
+export interface PipelineStoryPanel {
+  panel_index: number;
+  dialogue_text: string;
+  image_prompt: string;
+  layout_type?: string;
+}
+
 export interface PipelineStoryDetail {
   id: string;
   title: string;
@@ -279,7 +293,11 @@ export interface PipelineStoryDetail {
   genre: string[];
   summary: string;
   content: string;
+  topic?: string;
   lesson?: string;
+  characters?: PipelineStoryCharacter[];
+  panels?: PipelineStoryPanel[];
+  world_setting?: string;
   historicalNotes?: PipelineHistoricalNote[];
   sources?: PipelineSource[];
   metadata?: {

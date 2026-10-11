@@ -169,7 +169,7 @@ def validate_anti_cliche_compliance(text: str, genre: str = "", narrative_mode: 
 
 class StoryGenerator:
     def __init__(self):
-        self.llm = GroqClient(model_name="openai/gpt-oss-120b")
+        self.llm = GroqClient(model_name="qwen/qwen3.8-27b")
 
     def _extract_narrative_ontology(self, refined_prompt: str, narrative_mode: Any = None, genre: str = "") -> str:
         """

@@ -711,6 +711,11 @@ export const api = {
     return res.json();
   },
 
+  async mergePipelinePullRequest(prNumber: number, storyId: string): Promise<{ status: string; message: string }> {
+    window.open(`https://github.com/anhdinh0701/final/pull/${prNumber}`, '_blank');
+    return { status: 'success', message: `Đang mở GitHub PR #${prNumber} để duyệt và merge` };
+  },
+
   async revalidatePipelineStory(storyId: string): Promise<{ status: string; storyId: string; validation: import('./types').PipelineValidationResult }> {
     const res = await fetch(`${API_BASE_URL}/admin/story-pipeline/validate/${storyId}`, {
       method: 'POST',

@@ -27,7 +27,18 @@ from dotenv import load_dotenv
 # Load .env from current directory
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '.env'))
 
+# Fallback any missing specialized Groq keys to GROQ_API_KEY
+if os.environ.get("GROQ_API_KEY"):
+    for k in ["GROQ_API_KEY_BIBLE", "GROQ_API_KEY_COPILOT", "GROQ_API_KEY_COMIC"]:
+        if not os.environ.get(k):
+            os.environ[k] = os.environ["GROQ_API_KEY"]
+
 app = FastAPI(title="NarrAI MVP")
+
+@app.get("/")
+@app.get("/health")
+async def root_health():
+    return {"status": "ok", "service": "NarrAI API", "version": "1.0.0"}
 
 REQUIRED_API_KEYS = {
     "GROQ_API_KEY": "Story Generator and Editor",
@@ -38,8 +49,8 @@ REQUIRED_API_KEYS = {
 def safe_generation_error(error, operation="sinh truyện"):
     message = str(error)
     if "413" in message or "rate_limit_exceeded" in message or "Request too large" in message:
-        return f"Yêu cầu {operation} vượt giới hạn token hiện tại. Hãy chọn nội dung ngắn hơn hoặc thử lại sau."
-    return f"Không thể {operation} lúc này. Vui lòng thử lại sau."
+        return f"Yêu cầu {operation} vượt giới hạn token tạm thời của nhà cung cấp. Hệ thống đang tự động tối ưu hóa, vui lòng thử lại."
+    return f"Không thể {operation} lúc này. Vui lòng thử lại sau ({message[:80]})."
 
 # CORS configuration
 app.add_middleware(

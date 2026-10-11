@@ -952,6 +952,41 @@ export default function WorkspacePage() {
     }
   };
 
+  const handleLoadStoryFromPipeline = (content: string, title?: string, id?: number | null) => {
+    setStoryContent(content);
+    if (id) setStoryId(id);
+    setActiveTab("editor");
+    toast.success(lang === "vi" ? `Đã mở "${title || 'tác phẩm'}" trong Bản thảo!` : `Loaded "${title || 'story'}" to Editor!`);
+  };
+
+  const handleAdaptStoryFromPipeline = async (content: string, title?: string, id?: number | null) => {
+    setStoryContent(content);
+    if (id) setStoryId(id);
+    setActiveTab("comic");
+    setComicLoading(true);
+    setComicPanels([]);
+    setComicId(null);
+    try {
+      const res = await api.generateComic(id || null, content.substring(0, 30000));
+      if (res.status === "success" && res.panels) {
+        setComicId(res.comic_id || null);
+        setComicPanels(res.panels);
+        setComicHasMore(!!res.has_more);
+        toast.success(
+          lang === "vi" 
+            ? `Đã khởi tạo truyện tranh "${title || 'tác phẩm'}" thành công!` 
+            : `Manga adapted successfully for "${title || 'story'}"!`
+        );
+      } else {
+        toast.warning(res.message || (lang === "vi" ? "Không thể chuyển thể truyện tranh lúc này" : "Failed to generate comic"));
+      }
+    } catch (e: any) {
+      toast.error(e?.message || (lang === "vi" ? "Lỗi chuyển thể truyện tranh" : "Comic adaptation error"));
+    } finally {
+      setComicLoading(false);
+    }
+  };
+
   // If on landing view
   if (view === "landing") {
     return (
@@ -1116,7 +1151,11 @@ export default function WorkspacePage() {
 
         {activeTab === "pipeline" && (
           <div className="flex-1 flex min-h-0 min-w-0 overflow-y-auto">
-            <StoryPipelineView lang={lang} />
+            <StoryPipelineView
+              lang={lang}
+              onLoadStoryToEditor={handleLoadStoryFromPipeline}
+              onAdaptStoryToComic={handleAdaptStoryFromPipeline}
+            />
           </div>
         )}
       </main>

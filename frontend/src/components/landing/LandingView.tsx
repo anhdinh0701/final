@@ -194,6 +194,18 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
 
             {/* Controls & Primary Action */}
             <div className="flex items-center gap-2 sm:gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                  window.dispatchEvent(new CustomEvent("narrai:replay-intro"));
+                }}
+                className="hidden sm:inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-mono font-bold uppercase tracking-wider border border-amber-400/80 bg-amber-50 hover:bg-amber-100 text-amber-900 shadow-xs transition-all cursor-pointer"
+                title={lang === "vi" ? "Xem hiệu ứng Intro Trống Đồng Đông Sơn" : "Play Dong Son Drum Intro"}
+              >
+                <span>↻</span>
+                <span>{lang === "vi" ? "Intro Trống Đồng" : "Drum Intro"}</span>
+              </button>
               <LanguageSwitcher currentLang={lang} onLanguageChange={onLanguageChange} />
               <button
                 type="button"

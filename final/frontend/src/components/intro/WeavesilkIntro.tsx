@@ -83,14 +83,11 @@ export function WeavesilkIntro({
         window.location.hostname === "localhost" ||
         window.location.hostname === "127.0.0.1";
 
-      // On production, respect sessionStorage
-      if (!forcePlay && !isParamForced && !isLocalhost) {
-        const seen = sessionStorage.getItem(STORAGE_KEY);
-        if (seen === "true") {
-          setIsComplete(true);
-          onComplete?.();
-          return;
-        }
+      // Always play intro on load (with instant "Bỏ qua" button available)
+      if (params.get("no_intro") === "1") {
+        setIsComplete(true);
+        onComplete?.();
+        return;
       }
 
       // Check prefers-reduced-motion

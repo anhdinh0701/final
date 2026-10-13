@@ -246,6 +246,17 @@ export function Sidebar({
       {/* Footer controls */}
       <div className="pt-4 border-t border-neutral-200 flex items-center justify-between px-1">
         <LanguageSwitcher currentLang={lang} onLanguageChange={onLanguageChange} />
+        <button
+          type="button"
+          onClick={() => {
+            window.dispatchEvent(new CustomEvent("narrai:replay-intro"));
+          }}
+          className="text-[11px] font-mono font-bold text-neutral-600 hover:text-neutral-950 px-2.5 py-1.5 rounded hover:bg-neutral-200/60 transition-colors flex items-center gap-1 cursor-pointer"
+          title={lang === "vi" ? "Xem lại Intro Trống Đồng Đông Sơn" : "Play Dong Son Drum Intro"}
+        >
+          <span>↻</span>
+          <span>Intro Trống Đồng</span>
+        </button>
       </div>
     </aside>
   );

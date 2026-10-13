@@ -5,8 +5,9 @@
 @tailwind utilities;
 
 :root {
-  --font-sans: Arial, Helvetica, sans-serif;
-  --font-serif: Arial, Helvetica, sans-serif;
+  --font-sans: 'Aptos Display', 'Aptos', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-serif: 'Aptos Display', 'Aptos', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'Aptos Display', 'Aptos', 'JetBrains Mono', monospace;
 
   --bg-primary: #ffffff;
   --bg-secondary: #f5f5f5;
@@ -38,7 +39,7 @@
 }
 
 body, html {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Aptos Display', 'Aptos', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
@@ -57,6 +58,48 @@ body, html {
   isolation: isolate;
   overflow: hidden;
   background: #f5f5f5;
+}
+
+@keyframes sheen-sweep {
+  0% {
+    transform: translateX(-120%) skewX(-20deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.9;
+  }
+  80% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateX(140%) skewX(-20deg);
+    opacity: 0;
+  }
+}
+
+.animate-sheen-sweep {
+  animation: sheen-sweep 450ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* NarrAI Phase 2 Workspace Design System */
+:root {
+  --ws-bg: #f8f8f8;
+  --ws-surface-sub: #efefef;
+  --ws-surface-card: #ffffff;
+  --ws-border: rgba(0, 0, 0, 0.10);
+  --ws-border-hover: rgba(0, 0, 0, 0.25);
+  --ws-text-primary: #121212;
+  --ws-text-secondary: #5a5a5a;
+}
+
+.dark {
+  --ws-bg: #080808;
+  --ws-surface-sub: #111111;
+  --ws-surface-card: #171717;
+  --ws-border: rgba(255, 255, 255, 0.10);
+  --ws-border-hover: rgba(255, 255, 255, 0.25);
+  --ws-text-primary: #F5F5F5;
+  --ws-text-secondary: #A3A3A3;
 }
 
 .landing-backdrop::before,
@@ -85,17 +128,15 @@ body, html {
 }
 
 .dark .landing-backdrop {
-  background: #000000;
+  background: #F4EFE6;
 }
 
 .dark .landing-backdrop::before {
-  background: #1a1a1a;
-  opacity: 0.35;
+  display: none;
 }
 
 .dark .landing-backdrop::after {
-  background: #141414;
-  opacity: 0.3;
+  display: none;
 }
 
 .landing-orbit {
@@ -285,28 +326,28 @@ body, html {
 }
 
 .dark .landing-backdrop {
-  background: #211d19;
+  background: #F4EFE6 !important;
 }
 
 .landing-shell {
-  --landing-paper: #fbf8f1;
-  --landing-ink: #342722;
-  --landing-muted: #82766c;
+  --landing-paper: #FAF7F2;
+  --landing-ink: #171717;
+  --landing-muted: #525252;
   --landing-line: #d8cec2;
-  border-color: rgb(255 250 240 / 70%);
+  border-color: rgba(216, 206, 194, 0.8);
   border-radius: 1.25rem;
-  background: rgb(247 243 235 / 92%);
+  background: #FAF7F2 !important;
   box-shadow: 0 18px 55px rgb(62 48 37 / 11%);
   backdrop-filter: none;
 }
 
 .dark .landing-shell {
-  --landing-paper: #302a25;
-  --landing-ink: #eee6d9;
-  --landing-muted: #b8aa9b;
-  --landing-line: #54483e;
-  border-color: #564a40;
-  background: #28231f;
+  --landing-paper: #FAF7F2;
+  --landing-ink: #171717;
+  --landing-muted: #525252;
+  --landing-line: #d8cec2;
+  border-color: rgba(216, 206, 194, 0.8);
+  background: #FAF7F2 !important;
 }
 
 .landing-book-scene {
@@ -691,4 +732,50 @@ body, html {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(150, 150, 150, 0.5);
+}
+
+/* Golden Star WeaveSilk Landing Animations */
+@keyframes star-breathe {
+  0% {
+    transform: scale(1) translate3d(0, 0, 0);
+    opacity: 0.40;
+  }
+  50% {
+    transform: scale(1.04) translate3d(0.5%, -0.5%, 0);
+    opacity: 0.60;
+  }
+  100% {
+    transform: scale(1.015) translate3d(-0.5%, 0.5%, 0);
+    opacity: 0.48;
+  }
+}
+
+@keyframes star-undulate {
+  0% {
+    transform: scale(1.03) rotate(0deg);
+    opacity: 0.28;
+  }
+  50% {
+    transform: scale(0.97) rotate(1.2deg);
+    opacity: 0.50;
+  }
+  100% {
+    transform: scale(1.04) rotate(-1.2deg);
+    opacity: 0.32;
+  }
+}
+
+@keyframes star-core-pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(0.85);
+    opacity: 0.25;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.25);
+    opacity: 0.65;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.85);
+    opacity: 0.25;
+  }
 }

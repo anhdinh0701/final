@@ -1,7 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { Bot, Send, Undo2, X, Check, ArrowRight, CheckSquare } from "lucide-react";
+import {
+  Bot,
+  Send,
+  Undo2,
+  X,
+  Check,
+  Sparkles,
+  MessageSquare,
+  Wand2,
+  Cpu,
+  Layers,
+  ArrowRight,
+} from "lucide-react";
 import { translations, Language } from "@/lib/i18n";
 import { ChatMessage } from "@/lib/types";
 import type { ModelTier } from "@/components/morphicons/ModelSelectorMorphicon";
@@ -46,6 +58,7 @@ export function AICopilotPanel({
   const [modelTier, setModelTier] = useState<ModelTier>("versatile");
   const [customInstruction, setCustomInstruction] = useState("");
   const [chatInput, setChatInput] = useState("");
+  const [activeTab, setActiveTab] = useState<"tools" | "chat">("tools");
   const t = translations[lang];
 
   const handleCustomSubmit = () => {
@@ -60,27 +73,26 @@ export function AICopilotPanel({
     setChatInput("");
   };
 
-  const handleQuickPrompt = (prompt: string) => {
-    if (loading || streaming) return;
-    onSendCopilotMessage(prompt);
-  };
-
   const quickPrompts = [
     {
-      text: lang === "vi" ? "Tạo phần mở đầu khác đi" : "Write a completely different opening for this story",
-      label: t.quick_cmd_intro,
+      text: lang === "vi" ? "Tiếp tục viết phát triển mạch truyện hiện tại" : "Continue writing the story forward",
+      label: lang === "vi" ? "Viết tiếp đoạn sau" : "Continue narrative",
+      icon: "✍️",
     },
     {
-      text: lang === "vi" ? "Sửa lại đoạn kết kịch tính và bất ngờ hơn" : "Make the ending much more dramatic and suspenseful",
-      label: t.quick_cmd_outro,
+      text: lang === "vi" ? "Làm sâu sắc thêm đối thoại và diễn biến tâm lý nhân vật" : "Deepen character dialogue and internal thoughts",
+      label: lang === "vi" ? "Trau chuốt đối thoại" : "Polish dialogue",
+      icon: "💬",
     },
     {
-      text: lang === "vi" ? "Viết lại giọng văn u tối và hồi hộp hơn" : "Rewrite in a darker, more gripping thriller tone",
-      label: t.quick_cmd_tone,
+      text: lang === "vi" ? "Tăng thêm nhịp độ kịch tính, bất ngờ trước xung đột" : "Heighten dramatic pacing and tension before the clash",
+      label: lang === "vi" ? "Tăng kịch tính" : "Increase suspense",
+      icon: "⚡",
     },
     {
-      text: lang === "vi" ? "Bổ sung thêm diễn biến tâm lý và thoại cho nhân vật" : "Add deeper internal thoughts and character dialogues",
-      label: t.quick_cmd_depth,
+      text: lang === "vi" ? "Tra cứu điển tích và bổ sung phong tục cổ phong Việt phù hợp" : "Incorporate authentic ancient Vietnamese customs and lore",
+      label: lang === "vi" ? "Bổ sung văn hóa cổ" : "Add authentic lore",
+      icon: "📜",
     },
   ];
 
@@ -88,31 +100,31 @@ export function AICopilotPanel({
     <aside
       className={`${
         mobileOpen
-          ? "fixed inset-x-3 top-3 bottom-20 z-40 flex w-auto flex-col rounded shadow-xl lg:static lg:h-full lg:w-96 lg:rounded-none lg:shadow-none"
+          ? "fixed inset-x-2 top-2 bottom-20 z-40 flex w-auto flex-col rounded-xl shadow-2xl lg:static lg:h-full lg:w-96 lg:rounded-none lg:shadow-none"
           : "hidden lg:flex lg:h-full lg:w-96"
-      } flex-col border-l border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black shrink-0 px-4 py-4 transition-colors font-sans`}
+      } flex-col border-l border-neutral-200 dark:border-white/10 bg-white dark:bg-[#111111] shrink-0 transition-colors font-sans select-none`}
     >
-      {/* Copilot Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-neutral-200 dark:border-neutral-800 shrink-0">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 text-black dark:text-white flex items-center justify-center shrink-0">
-            <Bot className="w-4 h-4" />
+      {/* Header */}
+      <div className="h-14 px-4 flex items-center justify-between border-b border-neutral-200 dark:border-white/10 shrink-0">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg border border-neutral-300 dark:border-white/10 bg-neutral-100 dark:bg-[#171717] text-black dark:text-white flex items-center justify-center shrink-0">
+            <Sparkles className="w-4 h-4" />
           </div>
-          <div className="min-w-0">
-            <h3 className="font-bold text-sm text-black dark:text-white leading-tight">
-              {t.ai_copilot}
+          <div>
+            <h3 className="font-bold text-xs uppercase tracking-wider text-black dark:text-[#F5F5F5] font-mono">
+              AI Co-pilot Studio
             </h3>
-            <span className="text-[10px] text-neutral-500 dark:text-neutral-400 font-mono">
-              [TRỰC TIẾP] {t.live_editor_title}
+            <span className="text-[10px] text-neutral-500 font-mono block">
+              {streaming ? "Đang phản hồi..." : "Sẵn sàng hỗ trợ"}
             </span>
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-1.5 font-mono text-xs">
+        <div className="flex items-center gap-1.5 font-mono text-xs">
           {canUndo && onUndo && (
             <button
               onClick={onUndo}
-              className="px-2 py-1 rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-900 dark:hover:bg-neutral-800 text-black dark:text-white transition-colors flex items-center gap-1"
+              className="px-2 py-1 rounded border border-neutral-300 dark:border-white/10 bg-neutral-100 hover:bg-neutral-200 dark:bg-[#171717] dark:hover:bg-neutral-800 text-black dark:text-white transition-colors flex items-center gap-1"
               title={t.undo_tooltip}
             >
               <Undo2 className="w-3 h-3" />
@@ -123,203 +135,207 @@ export function AICopilotPanel({
             <button
               type="button"
               onClick={onCloseMobile}
-              aria-label={lang === "vi" ? "Đóng trợ lý" : "Close assistant"}
-              className="lg:hidden px-2 py-1 rounded border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-900 text-black dark:text-white flex items-center gap-1"
+              className="lg:hidden p-1 rounded hover:bg-neutral-100 dark:hover:bg-neutral-800 text-black dark:text-white"
             >
-              <X className="w-3.5 h-3.5" />
-              <span>{lang === "vi" ? "Đóng" : "Close"}</span>
+              <X className="w-4 h-4" />
             </button>
           )}
         </div>
       </div>
 
-      {/* Compact AI Model Tier selector */}
-      <div className="py-2 border-b border-neutral-200 dark:border-neutral-800 shrink-0 flex items-center gap-2 px-0.5">
-        <span className="text-[10px] font-mono font-bold text-neutral-500 dark:text-neutral-400 shrink-0 uppercase">
-          {lang === "vi" ? "Mô hình:" : "Model:"}
-        </span>
-        <select
-          value={modelTier}
-          onChange={(e) => setModelTier(e.target.value as ModelTier)}
-          className="flex-1 text-[11px] font-mono bg-neutral-100 dark:bg-neutral-900 text-black dark:text-white border border-neutral-300 dark:border-neutral-700 rounded px-2 py-1 outline-none cursor-pointer"
-          title={lang === "vi" ? "Chọn cấp độ mô hình AI" : "Select AI model tier"}
+      {/* Mode / Tabs Switcher */}
+      <div className="grid grid-cols-2 p-1.5 border-b border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-[#080808] shrink-0 font-mono text-xs">
+        <button
+          type="button"
+          onClick={() => setActiveTab("tools")}
+          className={`py-1.5 rounded text-center transition-colors font-bold ${
+            activeTab === "tools"
+              ? "bg-white dark:bg-[#171717] text-black dark:text-white shadow-sm border border-neutral-200 dark:border-white/10"
+              : "text-neutral-500 hover:text-black dark:hover:text-white"
+          }`}
         >
-          <option value="fast">{lang === "vi" ? "[Nhanh] Llama 8B" : "[Fast] Llama 8B"}</option>
-          <option value="versatile">{lang === "vi" ? "[Linh hoạt] Llama 70B" : "[Versatile] Llama 70B"}</option>
-          <option value="premium">{lang === "vi" ? "[Cao cấp] Qwen 27B" : "[Premium] Qwen 27B"}</option>
-        </select>
+          [Công cụ AI]
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("chat")}
+          className={`py-1.5 rounded text-center transition-colors font-bold ${
+            activeTab === "chat"
+              ? "bg-white dark:bg-[#171717] text-black dark:text-white shadow-sm border border-neutral-200 dark:border-white/10"
+              : "text-neutral-500 hover:text-black dark:hover:text-white"
+          }`}
+        >
+          [Hội thoại Copilot]
+        </button>
       </div>
 
-      {/* Main Copilot Content: Scrollable */}
-      <div className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto py-3 space-y-3 pr-1">
-        {/* If text is selected in the editor: Quick edit block */}
-        {selectedText ? (
-          <div className="p-3 rounded bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 space-y-2">
+      {/* Scrollable Main Area */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
+        
+        {/* PROPOSED TEXT PREVIEW CARD (NEVER OVERWRITES WITHOUT EXPLICIT CONFIRMATION) */}
+        {proposedText && (
+          <div className="p-4 rounded-xl bg-neutral-100 dark:bg-[#171717] border-2 border-black dark:border-white/30 space-y-3 shadow-lg animate-in fade-in zoom-in-95">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-300">
-                {t.selected_text}
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-black dark:text-white">
+                ✨ BẢN ĐỀ XUẤT CỦA AI
               </span>
-              <span className="text-[10px] font-mono text-neutral-500">
-                {selectedText.length} {t.chars_count}
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-black text-white dark:bg-white dark:text-black">
+                Chờ duyệt
               </span>
             </div>
-            <p className="text-xs italic text-neutral-700 dark:text-neutral-300 line-clamp-2 border-l-2 border-neutral-400 dark:border-neutral-600 pl-2">
-              "{selectedText}"
+            
+            <p className="text-xs text-black dark:text-[#F5F5F5] whitespace-pre-wrap leading-relaxed font-serif border-l-2 border-black dark:border-white pl-2.5 max-h-48 overflow-y-auto">
+              {proposedText ? proposedText.replace(/<[^>]+>/g, "").replace(/&nbsp;/gi, " ").trim() : ""}
             </p>
 
-            <div className="pt-2 space-y-2">
+            <div className="flex gap-2 pt-1 font-mono text-xs">
+              <button
+                onClick={onAcceptEdit}
+                className="flex-1 py-2 rounded-lg font-bold text-white bg-black hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-colors flex items-center justify-center gap-1.5 shadow-md"
+              >
+                <Check className="w-3.5 h-3.5" />
+                <span>Áp dụng vào bản thảo</span>
+              </button>
+              <button
+                onClick={onRejectEdit}
+                className="px-3 py-2 rounded-lg font-semibold text-neutral-600 dark:text-neutral-400 border border-neutral-300 dark:border-white/10 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors flex items-center justify-center gap-1"
+              >
+                <X className="w-3.5 h-3.5" />
+                <span>Bỏ qua</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Selected Text Focus Box */}
+        {selectedText ? (
+          <div className="p-3.5 rounded-lg bg-neutral-50 dark:bg-[#171717] border border-neutral-200 dark:border-white/10 space-y-2">
+            <div className="flex items-center justify-between text-[11px] font-mono font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-300">
+              <span>Đoạn văn đang chọn:</span>
+              <span className="text-neutral-500">{selectedText.length} ký tự</span>
+            </div>
+            <p className="text-xs italic text-neutral-700 dark:text-neutral-300 line-clamp-3 border-l-2 border-neutral-400 dark:border-neutral-600 pl-2">
+              "{selectedText}"
+            </p>
+            <div className="pt-1.5 space-y-2">
               <input
                 type="text"
                 value={customInstruction}
                 onChange={(e) => setCustomInstruction(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleCustomSubmit()}
-                placeholder={t.ai_instruction_placeholder}
-                className="w-full px-3 py-1.5 text-xs rounded border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-black text-black dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-500 font-sans"
+                placeholder="Yêu cầu AI sửa đoạn này..."
+                className="w-full px-3 py-1.5 text-xs rounded border border-neutral-300 dark:border-white/10 bg-white dark:bg-black text-black dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-500 font-sans"
               />
               <button
                 onClick={handleCustomSubmit}
                 disabled={loading || !customInstruction.trim()}
-                className="w-full py-1.5 rounded text-xs font-mono font-bold text-white bg-black hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 disabled:opacity-40 transition-colors"
+                className="w-full py-1.5 rounded text-xs font-mono font-bold text-white bg-black hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 disabled:opacity-40 transition-colors shadow-sm"
               >
-                [{t.ai_request_btn}]
+                [Gửi chỉ đạo sửa đổi]
+              </button>
+            </div>
+          </div>
+        ) : null}
+
+        {activeTab === "tools" ? (
+          <div className="space-y-4">
+            {/* Quick Action Buttons */}
+            <div>
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-neutral-500 block mb-2">
+                Chỉ Đạo Bẻ Lái Nhanh
+              </span>
+              <div className="space-y-2">
+                {quickPrompts.map((p, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => onSendCopilotMessage(p.text)}
+                    disabled={loading || streaming}
+                    className="w-full text-left p-2.5 rounded-lg border border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-[#171717] hover:border-black dark:hover:border-white text-xs font-mono transition-colors flex items-center justify-between group"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span>{p.icon}</span>
+                      <span className="truncate text-black dark:text-[#F5F5F5] font-medium">{p.label}</span>
+                    </div>
+                    <ArrowRight className="w-3 h-3 text-neutral-400 group-hover:text-black dark:group-hover:text-white shrink-0" />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Direct Narrative Advancement */}
+            <div className="pt-2 border-t border-neutral-200 dark:border-neutral-800 space-y-2 font-mono text-xs">
+              <button
+                type="button"
+                onClick={onContinueChapter}
+                disabled={loading || streaming}
+                className="w-full py-2.5 rounded-lg bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 font-bold uppercase tracking-wider transition-colors shadow-md disabled:opacity-40"
+              >
+                ✍️ {t.continue_chapter_btn}
+              </button>
+              <button
+                type="button"
+                onClick={onEndStory}
+                disabled={loading || streaming}
+                className="w-full py-2 rounded-lg border border-neutral-300 dark:border-white/10 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-400 font-bold uppercase tracking-wider transition-colors disabled:opacity-40"
+              >
+                🔚 {t.end_story_btn}
               </button>
             </div>
           </div>
         ) : (
-          <div className="p-3 rounded bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-xs text-neutral-600 dark:text-neutral-400 space-y-1.5">
-            <p className="font-semibold text-black dark:text-white">
-              {t.ai_welcome_1}
-            </p>
-            <p className="text-[11px] leading-relaxed">
-              {t.ai_welcome_2}
-            </p>
+          /* Chat History View */
+          <div className="space-y-3 font-sans">
+            {copilotMessages.length === 0 ? (
+              <div className="p-4 rounded-lg bg-neutral-50 dark:bg-[#171717] border border-neutral-200 dark:border-white/10 text-center text-xs text-neutral-500">
+                Chưa có trao đổi nào. Hãy nhập lệnh ở khung chat bên dưới để cùng AI phát triển cốt truyện.
+              </div>
+            ) : (
+              copilotMessages.map((msg, idx) => (
+                <div
+                  key={idx}
+                  className={`p-3 rounded-lg text-xs leading-relaxed ${
+                    msg.role === "user"
+                      ? "bg-neutral-200 dark:bg-[#171717] text-black dark:text-white ml-4 border border-neutral-300 dark:border-white/10"
+                      : "bg-neutral-100 dark:bg-[#080808] text-neutral-800 dark:text-neutral-200 mr-4 border border-neutral-200 dark:border-white/5"
+                  }`}
+                >
+                  <div className="font-mono text-[10px] text-neutral-500 uppercase font-bold mb-1">
+                    {msg.role === "user" ? "Bạn" : "AI Co-pilot"}
+                  </div>
+                  <div className="whitespace-pre-wrap">{msg.content}</div>
+                </div>
+              ))
+            )}
           </div>
         )}
 
-        {/* Proposed Text Diff/Preview */}
-        {proposedText && (
-          <div className="p-3 rounded bg-neutral-100 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 space-y-2.5">
-            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-black dark:text-white block">
-              [KẾT QUẢ ĐỀ XUẤT]
-            </span>
-            <p className="text-xs text-black dark:text-white whitespace-pre-wrap leading-relaxed font-serif">
-              {proposedText ? proposedText.replace(/<[^>]+>/g, "").replace(/&nbsp;/gi, " ").trim() : ""}
-            </p>
-            <div className="flex gap-2 pt-1 font-mono text-xs">
-              <button
-                onClick={onAcceptEdit}
-                className="flex-1 py-1.5 rounded font-bold text-white bg-black hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-colors flex items-center justify-center gap-1.5"
-              >
-                <Check className="w-3.5 h-3.5" />
-                <span>{t.accept_btn}</span>
-              </button>
-              <button
-                onClick={onRejectEdit}
-                className="px-3 py-1.5 rounded font-semibold text-black dark:text-white border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors flex items-center justify-center gap-1.5"
-              >
-                <X className="w-3.5 h-3.5" />
-                <span>{t.reject_btn}</span>
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Status indicator */}
-        {(loading || streaming) && (
-          <div className="p-2.5 rounded bg-neutral-100 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 flex items-center gap-2 text-xs font-mono text-black dark:text-white">
-            <span className="animate-pulse">[•••]</span>
-            <span>
-              {streaming ? t.live_drafting : t.ai_thinking}
-            </span>
-          </div>
-        )}
-
-        {/* Interactive Chat Box Messages */}
-        <div className="space-y-2 pt-1">
-          <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-neutral-500 block">
-            {t.copilot_chat_title}
-          </span>
-          {copilotMessages.map((msg, i) => (
-            <div
-              key={i}
-              className={`min-w-0 break-words p-2.5 rounded text-xs leading-relaxed ${
-                msg.role === "user"
-                  ? "bg-black text-white dark:bg-white dark:text-black ml-6"
-                  : "bg-neutral-100 dark:bg-neutral-900 text-black dark:text-white mr-4 border border-neutral-200 dark:border-neutral-800 whitespace-pre-line"
-              }`}
-            >
-              {msg.content}
-            </div>
-          ))}
-        </div>
       </div>
 
-      {/* Quick Command Chips */}
-      <div className="pt-2 border-t border-neutral-200 dark:border-neutral-800 shrink-0">
-        <span className="text-[10px] font-mono font-semibold text-neutral-500 block mb-1">
-          {t.quick_commands_label}
-        </span>
-        <div className="flex flex-wrap gap-1 mb-2 font-mono">
-          {quickPrompts.map((qp, idx) => (
-            <button
-              key={idx}
-              disabled={loading || streaming}
-              onClick={() => handleQuickPrompt(qp.text)}
-              className="text-[10px] font-medium px-2 py-0.5 rounded bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-900 dark:hover:bg-neutral-800 text-black dark:text-white transition-colors border border-neutral-300 dark:border-neutral-700 disabled:opacity-40"
-            >
-              [{qp.label}]
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Chat Input Area */}
-      <div className="shrink-0 mb-2 font-mono">
+      {/* Bottom Chat Input */}
+      <div className="p-3 border-t border-neutral-200 dark:border-white/10 bg-white dark:bg-[#111111] shrink-0">
         <div className="relative">
-          <textarea
-            rows={2}
+          <input
+            type="text"
             value={chatInput}
             onChange={(e) => setChatInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleChatSubmit();
-              }
-            }}
-            placeholder={t.copilot_placeholder}
-            className="w-full pl-3 pr-16 py-2 text-xs rounded border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-black dark:text-white focus:outline-none focus:ring-1 focus:ring-neutral-500 resize-none font-sans"
+            onKeyDown={(e) => e.key === "Enter" && handleChatSubmit()}
+            placeholder="Ra lệnh bẻ lái hoặc hỏi ý tưởng..."
+            disabled={loading || streaming}
+            className="w-full pl-3 pr-10 py-2.5 rounded-lg border border-neutral-300 dark:border-white/10 bg-neutral-50 dark:bg-[#080808] text-xs text-black dark:text-white outline-none focus:border-black dark:focus:border-white font-sans"
           />
           <button
+            type="button"
             onClick={handleChatSubmit}
             disabled={loading || streaming || !chatInput.trim()}
-            className="absolute right-2 top-2 px-2 py-1 rounded text-[11px] font-mono font-bold bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 disabled:opacity-40 transition-all flex items-center gap-1"
+            className="absolute right-2 top-2 p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-800 text-black dark:text-white disabled:opacity-30 transition-colors"
           >
-            <Send className="w-3 h-3" />
-            <span>{lang === "vi" ? "Gửi" : "Send"}</span>
+            <Send className="w-4 h-4" />
           </button>
         </div>
-      </div>
-
-      {/* Action Buttons: Continue chapter / End story */}
-      <div className="pt-2 border-t border-neutral-200 dark:border-neutral-800 space-y-2 shrink-0 font-mono text-xs">
-        <button
-          onClick={onContinueChapter}
-          disabled={loading || streaming}
-          className="w-full py-2 rounded font-bold text-white bg-black hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 flex items-center justify-center gap-1.5 transition-all disabled:opacity-50"
-        >
-          <span>{t.continue_chapter_btn}</span>
-          <ArrowRight className="w-3.5 h-3.5" />
-        </button>
-
-        <button
-          onClick={onEndStory}
-          disabled={loading || streaming}
-          className="w-full py-2 rounded font-semibold text-neutral-600 dark:text-neutral-400 border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-900 flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
-        >
-          <CheckSquare className="w-3.5 h-3.5" />
-          <span>{t.end_story_btn}</span>
-        </button>
       </div>
     </aside>
   );
 }
+
+export default AICopilotPanel;

@@ -24,6 +24,8 @@ import { AICopilotPanel } from "@/components/editor/AICopilotPanel";
 import { ComicViewer } from "@/components/comic/ComicViewer";
 import { NeuralVisualPreview } from "@/components/canvas/NeuralVisualPreview";
 import { StoryPipelineView } from "@/components/admin/StoryPipelineView";
+import { CharacterLoreStudio } from "@/components/lore/CharacterLoreStudio";
+import { MotionStudio } from "@/components/motion/MotionStudio";
 
 
 /**
@@ -174,7 +176,7 @@ export default function WorkspacePage() {
   const [user, setUser] = useState<{ username: string; fullName?: string } | null>(null);
   const [lang, setLang] = useState<Language>("vi");
   const [view, setView] = useState<"landing" | "workspace">("landing");
-  const [activeTab, setActiveTab] = useState<"setup" | "editor" | "comic" | "posts" | "pipeline">("setup");
+  const [activeTab, setActiveTab] = useState<"setup" | "editor" | "comic" | "lore" | "motion" | "posts" | "pipeline">("setup");
 
   const t = translations[lang] || translations.vi;
   const { toast } = useToast();
@@ -998,6 +1000,10 @@ export default function WorkspacePage() {
             setActiveTab("posts");
             setView("workspace");
           }}
+          onNavigateStudio={(studio) => {
+            setActiveTab(studio);
+            setView("workspace");
+          }}
         />
         <AuthModal
           isOpen={isAuthOpen}
@@ -1137,6 +1143,30 @@ export default function WorkspacePage() {
             loadingMore={comicLoading}
             coinBalance={coinBalance}
             onOpenCoinModal={() => setIsCoinModalOpen(true)}
+          />
+        )}
+
+        {activeTab === "lore" && (
+          <CharacterLoreStudio
+            lang={lang}
+            onSelectCharacterForPrompt={(desc) => {
+              setStoryContent((prev) => (prev ? prev + "\n\n" + desc : desc));
+              setActiveTab("editor");
+              toast.success(
+                lang === "vi"
+                  ? "Đã nạp thiết lập nhân vật vào Bản thảo Story!"
+                  : "Character profile loaded into Story Lab!"
+              );
+            }}
+            onBackToEditor={() => setActiveTab("editor")}
+          />
+        )}
+
+        {activeTab === "motion" && (
+          <MotionStudio
+            lang={lang}
+            onBackToManga={() => setActiveTab("comic")}
+            onBackToEditor={() => setActiveTab("editor")}
           />
         )}
 

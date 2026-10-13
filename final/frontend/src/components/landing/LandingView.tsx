@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useState } from "react";
 import Image from "next/image";
 import { translations, Language } from "@/lib/i18n";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
@@ -14,235 +15,821 @@ interface Props {
 
 export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommunity }: Props) {
   const t = translations[lang];
+  const [activeHeroTab, setActiveHeroTab] = useState<"prose" | "manga">("manga");
+  const [activeWorldIdx, setActiveWorldIdx] = useState<number>(0);
+
+  const featuredWorlds = [
+    {
+      id: "dai-viet",
+      title: lang === "vi" ? "Đại Việt Cổ Phong (1279 - 1428)" : "Ancient Dai Viet (1279 - 1428)",
+      period: lang === "vi" ? "Thời Trần - Hậu Lê" : "Tran & Later Le Dynasties",
+      image: "/assets/landing/world_warrior_rain.png",
+      desc:
+        lang === "vi"
+          ? "Thế giới dã sử hào hùng nơi các hiệp sĩ áo tơi nón lá, nghĩa quân bến sông gìn giữ giang sơn giữa phong ba thời loạn."
+          : "An epic historical realm of rain-swept river warriors, conical hats, and martial heroes defending the sovereign frontier.",
+      tags: lang === "vi" ? ["Chính sử chuẩn mực", "Áo giao lĩnh & Nón lá", "Thủy chiến bến sông"] : ["Strict History", "Traditional Robes", "River Warfare"],
+    },
+    {
+      id: "dan-gian",
+      title: lang === "vi" ? "Thần Thoại & Dân Gian Rừng Thiêng" : "Folklore & Sacred Forests",
+      period: lang === "vi" ? "Huyền tích Cổ tích Việt" : "Vietnamese Myth & Legends",
+      image: "/assets/landing/folktale_child_roots.png",
+      desc:
+        lang === "vi"
+          ? "Rừng sâu đại ngàn, cổ thụ ngàn năm và những huyền tích dân gian như Thạch Sanh, Chử Đồng Tử với ma thuật cội nguồn."
+          : "Ancient deep forests, sacred banyan roots, and folklore legends echoing through generations with ancestral primal magic.",
+      tags: lang === "vi" ? ["Cổ tích tái hiện", "Cổ thụ & Thần thú", "Bảo pháp dân gian"] : ["Reimagined Folktale", "Sacred Trees", "Ancient Relics"],
+    },
+    {
+      id: "bach-dang",
+      title: lang === "vi" ? "Bạch Đằng Dạ Chiến (Manga Trắng Đen)" : "Bach Dang Night Battle (B&W Manga)",
+      period: lang === "vi" ? "Thủy chiến Dã sử" : "Naval Historical Battle",
+      image: "/assets/landing/manga_battle_scene.png",
+      desc:
+        lang === "vi"
+          ? "Bãi cọc ngầm huyền thoại xé toang chiến thuyền giặc trong đêm giông bão, phân khung kịch tính theo phong cách manga tương phản cao."
+          : "Legendary sunken stakes tearing into enemy armada beneath thunderous skies, storyboarded in high-contrast manga inking.",
+      tags: lang === "vi" ? ["Trận địa cọc ngầm", "Mực truyện tranh tương phản", "Góc máy điện ảnh"] : ["Sunken Stakes", "High-Contrast Inking", "Cinematic Angles"],
+    },
+  ];
+
+  const recentProjects = [
+    {
+      title: lang === "vi" ? "Chiến Thần Bạch Đằng" : "Warlord of Bach Dang",
+      genre: lang === "vi" ? "Dã sử · Thủy chiến · Manga đen trắng" : "Historical Fiction · Naval Battle · B&W Manga",
+      image: "/assets/landing/manga_battle_scene.png",
+      stats: lang === "vi" ? "4 Chương · 18 Khung manga" : "4 Chapters · 18 Manga panels",
+      progress: "92%",
+      synopsis:
+        lang === "vi"
+          ? "Đoàn thuyền xé toang màn sương mù dày đặc bến Bạch Đằng, trận địa cọc ngầm chuẩn bị đóng dấu định mệnh cho quân giặc phương Bắc..."
+          : "War galleys pierce the thick river mist along the Bach Dang River as hidden stake barriers prepare to seal the northern armada's fate...",
+      tag: "[MANGA STORYBOARD]",
+    },
+    {
+      title: lang === "vi" ? "Bóng Kiếm Đêm Mưa" : "Sword in the Rain",
+      genre: lang === "vi" ? "Kiếm hiệp Cổ phong · Tiểu thuyết" : "Historical Wuxia · Epic Prose",
+      image: "/assets/landing/world_warrior_rain.png",
+      stats: lang === "vi" ? "8 Chương · 14,200 từ" : "8 Chapters · 14,200 words",
+      progress: "100%",
+      synopsis:
+        lang === "vi"
+          ? "Kiếm khách áo tơi nón lá lặng lẽ đứng giữa bến đò đêm mưa lạnh. Một đường kiếm quyết định ân oán gia tộc mười năm chôn giấu..."
+          : "A lone swordsman in a rain-soaked straw cloak waits at the ferry landing. A single slash to resolve a decade of clan vengeance...",
+      tag: "[STORY LAB]",
+    },
+    {
+      title: lang === "vi" ? "Huyền Tích Nàng Thiềm" : "Legend of Lady Thiem",
+      genre: lang === "vi" ? "Dân gian Huyền ảo · Thiết kế nhân vật" : "Mythic Fantasy · Character Dossier",
+      image: "/assets/landing/hero_character_aodai.png",
+      stats: lang === "vi" ? "6 Nhân vật · 1 Lore Bible" : "6 Characters · 1 Lore Bible",
+      progress: "85%",
+      synopsis:
+        lang === "vi"
+          ? "Hồ sơ tạo hình nàng thiếu nữ mang phong thái cung đình với áo dài truyền thống thêu chỉ vàng, ẩn chứa phong ấn linh thú gia tộc..."
+          : "Design sheet of a noble maiden in golden embroidered traditional attire, harboring the ancient celestial seal of her lineage...",
+      tag: "[CHARACTER & LORE]",
+    },
+    {
+      title: lang === "vi" ? "Thạch Sanh: Ký Sự Rừng Sâu" : "Thach Sanh: Forest Chronicles",
+      genre: lang === "vi" ? "Cổ tích tái hiện · Shonen Manga" : "Folklore Adaptation · Shonen Manga",
+      image: "/assets/landing/folktale_child_roots.png",
+      stats: lang === "vi" ? "3 Chương · 12 Khung manga" : "3 Chapters · 12 Manga panels",
+      progress: "70%",
+      synopsis:
+        lang === "vi"
+          ? "Dưới bóng cổ thụ bạt ngàn của rừng thiêng, chàng tiều phu mồ côi bắt đầu cảm nhận nguồn linh lực vô tận thức tỉnh trong cơ thể..."
+          : "Beneath the massive ancient roots of the sacred forest, an orphan woodcutter begins to feel ancestral primordial power awakening...",
+      tag: "[MOTION STUDIO]",
+    },
+  ];
 
   return (
-    <main className="landing-backdrop min-h-screen px-3 py-3 text-black transition-colors sm:px-6 sm:py-6 dark:text-white bg-neutral-100 dark:bg-black font-sans">
-      <div className="landing-shell mx-auto max-w-[1440px] overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-xl dark:border-neutral-800 dark:bg-neutral-950">
-        {/* Navigation Bar */}
-        <nav
-          aria-label={lang === "vi" ? "Điều hướng chính" : "Main navigation"}
-          className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-4 sm:gap-4 sm:px-8 lg:px-10 border-b border-neutral-200 dark:border-neutral-800"
-        >
-          <button
-            type="button"
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="flex shrink-0 items-center gap-3 rounded-lg text-left"
-            aria-label="NarrAI"
+    <main className="landing-backdrop min-h-screen px-2.5 py-2.5 sm:px-6 sm:py-6 text-black dark:text-white bg-neutral-100 dark:bg-black font-sans transition-colors">
+      <div className="landing-shell mx-auto max-w-[1440px] overflow-hidden rounded-2xl border border-neutral-200/80 bg-white/95 shadow-2xl dark:border-neutral-800/80 dark:bg-neutral-950/95 backdrop-blur-sm">
+        
+        {/* ========================================================= */}
+        {/* HEADER / NAVIGATION BAR */}
+        {/* ========================================================= */}
+        <header className="sticky top-0 z-40 border-b border-neutral-200/90 dark:border-neutral-800/90 bg-white/90 dark:bg-neutral-950/90 backdrop-blur-md">
+          <nav
+            aria-label={lang === "vi" ? "Điều hướng chính" : "Main navigation"}
+            className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3.5 sm:px-8 lg:px-10"
           >
-            <Image
-              src="/assets/logo.png"
-              alt="NARR AI Logo"
-              width={36}
-              height={36}
-              className="h-9 w-9 object-contain rounded-md bg-black"
-              priority
-            />
-            <span className="font-mono text-xl font-bold tracking-wider uppercase">NarrAI</span>
-            <span className="hidden rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider text-black dark:text-white sm:inline">
-              {t.pro_badge}
-            </span>
-          </button>
-
-          <div className="landing-header-controls flex items-center gap-2 sm:gap-3">
-            <LanguageSwitcher currentLang={lang} onLanguageChange={onLanguageChange} />
-            <ThemeToggle lang={lang} />
+            {/* Logo Brand with Instant Replay Trigger */}
             <button
               type="button"
-              onClick={onOpenAuth}
-              aria-label={t.login}
-              className="rounded px-4 py-1.5 text-xs font-mono font-bold uppercase tracking-wider bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-colors"
+              onClick={() => {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+                window.dispatchEvent(new CustomEvent("narrai:replay-intro"));
+              }}
+              className="flex shrink-0 items-center gap-3 text-left cursor-pointer group rounded-lg focus:outline-none focus:ring-1 focus:ring-neutral-400"
+              title={lang === "vi" ? "Nhấp để phát lại hiệu ứng WeaveSilk Intro" : "Click to replay WeaveSilk cinematic intro"}
+              aria-label="NarrAI Home"
             >
-              {t.login}
+              <div className="relative h-9 w-9 rounded-md overflow-hidden bg-black border border-neutral-800 group-hover:border-neutral-500 transition-colors">
+                <Image
+                  src="/assets/narrai_emblem.png"
+                  alt="NARR AI Official Emblem"
+                  fill
+                  className="object-contain p-0.5 group-hover:scale-105 transition-transform"
+                  priority
+                />
+              </div>
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-lg sm:text-xl font-bold tracking-widest uppercase">
+                    NarrAI
+                  </span>
+                  <span className="rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 px-1.5 py-0.2 text-[9px] font-mono font-bold uppercase tracking-wider text-black dark:text-white">
+                    {t.pro_badge}
+                  </span>
+                </div>
+                <span className="hidden sm:inline text-[9px] font-mono tracking-wider text-neutral-500 uppercase">
+                  AI Novel & Manga Studio
+                </span>
+              </div>
             </button>
-          </div>
-        </nav>
 
-        {/* Hero Section */}
-        <section className="mx-auto grid max-w-7xl items-center gap-10 px-5 pb-14 pt-9 sm:px-8 sm:pb-20 sm:pt-12 lg:grid-cols-[0.95fr_1.05fr] lg:gap-14 lg:px-12 lg:pb-24 lg:pt-14">
-          <div className="text-center lg:text-left">
-            <p className="mb-4 inline-flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-neutral-500">
-              <span>[NARRATIVE PLATFORM]</span>
-              <span>—</span>
-              <span>{t.hero_badge}</span>
-            </p>
-            <h1 className="mx-auto max-w-2xl font-serif text-4xl font-bold leading-[1.15] tracking-tight text-black dark:text-white sm:text-5xl lg:mx-0 lg:text-6xl">
-              {t.hero_title}
-            </h1>
-            <p className="mx-auto mt-6 max-w-xl text-base leading-7 text-neutral-600 dark:text-neutral-400 sm:text-lg sm:leading-8 lg:mx-0">
-              {t.hero_sub}
-            </p>
+            {/* Quick In-page Navigation Anchors (Desktop) */}
+            <div className="hidden lg:flex items-center gap-6 font-mono text-xs uppercase tracking-wider text-neutral-600 dark:text-neutral-400">
+              <a
+                href="#studios"
+                className="hover:text-black dark:hover:text-white transition-colors"
+              >
+                {t.nav_studios}
+              </a>
+              <a
+                href="#recent-projects"
+                className="hover:text-black dark:hover:text-white transition-colors"
+              >
+                {t.nav_recent_projects}
+              </a>
+              <a
+                href="#featured-worlds"
+                className="hover:text-black dark:hover:text-white transition-colors"
+              >
+                {t.nav_featured_worlds}
+              </a>
+              <a
+                href="#heritage"
+                className="hover:text-black dark:hover:text-white transition-colors"
+              >
+                {t.nav_heritage}
+              </a>
+            </div>
 
-            <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center lg:justify-start">
+            {/* Controls & Primary Action */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              <LanguageSwitcher currentLang={lang} onLanguageChange={onLanguageChange} />
+              <ThemeToggle lang={lang} />
               <button
                 type="button"
                 onClick={onOpenAuth}
-                className="inline-flex min-h-12 items-center justify-center rounded px-6 py-3.5 text-sm font-mono font-bold uppercase tracking-wider bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-colors shadow-md sm:text-base"
+                className="rounded-lg px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 shadow-md transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black dark:focus:ring-white"
               >
-                {t.hero_cta}
-              </button>
-              <button
-                type="button"
-                onClick={onExploreCommunity ?? onOpenAuth}
-                className="inline-flex min-h-12 items-center justify-center rounded border border-neutral-300 dark:border-neutral-700 bg-transparent px-5 py-3.5 text-sm font-mono font-bold uppercase tracking-wider text-black dark:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors sm:text-base"
-              >
-                {lang === "vi" ? "Khám phá cộng đồng" : "Explore community"}
+                {t.login}
               </button>
             </div>
+          </nav>
+        </header>
 
-            <p className="mt-6 text-xs font-mono text-neutral-500">
-              {lang === "vi"
-                ? "Phát triển ý tưởng · Viết và biên tập · Chuyển thể thành truyện tranh"
-                : "Develop ideas · Write and edit · Adapt into comics"}
-            </p>
-          </div>
-
-          {/* Book / Comic Illustration (Monochrome) */}
-          <div
-            className="relative mx-auto w-full max-w-[590px] px-2 pb-6 pt-2 sm:px-6"
-            aria-label={lang === "vi" ? "Minh họa bản thảo và truyện tranh" : "Manuscript and comic illustration"}
-          >
-            <div className="landing-book-scene border border-neutral-200 dark:border-neutral-800 rounded-xl p-4 bg-neutral-50 dark:bg-neutral-900">
-              <div className="landing-book border border-neutral-300 dark:border-neutral-700 rounded-lg p-4 bg-white dark:bg-black">
-                <div className="landing-book-page landing-book-page-left">
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-neutral-500 font-bold">{lang === "vi" ? "BẢN THẢO" : "MANUSCRIPT"}</span>
-                  <h2 className="text-base font-serif font-bold mt-2 text-black dark:text-white">{lang === "vi" ? "Chương mở đầu" : "The first chapter"}</h2>
-                  <div className="h-px bg-neutral-200 dark:bg-neutral-800 my-2" />
-                  <p className="text-xs leading-relaxed text-neutral-600 dark:text-neutral-400 font-serif">
-                    {lang === "vi"
-                      ? "Mưa đổ xuống mái ngói cũ. Trong căn phòng nhỏ, một câu chuyện đang chờ được viết tiếp."
-                      : "Rain fell on the old roof. In a quiet room, a story waited to be continued."}
-                  </p>
-                </div>
+        {/* ========================================================= */}
+        {/* HERO SECTION */}
+        {/* ========================================================= */}
+        <section className="relative mx-auto max-w-7xl px-4 pb-14 pt-8 sm:px-8 sm:pb-20 sm:pt-12 lg:px-10 lg:pb-24 lg:pt-14">
+          <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
+            
+            {/* Left: Headline, Value Proposition, Action CTAs */}
+            <div className="text-center lg:text-left">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-neutral-300 dark:border-neutral-800 bg-neutral-100/70 dark:bg-neutral-900/70 px-3.5 py-1 text-[11px] font-mono font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span>[GEN-AI NARRATIVE PLATFORM]</span>
+                <span>—</span>
+                <span>{t.hero_badge}</span>
               </div>
-              <div className="mt-4 pt-3 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-between text-xs font-mono text-neutral-500">
-                <span>[MANGA ADAPTATION]</span>
-                <span>{lang === "vi" ? "Từ trang viết đến khung truyện" : "From prose to sequential panels"}</span>
-              </div>
-            </div>
-          </div>
-        </section>
 
-        {/* Feature Cards Section */}
-        <section className="mx-auto max-w-7xl px-5 pb-12 sm:px-8 sm:pb-16 lg:px-12 border-t border-neutral-200 dark:border-neutral-800 pt-10">
-          <div className="mb-8 border-b border-neutral-200 dark:border-neutral-800 pb-4">
-            <p className="text-xs font-mono font-bold uppercase tracking-widest text-neutral-500">
-              {t.features_section_title}
-            </p>
-            <h2 className="mt-2 font-serif text-2xl font-bold tracking-tight text-black dark:text-white sm:text-3xl">
-              {lang === "vi" ? "Mọi chặng đường của câu chuyện" : "Every stage of your story"}
-            </h2>
-          </div>
+              <h1 className="font-serif text-3xl font-bold leading-[1.2] tracking-tight sm:text-5xl lg:text-6xl text-black dark:text-white">
+                {t.hero_title}
+              </h1>
 
-          <div className="grid divide-y divide-neutral-200 dark:divide-neutral-800 md:grid-cols-3 md:divide-x md:divide-y-0">
-            <article className="py-6 md:py-2 md:pr-8">
-              <div className="mb-3 text-xs font-mono font-bold tracking-widest text-neutral-500">
-                [BƯỚC 01]
-              </div>
-              <h3 className="font-serif text-lg font-bold text-black dark:text-white">{t.feat1_title}</h3>
-              <p className="mt-2 text-sm leading-6 text-neutral-600 dark:text-neutral-400">{t.feat1_desc}</p>
-            </article>
+              <p className="mt-5 max-w-xl mx-auto lg:mx-0 text-base leading-relaxed text-neutral-600 dark:text-neutral-400 sm:text-lg">
+                {t.hero_sub}
+              </p>
 
-            <article className="py-6 md:px-8 md:py-2">
-              <div className="mb-3 text-xs font-mono font-bold tracking-widest text-neutral-500">
-                [BƯỚC 02]
-              </div>
-              <h3 className="font-serif text-lg font-bold text-black dark:text-white">{t.feat2_title}</h3>
-              <p className="mt-2 text-sm leading-6 text-neutral-600 dark:text-neutral-400">{t.feat2_desc}</p>
-            </article>
-
-            <article className="py-6 md:py-2 md:pl-8">
-              <div className="mb-3 text-xs font-mono font-bold tracking-widest text-neutral-500">
-                [BƯỚC 03]
-              </div>
-              <h3 className="font-serif text-lg font-bold text-black dark:text-white">{t.feat3_title}</h3>
-              <p className="mt-2 text-sm leading-6 text-neutral-600 dark:text-neutral-400">{t.feat3_desc}</p>
-            </article>
-          </div>
-
-          {/* Heritage Section */}
-          <section
-            aria-labelledby="heritage-heading"
-            className="mt-12 border-y border-neutral-200 dark:border-neutral-800 py-8 sm:mt-16 sm:py-10"
-          >
-            <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
-              <div className="max-w-xl">
-                <p className="text-xs font-mono font-bold uppercase tracking-widest text-neutral-500">
-                  {t.heritage_eyebrow}
-                </p>
-                <h2
-                  id="heritage-heading"
-                  className="mt-3 font-serif text-2xl font-bold leading-tight tracking-tight text-black dark:text-white sm:text-3xl"
-                >
-                  {t.heritage_title}
-                </h2>
-                <p className="mt-4 text-sm leading-7 text-neutral-600 dark:text-neutral-400">
-                  {t.heritage_desc}
-                </p>
+              {/* CTAs */}
+              <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center lg:justify-start">
                 <button
                   type="button"
                   onClick={onOpenAuth}
-                  className="mt-5 inline-flex items-center text-sm font-mono font-bold uppercase tracking-wider text-black dark:text-white underline hover:opacity-80 transition-opacity"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg px-7 py-3.5 text-sm font-mono font-bold uppercase tracking-wider bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-all shadow-xl cursor-pointer"
                 >
-                  {t.heritage_cta}
+                  <span>{t.hero_cta}</span>
+                  <span className="text-xs">➔</span>
                 </button>
+                <a
+                  href="#recent-projects"
+                  className="inline-flex min-h-12 items-center justify-center rounded-lg border border-neutral-300 dark:border-neutral-700 bg-transparent px-5 py-3.5 text-sm font-mono font-bold uppercase tracking-wider text-black dark:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors text-center"
+                >
+                  {lang === "vi" ? "Xem Dự Án Mẫu" : "View Sample Works"}
+                </a>
               </div>
 
-              <div className="divide-y divide-neutral-200 dark:divide-neutral-800">
-                {[
-                  { number: "[01]", title: t.heritage_history_title, description: t.heritage_history_desc },
-                  { number: "[02]", title: t.heritage_culture_title, description: t.heritage_culture_desc },
-                  { number: "[03]", title: t.heritage_community_title, description: t.heritage_community_desc },
-                ].map((item) => (
-                  <article key={item.number} className="grid grid-cols-[3rem_1fr] gap-3 py-4 first:pt-0 last:pb-0">
-                    <span className="pt-0.5 text-xs font-mono font-bold text-neutral-500">
-                      {item.number}
-                    </span>
-                    <div>
-                      <h3 className="font-serif text-base font-bold text-black dark:text-white">
-                        {item.title}
-                      </h3>
-                      <p className="mt-1 text-sm leading-6 text-neutral-600 dark:text-neutral-400">
-                        {item.description}
-                      </p>
-                    </div>
-                  </article>
-                ))}
+              {/* Verified Trust Stats */}
+              <div className="mt-8 grid grid-cols-3 gap-3 border-t border-neutral-200 dark:border-neutral-800 pt-5 text-center lg:text-left">
+                <div>
+                  <div className="font-serif text-lg sm:text-xl font-bold text-black dark:text-white">
+                    35,000+
+                  </div>
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-500">
+                    {lang === "vi" ? "Từ bản thảo AI" : "Prose drafted"}
+                  </div>
+                </div>
+                <div>
+                  <div className="font-serif text-lg sm:text-xl font-bold text-black dark:text-white">
+                    1,200+
+                  </div>
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-500">
+                    {lang === "vi" ? "Khung manga mực" : "Manga panels"}
+                  </div>
+                </div>
+                <div>
+                  <div className="font-serif text-lg sm:text-xl font-bold text-black dark:text-white">
+                    100%
+                  </div>
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-500">
+                    {lang === "vi" ? "Bản quyền tác giả" : "Creator IP"}
+                  </div>
+                </div>
               </div>
             </div>
-          </section>
 
-          {/* Safety & Community Footer Banner */}
-          <div className="mt-8 flex flex-col items-start justify-between gap-4 border-y border-neutral-200 dark:border-neutral-800 py-5 sm:flex-row sm:items-center">
+            {/* Right: Integrated Dual-Media Showcase Preview (Prose + Manga Panel) */}
+            <div className="relative mx-auto w-full max-w-[540px]">
+              <div className="relative rounded-2xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 p-3 sm:p-5 shadow-2xl overflow-hidden">
+                
+                {/* Live Preview Header with Tabs */}
+                <div className="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 pb-3 mb-3">
+                  <div className="flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-full bg-red-500/80" />
+                    <span className="h-2 w-2 rounded-full bg-amber-500/80" />
+                    <span className="h-2 w-2 rounded-full bg-emerald-500/80" />
+                    <span className="ml-2 font-mono text-[10px] uppercase tracking-widest text-neutral-500 font-bold">
+                      {t.live_preview_badge}
+                    </span>
+                  </div>
+
+                  {/* Mode switcher tab buttons */}
+                  <div className="flex rounded-md border border-neutral-300 dark:border-neutral-700 bg-neutral-200/50 dark:bg-neutral-800/50 p-0.5 text-[10px] font-mono font-bold">
+                    <button
+                      type="button"
+                      onClick={() => setActiveHeroTab("manga")}
+                      className={`px-2.5 py-1 rounded transition-colors ${
+                        activeHeroTab === "manga"
+                          ? "bg-white dark:bg-black text-black dark:text-white shadow-sm"
+                          : "text-neutral-500 hover:text-black dark:hover:text-white"
+                      }`}
+                    >
+                      Manga Panel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveHeroTab("prose")}
+                      className={`px-2.5 py-1 rounded transition-colors ${
+                        activeHeroTab === "prose"
+                          ? "bg-white dark:bg-black text-black dark:text-white shadow-sm"
+                          : "text-neutral-500 hover:text-black dark:hover:text-white"
+                      }`}
+                    >
+                      Bản Thảo
+                    </button>
+                  </div>
+                </div>
+
+                {/* Tab A: Manga Adaptation Interactive View */}
+                {activeHeroTab === "manga" ? (
+                  <div className="space-y-3">
+                    {/* Main Establishing Battle Panel (Image 4: manga_battle_scene.png) */}
+                    <div className="relative aspect-[16/10] w-full rounded-xl overflow-hidden border border-neutral-300 dark:border-neutral-700 bg-black group">
+                      <Image
+                        src="/assets/landing/manga_battle_scene.png"
+                        alt="Chiến trận bãi cọc Bạch Đằng - Manga Studio"
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        priority
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+                      <div className="absolute bottom-2.5 left-3 right-3 flex items-end justify-between">
+                        <div>
+                          <span className="inline-block px-1.5 py-0.5 rounded bg-black/80 text-[9px] font-mono text-white font-bold tracking-widest border border-white/20 mb-1">
+                            [PANEL 01 · GÓC RỘNG]
+                          </span>
+                          <p className="text-xs font-serif italic text-white/95 line-clamp-1">
+                            "Mặt nước dậy sóng, hàng cọc nhọn vươn lên đón đợi đại quân..."
+                          </p>
+                        </div>
+                        <span className="text-[10px] font-mono text-neutral-400 font-bold">
+                          100% INK
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Secondary Dual Inset Strip (Image 1: Character Lore & Image 3: Heroine Portrait) */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="relative aspect-[4/3] rounded-lg overflow-hidden border border-neutral-300 dark:border-neutral-700 bg-neutral-900 group">
+                        <Image
+                          src="/assets/landing/hero_character_aodai.png"
+                          alt="Nhân vật cổ trang Việt - Character Lore"
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent pointer-events-none" />
+                        <span className="absolute bottom-1.5 left-2 px-1 rounded bg-black/80 text-[8px] font-mono text-white font-bold border border-white/20">
+                          [LORE: NÀNG THIỀM]
+                        </span>
+                      </div>
+
+                      <div className="relative aspect-[4/3] rounded-lg overflow-hidden border border-neutral-300 dark:border-neutral-700 bg-neutral-900 group">
+                        <Image
+                          src="/assets/landing/manga_heroine_portrait.png"
+                          alt="Chân dung manga hiệp nữ"
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent pointer-events-none" />
+                        <span className="absolute bottom-1.5 left-2 px-1 rounded bg-black/80 text-[8px] font-mono text-white font-bold border border-white/20">
+                          [PANEL 02: CẬN CẢNH]
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* Tab B: Prose Manuscript View */
+                  <div className="rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-black p-4 space-y-3 font-serif">
+                    <div className="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 pb-2">
+                      <span className="text-[10px] font-mono uppercase tracking-widest text-neutral-500 font-bold">
+                        BẢN THẢO CHƯƠNG 01 · DÃ SỬ
+                      </span>
+                      <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">
+                        ● Đang đồng bộ với Copilot
+                      </span>
+                    </div>
+
+                    <h3 className="text-base font-bold text-black dark:text-white">
+                      Hồi 1: Đêm Trăng Cửa Sông Bạch Đằng
+                    </h3>
+
+                    <p className="text-xs leading-relaxed text-neutral-700 dark:text-neutral-300">
+                      Mưa lất phất trên bến đò Vạn Kiếp. Nước triều bắt đầu rút về phía biển lớn, để lộ những đầu cọc gỗ lim đen bóng ngâm mình trong dòng phù sa nghìn năm. 
+                      Người tráng sĩ khoác chiếc áo tơi nón lá, bàn tay ghì chặt chuôi kiếm cổ. Đôi mắt chàng hướng ra dòng sông mênh mông, nơi gió đông bắc đang dồn dập kéo tới...
+                    </p>
+
+                    <div className="rounded border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 p-2.5 font-mono text-[11px] text-neutral-600 dark:text-neutral-400">
+                      <span className="font-bold text-black dark:text-white">🤖 Gợi ý Co-pilot: </span>
+                      <span>"Tăng thêm nhịp thở kịch tính của quân sĩ trước giờ phục kích."</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Footer conversion prompt */}
+                <div className="mt-3 pt-2.5 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-between text-[11px] font-mono text-neutral-500">
+                  <span>[TỰ ĐỘNG CHUYỂN THỂ]</span>
+                  <button
+                    type="button"
+                    onClick={onOpenAuth}
+                    className="text-black dark:text-white font-bold hover:underline cursor-pointer"
+                  >
+                    {lang === "vi" ? "Thử nghiệm phân khung ngay ➔" : "Try storyboard now ➔"}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        {/* ========================================================= */}
+        {/* 4 CORE STUDIOS (THẺ CHỨC NĂNG) */}
+        {/* ========================================================= */}
+        <section
+          id="studios"
+          className="mx-auto max-w-7xl px-4 pb-16 sm:px-8 sm:pb-20 lg:px-10 border-t border-neutral-200 dark:border-neutral-800 pt-12"
+        >
+          <div className="mb-10 text-center max-w-3xl mx-auto">
+            <p className="text-xs font-mono font-bold uppercase tracking-widest text-neutral-500">
+              {t.studios_section_eyebrow}
+            </p>
+            <h2 className="mt-2 font-serif text-2xl font-bold tracking-tight text-black dark:text-white sm:text-4xl">
+              {t.studios_section_title}
+            </h2>
+            <p className="mt-3 text-sm sm:text-base text-neutral-600 dark:text-neutral-400">
+              {t.studios_section_sub}
+            </p>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            
+            {/* Studio 1: Story Lab */}
+            <div className="group rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50 p-5 hover:border-black dark:hover:border-white transition-all shadow-sm hover:shadow-md flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between text-[10px] font-mono font-bold text-neutral-500 uppercase tracking-widest mb-3">
+                  <span>{t.studio_story_tag}</span>
+                  <span className="rounded bg-neutral-200 dark:bg-neutral-800 px-1.5 py-0.5">[01]</span>
+                </div>
+                <div className="relative aspect-[16/10] w-full rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black p-3 mb-4 flex flex-col justify-between">
+                  <div className="space-y-1">
+                    <div className="h-1.5 w-12 bg-neutral-400 dark:bg-neutral-600 rounded" />
+                    <div className="h-2 w-full bg-neutral-200 dark:bg-neutral-800 rounded" />
+                    <div className="h-2 w-4/5 bg-neutral-200 dark:bg-neutral-800 rounded" />
+                    <div className="h-2 w-2/3 bg-neutral-200 dark:bg-neutral-800 rounded" />
+                  </div>
+                  <div className="rounded bg-neutral-100 dark:bg-neutral-900 p-1.5 text-[9px] font-mono text-neutral-600 dark:text-neutral-400 flex items-center justify-between">
+                    <span>AI Co-pilot</span>
+                    <span className="text-emerald-500 font-bold">Ready</span>
+                  </div>
+                </div>
+                <h3 className="font-serif text-lg font-bold text-black dark:text-white">
+                  {t.studio_story_name}
+                </h3>
+                <p className="mt-2 text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">
+                  {t.studio_story_desc}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={onOpenAuth}
+                className="mt-5 inline-flex items-center justify-between text-xs font-mono font-bold uppercase tracking-wider text-black dark:text-white border-t border-neutral-200 dark:border-neutral-800 pt-3 group-hover:underline cursor-pointer"
+              >
+                <span>{lang === "vi" ? "Mở Story Lab" : "Open Story Lab"}</span>
+                <span>➔</span>
+              </button>
+            </div>
+
+            {/* Studio 2: Manga Studio */}
+            <div className="group rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50 p-5 hover:border-black dark:hover:border-white transition-all shadow-sm hover:shadow-md flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between text-[10px] font-mono font-bold text-neutral-500 uppercase tracking-widest mb-3">
+                  <span>{t.studio_manga_tag}</span>
+                  <span className="rounded bg-neutral-200 dark:bg-neutral-800 px-1.5 py-0.5">[02]</span>
+                </div>
+                <div className="relative aspect-[16/10] w-full rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-800 bg-black mb-4 group-hover:scale-[1.02] transition-transform">
+                  <Image
+                    src="/assets/landing/manga_heroine_portrait.png"
+                    alt="Manga Studio Showcase"
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+                  <span className="absolute bottom-1.5 left-2 px-1 rounded bg-black/80 text-[8px] font-mono text-white border border-white/20">
+                    B&W Inking
+                  </span>
+                </div>
+                <h3 className="font-serif text-lg font-bold text-black dark:text-white">
+                  {t.studio_manga_name}
+                </h3>
+                <p className="mt-2 text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">
+                  {t.studio_manga_desc}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={onOpenAuth}
+                className="mt-5 inline-flex items-center justify-between text-xs font-mono font-bold uppercase tracking-wider text-black dark:text-white border-t border-neutral-200 dark:border-neutral-800 pt-3 group-hover:underline cursor-pointer"
+              >
+                <span>{lang === "vi" ? "Mở Manga Studio" : "Open Manga Studio"}</span>
+                <span>➔</span>
+              </button>
+            </div>
+
+            {/* Studio 3: Character & Lore */}
+            <div className="group rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50 p-5 hover:border-black dark:hover:border-white transition-all shadow-sm hover:shadow-md flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between text-[10px] font-mono font-bold text-neutral-500 uppercase tracking-widest mb-3">
+                  <span>{t.studio_lore_tag}</span>
+                  <span className="rounded bg-neutral-200 dark:bg-neutral-800 px-1.5 py-0.5">[03]</span>
+                </div>
+                <div className="relative aspect-[16/10] w-full rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-800 bg-black mb-4 group-hover:scale-[1.02] transition-transform">
+                  <Image
+                    src="/assets/landing/hero_character_aodai.png"
+                    alt="Character Lore Showcase"
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+                  <span className="absolute bottom-1.5 left-2 px-1 rounded bg-black/80 text-[8px] font-mono text-white border border-white/20">
+                    Lore Dossier
+                  </span>
+                </div>
+                <h3 className="font-serif text-lg font-bold text-black dark:text-white">
+                  {t.studio_lore_name}
+                </h3>
+                <p className="mt-2 text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">
+                  {t.studio_lore_desc}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={onOpenAuth}
+                className="mt-5 inline-flex items-center justify-between text-xs font-mono font-bold uppercase tracking-wider text-black dark:text-white border-t border-neutral-200 dark:border-neutral-800 pt-3 group-hover:underline cursor-pointer"
+              >
+                <span>{lang === "vi" ? "Khám phá Lore" : "Explore Lore"}</span>
+                <span>➔</span>
+              </button>
+            </div>
+
+            {/* Studio 4: Motion Studio */}
+            <div className="group rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50 p-5 hover:border-black dark:hover:border-white transition-all shadow-sm hover:shadow-md flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between text-[10px] font-mono font-bold text-neutral-500 uppercase tracking-widest mb-3">
+                  <span>{t.studio_motion_tag}</span>
+                  <span className="rounded bg-neutral-200 dark:bg-neutral-800 px-1.5 py-0.5">[04]</span>
+                </div>
+                <div className="relative aspect-[16/10] w-full rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-800 bg-black mb-4 group-hover:scale-[1.02] transition-transform">
+                  <Image
+                    src="/assets/landing/world_warrior_rain.png"
+                    alt="Motion Studio Showcase"
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+                  <span className="absolute bottom-1.5 left-2 px-1 rounded bg-black/80 text-[8px] font-mono text-white border border-white/20">
+                    Cinematic FX
+                  </span>
+                </div>
+                <h3 className="font-serif text-lg font-bold text-black dark:text-white">
+                  {t.studio_motion_name}
+                </h3>
+                <p className="mt-2 text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">
+                  {t.studio_motion_desc}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={onOpenAuth}
+                className="mt-5 inline-flex items-center justify-between text-xs font-mono font-bold uppercase tracking-wider text-black dark:text-white border-t border-neutral-200 dark:border-neutral-800 pt-3 group-hover:underline cursor-pointer"
+              >
+                <span>{lang === "vi" ? "Trải nghiệm Motion" : "Try Motion FX"}</span>
+                <span>➔</span>
+              </button>
+            </div>
+
+          </div>
+        </section>
+
+        {/* ========================================================= */}
+        {/* RECENT PROJECTS / DRAFTS SHOWCASE */}
+        {/* ========================================================= */}
+        <section
+          id="recent-projects"
+          className="mx-auto max-w-7xl px-4 pb-16 sm:px-8 sm:pb-20 lg:px-10 border-t border-neutral-200 dark:border-neutral-800 pt-12"
+        >
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+            <div>
+              <p className="text-xs font-mono font-bold uppercase tracking-widest text-neutral-500">
+                {t.recent_projects_eyebrow}
+              </p>
+              <h2 className="mt-2 font-serif text-2xl font-bold tracking-tight text-black dark:text-white sm:text-3xl">
+                {t.recent_projects_title}
+              </h2>
+              <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400 max-w-xl">
+                {t.recent_projects_sub}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onOpenAuth}
+              className="inline-flex items-center gap-2 rounded-lg border border-neutral-300 dark:border-neutral-700 px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider text-black dark:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors shrink-0"
+            >
+              <span>{lang === "vi" ? "Bắt đầu dự án mới" : "Start New Project"}</span>
+              <span>➔</span>
+            </button>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {recentProjects.map((project, idx) => (
+              <div
+                key={idx}
+                onClick={onOpenAuth}
+                className="group rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 overflow-hidden shadow-sm hover:shadow-xl transition-all cursor-pointer flex flex-col justify-between"
+              >
+                <div>
+                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-black">
+                    <Image
+                      src={project.image}
+                      alt={project.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+                    <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded bg-black/80 text-[9px] font-mono font-bold text-white border border-white/20">
+                      {project.tag}
+                    </span>
+                    <span className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-white/90 dark:bg-black/90 text-[9px] font-mono font-bold text-black dark:text-white">
+                      {project.progress}
+                    </span>
+                  </div>
+
+                  <div className="p-4">
+                    <span className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider block">
+                      {project.genre}
+                    </span>
+                    <h3 className="font-serif text-base font-bold text-black dark:text-white mt-1 group-hover:underline">
+                      {project.title}
+                    </h3>
+                    <p className="mt-2 text-xs leading-relaxed text-neutral-600 dark:text-neutral-400 line-clamp-2">
+                      {project.synopsis}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="px-4 pb-4 pt-2 border-t border-neutral-100 dark:border-neutral-800/80 flex items-center justify-between text-[11px] font-mono text-neutral-500">
+                  <span>{project.stats}</span>
+                  <span className="font-bold text-black dark:text-white group-hover:translate-x-1 transition-transform">
+                    {lang === "vi" ? "Xem ➔" : "View ➔"}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ========================================================= */}
+        {/* FEATURED WORLDS SECTION (WORLD BUILDING) */}
+        {/* ========================================================= */}
+        <section
+          id="featured-worlds"
+          className="mx-auto max-w-7xl px-4 pb-16 sm:px-8 sm:pb-20 lg:px-10 border-t border-neutral-200 dark:border-neutral-800 pt-12"
+        >
+          <div className="mb-8">
+            <p className="text-xs font-mono font-bold uppercase tracking-widest text-neutral-500">
+              {t.featured_worlds_eyebrow}
+            </p>
+            <h2 className="mt-2 font-serif text-2xl font-bold tracking-tight text-black dark:text-white sm:text-3xl">
+              {t.featured_worlds_title}
+            </h2>
+            <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400 max-w-2xl">
+              {t.featured_worlds_sub}
+            </p>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-3">
+            {featuredWorlds.map((world, idx) => (
+              <div
+                key={world.id}
+                onClick={() => {
+                  setActiveWorldIdx(idx);
+                  onOpenAuth();
+                }}
+                className={`group relative rounded-xl border overflow-hidden p-5 transition-all cursor-pointer flex flex-col justify-between ${
+                  activeWorldIdx === idx
+                    ? "border-black dark:border-white bg-neutral-50 dark:bg-neutral-900 shadow-xl"
+                    : "border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 hover:border-neutral-400 dark:hover:border-neutral-600 shadow-sm"
+                }`}
+              >
+                <div>
+                  <div className="relative aspect-[16/9] w-full rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-800 bg-black mb-4 group-hover:scale-[1.02] transition-transform duration-500">
+                    <Image
+                      src={world.image}
+                      alt={world.title}
+                      fill
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+                    <span className="absolute bottom-2 left-2 px-1.5 py-0.5 rounded bg-black/80 text-[9px] font-mono text-white border border-white/20">
+                      {world.period}
+                    </span>
+                  </div>
+
+                  <h3 className="font-serif text-lg font-bold text-black dark:text-white group-hover:underline">
+                    {world.title}
+                  </h3>
+                  <p className="mt-2 text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">
+                    {world.desc}
+                  </p>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-neutral-200 dark:border-neutral-800 space-y-3">
+                  <div className="flex flex-wrap gap-1.5">
+                    {world.tags.map((tag, tIdx) => (
+                      <span
+                        key={tIdx}
+                        className="rounded border border-neutral-200 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 text-[9px] font-mono font-bold text-neutral-700 dark:text-neutral-300"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] font-mono font-bold text-black dark:text-white">
+                    <span>{lang === "vi" ? "Áp dụng vào bản thảo" : "Load World Preset"}</span>
+                    <span>➔</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ========================================================= */}
+        {/* HERITAGE, ETHICS & SAFETY GUARANTEE */}
+        {/* ========================================================= */}
+        <section
+          id="heritage"
+          aria-labelledby="heritage-heading"
+          className="mx-auto max-w-7xl px-4 pb-14 sm:px-8 sm:pb-16 lg:px-10 border-t border-neutral-200 dark:border-neutral-800 pt-12"
+        >
+          <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14">
+            <div className="max-w-xl">
+              <p className="text-xs font-mono font-bold uppercase tracking-widest text-neutral-500">
+                {t.heritage_eyebrow}
+              </p>
+              <h2
+                id="heritage-heading"
+                className="mt-3 font-serif text-2xl font-bold leading-tight tracking-tight text-black dark:text-white sm:text-3xl"
+              >
+                {t.heritage_title}
+              </h2>
+              <p className="mt-4 text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+                {t.heritage_desc}
+              </p>
+              <button
+                type="button"
+                onClick={onOpenAuth}
+                className="mt-5 inline-flex items-center gap-2 text-sm font-mono font-bold uppercase tracking-wider text-black dark:text-white underline hover:opacity-80 transition-opacity cursor-pointer"
+              >
+                <span>{t.heritage_cta}</span>
+                <span>➔</span>
+              </button>
+            </div>
+
+            <div className="divide-y divide-neutral-200 dark:divide-neutral-800">
+              {[
+                { number: "[01]", title: t.heritage_history_title, description: t.heritage_history_desc },
+                { number: "[02]", title: t.heritage_culture_title, description: t.heritage_culture_desc },
+                { number: "[03]", title: t.heritage_community_title, description: t.heritage_community_desc },
+              ].map((item) => (
+                <article key={item.number} className="grid grid-cols-[3rem_1fr] gap-3 py-4 first:pt-0 last:pb-0">
+                  <span className="pt-0.5 text-xs font-mono font-bold text-neutral-500">
+                    {item.number}
+                  </span>
+                  <div>
+                    <h3 className="font-serif text-base font-bold text-black dark:text-white">
+                      {item.title}
+                    </h3>
+                    <p className="mt-1 text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+                      {item.description}
+                    </p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+
+          {/* Bottom Security Assurance Banner */}
+          <div className="mt-10 flex flex-col items-start justify-between gap-4 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50/70 dark:bg-neutral-900/70 p-5 sm:flex-row sm:items-center">
             <div className="flex items-start gap-3">
-              <span className="px-2 py-0.5 text-xs font-mono font-bold border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 text-black dark:text-white rounded">
-                [BẢO ĐẢM]
+              <span className="px-2 py-0.5 text-xs font-mono font-bold border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-black text-black dark:text-white rounded shrink-0">
+                [BẢO ĐẢM IP]
               </span>
               <div>
                 <h3 className="font-serif text-base font-bold text-black dark:text-white">
-                  {lang === "vi" ? "Sáng tác với sự an tâm" : "Create with confidence"}
+                  {lang === "vi" ? "Sáng tác với sự an tâm tuyệt đối" : "Create with complete confidence"}
                 </h3>
-                <p className="mt-1 max-w-3xl text-sm leading-6 text-neutral-600 dark:text-neutral-400">
+                <p className="mt-1 text-xs sm:text-sm text-neutral-600 dark:text-neutral-400">
                   {lang === "vi"
-                    ? "Có thêm lớp kiểm tra nội dung lịch sử và hỗ trợ lưu bản nháp khi quá trình sinh truyện bị gián đoạn."
-                    : "Historical-content checks and draft recovery help protect your work when generation is interrupted."}
+                    ? "Toàn bộ cốt truyện, nhân vật và khung manga thuộc quyền sở hữu trí tuệ 100% của tác giả. Hệ thống có cơ chế kiểm duyệt nội dung văn hóa và tự động lưu dự phòng."
+                    : "All narratives, characters, and manga storyboards are 100% owned by the creator. Cultural guardrails and automated draft backups ensure safe storytelling."}
                 </p>
               </div>
             </div>
             <button
               type="button"
               onClick={onExploreCommunity ?? onOpenAuth}
-              className="inline-flex shrink-0 items-center rounded border border-neutral-300 dark:border-neutral-700 px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider text-black dark:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors"
+              className="inline-flex shrink-0 items-center rounded-lg border border-neutral-300 dark:border-neutral-700 px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider text-black dark:text-white hover:bg-white dark:hover:bg-black transition-colors"
             >
-              {lang === "vi" ? "Gặp gỡ cộng đồng" : "Meet the community"}
+              {lang === "vi" ? "Gặp gỡ cộng đồng" : "Meet Community"}
             </button>
           </div>
         </section>
 
-        {/* Footer */}
+        {/* ========================================================= */}
+        {/* FOOTER */}
+        {/* ========================================================= */}
         <footer className="border-t border-neutral-200 dark:border-neutral-800 px-5 py-6 text-center text-xs font-mono text-neutral-500">
-          {t.footer_copyright}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 max-w-7xl mx-auto">
+            <span>{t.footer_copyright}</span>
+            <div className="flex items-center gap-4 text-[11px]">
+              <a href="#studios" className="hover:underline">Story Lab</a>
+              <a href="#studios" className="hover:underline">Manga Studio</a>
+              <a href="#studios" className="hover:underline">Character Lore</a>
+              <a href="#studios" className="hover:underline">Motion Studio</a>
+            </div>
+          </div>
         </footer>
+
       </div>
     </main>
   );
 }
+
+export default LandingView;

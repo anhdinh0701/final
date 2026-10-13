@@ -5,8 +5,9 @@
 @tailwind utilities;
 
 :root {
-  --font-sans: Arial, Helvetica, sans-serif;
-  --font-serif: Arial, Helvetica, sans-serif;
+  --font-sans: 'Aptos Display', 'Aptos', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-serif: 'Aptos Display', 'Aptos', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'Aptos Display', 'Aptos', 'JetBrains Mono', monospace;
 
   --bg-primary: #ffffff;
   --bg-secondary: #f5f5f5;
@@ -38,7 +39,7 @@
 }
 
 body, html {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Aptos Display', 'Aptos', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
@@ -57,6 +58,27 @@ body, html {
   isolation: isolate;
   overflow: hidden;
   background: #f5f5f5;
+}
+
+@keyframes sheen-sweep {
+  0% {
+    transform: translateX(-120%) skewX(-20deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.9;
+  }
+  80% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateX(140%) skewX(-20deg);
+    opacity: 0;
+  }
+}
+
+.animate-sheen-sweep {
+  animation: sheen-sweep 450ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
 .landing-backdrop::before,
@@ -295,18 +317,18 @@ body, html {
   --landing-line: #d8cec2;
   border-color: rgb(255 250 240 / 70%);
   border-radius: 1.25rem;
-  background: rgb(247 243 235 / 92%);
+  background: #FAF7F2 !important;
   box-shadow: 0 18px 55px rgb(62 48 37 / 11%);
   backdrop-filter: none;
 }
 
 .dark .landing-shell {
-  --landing-paper: #302a25;
-  --landing-ink: #eee6d9;
-  --landing-muted: #b8aa9b;
-  --landing-line: #54483e;
-  border-color: #564a40;
-  background: #28231f;
+  --landing-paper: #FAF7F2;
+  --landing-ink: #171717;
+  --landing-muted: #525252;
+  --landing-line: #d8cec2;
+  border-color: rgba(216, 206, 194, 0.8);
+  background: #FAF7F2 !important;
 }
 
 .landing-book-scene {

@@ -1,7 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { ArrowLeft, Coins, Sparkles, RefreshCw } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import {
+  ArrowLeft,
+  Coins,
+  Sparkles,
+  RefreshCw,
+  LayoutGrid,
+  Columns,
+  Eye,
+  CheckCircle2,
+  AlertCircle,
+  Clock,
+  Layers,
+  ChevronRight,
+  Maximize2,
+  Download,
+  Info,
+} from "lucide-react";
 import { translations, Language } from "@/lib/i18n";
 import { ComicPanel } from "@/lib/types";
 import { api } from "@/lib/api";
@@ -38,186 +54,6 @@ function parseComicDialogue(rawText: string) {
   }
 
   return { speaker: null, text: clean, isDialogue: false };
-}
-
-function ComicPanelFrame({
-  panel,
-  t,
-  lang,
-  slot,
-  globalIndex,
-  canLoad,
-  activeQueueIndex,
-  onPanelDone,
-}: {
-  panel: ComicPanel;
-  t: (typeof translations)[Language];
-  lang: Language;
-  slot: number;
-  globalIndex: number;
-  canLoad: boolean;
-  activeQueueIndex: number;
-  onPanelDone: () => void;
-}) {
-  const [loaded, setLoaded] = useState(false);
-  const [error, setError] = useState(false);
-  const [retryKey, setRetryKey] = useState(0);
-  const [manualTrigger, setManualTrigger] = useState(false);
-
-  const parsed = parseComicDialogue(panel.dialogue_text || "");
-  const dialogueText = parsed.text || sanitizeComicCaption(panel.dialogue_text || "");
-  const speakerName = parsed.speaker;
-  const isDialogue = parsed.isDialogue;
-
-  const panelIdentifier = panel.id || panel.panel_id;
-  const rawUrl = panel.image_url || (panelIdentifier ? `/api/comic/image/${panelIdentifier}` : "");
-  const fullUrl = rawUrl ? api.getComicImageUrl(rawUrl) : "";
-
-  // Sequential loading: only fetch image when it's this panel's turn, or manually triggered, or already loaded
-  const shouldFetch = (canLoad || manualTrigger || loaded) && !!fullUrl;
-  const imageUrl = shouldFetch
-    ? `${fullUrl}${fullUrl.includes("?") ? "&" : "?"}v=${retryKey}`
-    : "";
-  const imageFailed = !fullUrl || error;
-
-  return (
-    <figure className="manga-panel relative" data-slot={slot}>
-      <div className={`manga-artwork relative overflow-hidden ${imageFailed ? "has-error" : ""}`}>
-        {/* Queued state: waiting for preceding panel in sequence to finish rendering */}
-        {!shouldFetch && !loaded && !error && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-neutral-100/90 dark:bg-neutral-900/90 backdrop-blur-xs font-mono z-10">
-            <div className="w-2.5 h-2.5 rounded-full bg-neutral-400 dark:bg-neutral-500 animate-pulse mb-2.5" />
-            <span className="text-xs font-bold text-neutral-600 dark:text-neutral-400 uppercase tracking-wider">
-              {lang === "vi" ? `[CHỜ GPU: KHUNG ${globalIndex + 1}]` : `[QUEUED: PANEL ${globalIndex + 1}]`}
-            </span>
-            <p className="mt-1.5 text-[11px] text-neutral-400 dark:text-neutral-500 max-w-xs">
-              {lang === "vi"
-                ? `Đang xếp hàng kết xuất (Khung ${activeQueueIndex + 1} đang vẽ...)`
-                : `Waiting in GPU rendering queue...`}
-            </p>
-          </div>
-        )}
-
-        {/* Active rendering overlay when this panel is actively being generated via GPU */}
-        {shouldFetch && imageUrl && !loaded && !error && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-neutral-100/90 dark:bg-neutral-900/90 backdrop-blur-xs font-mono z-10 animate-fadeIn">
-            <RefreshCw className="w-5 h-5 animate-spin text-black dark:text-white mb-2" />
-            <span className="text-xs font-bold text-black dark:text-white uppercase tracking-wider">
-              {lang === "vi" ? `Đang tạo tranh ComfyUI... (Khung ${globalIndex + 1})` : `Generating Manga... (Panel ${globalIndex + 1})`}
-            </span>
-            <p className="mt-1 text-[11px] text-neutral-500 max-w-xs">
-              {lang === "vi"
-                ? "Mô hình AI đang kết xuất tranh manga qua GPU..."
-                : "AI model is rendering high-fidelity artwork via GPU..."}
-            </p>
-          </div>
-        )}
-
-        {shouldFetch && imageUrl && !error ? (
-          <img
-            src={imageUrl}
-            alt={dialogueText || `Manga panel ${panel.panel_index}`}
-            loading="eager"
-            decoding="async"
-            className={loaded ? "is-loaded" : "is-loading opacity-0"}
-            onLoad={() => {
-              setLoaded(true);
-              setError(false);
-              onPanelDone();
-            }}
-            onError={() => {
-              if (retryKey < 3) {
-                // Auto-retry with 4s delay to allow queued GPU jobs to complete
-                setTimeout(() => {
-                  setError(false);
-                  setRetryKey((k) => k + 1);
-                }, 4000);
-              } else {
-                setError(true);
-                // Unblock queue so other panels can continue
-                onPanelDone();
-              }
-            }}
-          />
-        ) : null}
-
-        {imageFailed && (
-          <div className="flex flex-col items-center justify-center p-6 text-center font-mono">
-            <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">
-              {lang === "vi" ? "[Chưa có hình ảnh]" : "[Image not loaded]"}
-            </span>
-            <p className="mt-2 text-[11px] text-neutral-400 max-w-xs">
-              {lang === "vi" 
-                ? "Máy chủ hình ảnh hoặc ComfyUI chưa sẵn sàng." 
-                : "Image renderer or ComfyUI is not ready."}
-            </p>
-            {fullUrl && (
-              <button
-                type="button"
-                onClick={() => {
-                  setError(false);
-                  setLoaded(false);
-                  setManualTrigger(true);
-                  setRetryKey((k) => k + 1);
-                }}
-                className="mt-3 flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-bold uppercase rounded border border-neutral-400 bg-white text-black hover:bg-neutral-100 dark:border-neutral-700 dark:bg-black dark:text-white dark:hover:bg-neutral-900 transition-colors cursor-pointer active:scale-95 shadow-xs"
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-                <span>{lang === "vi" ? "Thử lại kết nối tranh" : "Retry render"}</span>
-              </button>
-            )}
-          </div>
-        )}
-      </div>
-
-      {dialogueText && (
-        <figcaption className="manga-caption">
-          {speakerName ? (
-            <p className="font-sans text-xs leading-relaxed text-black dark:text-neutral-900">
-              <strong className="font-bold uppercase tracking-wide mr-1.5 font-mono">{speakerName}:</strong>
-              <span>{dialogueText}</span>
-            </p>
-          ) : isDialogue ? (
-            <p className="font-sans text-xs italic leading-relaxed text-black dark:text-neutral-900">
-              &ldquo;{dialogueText}&rdquo;
-            </p>
-          ) : (
-            <p className="font-sans text-xs leading-relaxed text-neutral-800 dark:text-neutral-800">
-              {dialogueText}
-            </p>
-          )}
-
-          {imageFailed ? (
-            <div className="manga-image-error mt-2 pt-1 border-t border-neutral-200">
-              <span className="text-[11px] font-mono text-neutral-500">
-                {lang === "vi" ? "Chưa tải được ảnh." : "Failed to load image."}
-              </span>
-              {fullUrl && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setError(false);
-                    setLoaded(false);
-                    setManualTrigger(true);
-                    setRetryKey((k) => k + 1);
-                  }}
-                  className="text-xs font-mono font-bold underline text-black dark:text-neutral-900 cursor-pointer ml-1.5"
-                >
-                  [{lang === "vi" ? "Thử lại" : "Retry"}]
-                </button>
-              )}
-            </div>
-          ) : !loaded ? (
-            <span className="manga-image-status block mt-1 text-[11px] font-mono text-neutral-400 animate-pulse">
-              {shouldFetch 
-                ? (lang === "vi" ? `Đang kết nối ComfyUI & tạo khung ${globalIndex + 1}...` : t.loading_comic)
-                : (lang === "vi" ? `Đang chờ tới lượt vẽ GPU (Khung ${globalIndex + 1})...` : "Queued...")}
-            </span>
-          ) : null}
-        </figcaption>
-      )}
-    </figure>
-  );
 }
 
 function sanitizeComicCaption(value: string): string {
@@ -261,267 +97,441 @@ export function ComicViewer({
 }: Props) {
   const t = translations[lang];
   const pages = splitIntoPages(panels, 4);
-
   const totalPanels = panels.length;
-  const isFreeTier = totalPanels < 12;
-  const remainingFreeBatches = Math.max(0, 3 - Math.floor(totalPanels / 4));
-  const currentBatchNumber = Math.min(3, Math.floor(totalPanels / 4) + 1);
 
-  // Sequential rendering queue: renders panels sequentially to eliminate concurrent GPU/tunnel contention
+  const [viewMode, setViewMode] = useState<"page" | "panel">("page");
+  const [selectedPanelIdx, setSelectedPanelIdx] = useState<number>(0);
   const [activeQueueIndex, setActiveQueueIndex] = useState(0);
-
-  const handlePanelDone = (globalIndex: number) => {
-    setActiveQueueIndex((prev) => Math.max(prev, globalIndex + 1));
-  };
-
   const [comfyStatus, setComfyStatus] = useState<{ available: boolean } | null>(null);
+  const [loadedPanels, setLoadedPanels] = useState<Record<number, boolean>>({});
+  const [errorPanels, setErrorPanels] = useState<Record<number, boolean>>({});
+  const [retryKeys, setRetryKeys] = useState<Record<number, number>>({});
 
   useEffect(() => {
     let active = true;
-    api.getComfyUIStatus().then((res) => {
-      if (active) setComfyStatus({ available: !!res.available });
-    }).catch(() => {
-      if (active) setComfyStatus({ available: false });
-    });
+    api.getComfyUIStatus()
+      .then((res) => {
+        if (active) setComfyStatus({ available: !!res?.available });
+      })
+      .catch(() => {
+        if (active) setComfyStatus({ available: false });
+      });
     return () => { active = false; };
   }, []);
 
-  const handleContinueClick = () => {
-    if (!isFreeTier && coinBalance < 100) {
-      if (onOpenCoinModal) {
-        onOpenCoinModal();
-        return;
-      }
-    }
-    onContinueComic();
+  const handlePanelDone = (globalIndex: number) => {
+    setLoadedPanels((prev) => ({ ...prev, [globalIndex]: true }));
+    setErrorPanels((prev) => ({ ...prev, [globalIndex]: false }));
+    setActiveQueueIndex((prev) => Math.max(prev, globalIndex + 1));
   };
 
+  const handlePanelError = (globalIndex: number) => {
+    const currentRetries = retryKeys[globalIndex] || 0;
+    if (currentRetries < 3) {
+      setTimeout(() => {
+        setRetryKeys((prev) => ({ ...prev, [globalIndex]: currentRetries + 1 }));
+      }, 4000);
+    } else {
+      setErrorPanels((prev) => ({ ...prev, [globalIndex]: true }));
+      setActiveQueueIndex((prev) => Math.max(prev, globalIndex + 1));
+    }
+  };
+
+  const retrySinglePanel = (globalIndex: number) => {
+    setErrorPanels((prev) => ({ ...prev, [globalIndex]: false }));
+    setLoadedPanels((prev) => ({ ...prev, [globalIndex]: false }));
+    setRetryKeys((prev) => ({ ...prev, [globalIndex]: (prev[globalIndex] || 0) + 1 }));
+  };
+
+  const selectedPanel = panels[selectedPanelIdx] || panels[0];
+  const parsedSelected = selectedPanel ? parseComicDialogue(selectedPanel.dialogue_text || "") : null;
+
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-neutral-100 text-black dark:bg-black dark:text-white font-sans select-none">
-      {/* Top Bar Header */}
-      <header className="z-10 flex h-16 shrink-0 items-center justify-between border-b border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 px-3 shadow-sm sm:px-6">
-        <div className="flex items-center gap-3">
+    <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden bg-neutral-100 dark:bg-[#080808] text-black dark:text-[#F5F5F5] font-sans transition-colors">
+      
+      {/* ========================================================= */}
+      {/* MANGA STUDIO WORKSPACE HEADER */}
+      {/* ========================================================= */}
+      <header className="h-14 border-b border-neutral-200 dark:border-white/10 bg-white dark:bg-[#111111] px-3 sm:px-6 flex items-center justify-between gap-3 shrink-0 select-none">
+        {/* Left: Breadcrumbs & Status */}
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <button
             type="button"
             onClick={onBackToEditor}
-            className="flex items-center gap-1.5 rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-900 dark:hover:bg-neutral-800 px-3 py-1.5 text-xs font-mono font-bold uppercase tracking-wider text-black dark:text-white transition-colors"
-            title={t.back_to_editor}
-            aria-label={t.back_to_editor}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-neutral-300 dark:border-white/10 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-xs font-mono font-bold uppercase tracking-wider text-black dark:text-white transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>{t.back_to_editor || (lang === "vi" ? "Bản thảo chữ" : "Editor")}</span>
+            <span className="hidden sm:inline">Story Lab</span>
           </button>
 
-          <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-200 dark:bg-neutral-800 text-xs font-mono font-bold">
-              MANGA
-            </span>
-            <div>
-              <h2 className="text-sm font-bold text-black dark:text-white font-mono sm:text-base">
-                {t.comic_view_title}
-              </h2>
-              <p className="hidden text-[11px] font-mono text-neutral-500 sm:block">
-                {lang === "vi" 
-                  ? `Đã tạo ${totalPanels} khung tranh manga (4 khung/đợt)` 
-                  : `${totalPanels} manga panels rendered (4 panels/batch)`}
-              </p>
-            </div>
+          <div className="flex items-center gap-1.5 text-xs font-mono text-neutral-500">
+            <span>Dự án</span>
+            <ChevronRight className="w-3 h-3 text-neutral-400" />
+            <span className="font-bold text-black dark:text-white uppercase tracking-wider">Manga Studio</span>
+          </div>
+
+          <div className="hidden sm:block h-4 w-px bg-neutral-300 dark:border-white/10 mx-1" />
+
+          {/* ComfyUI GPU Status Badge */}
+          <div className="flex items-center gap-1.5 text-[10px] font-mono px-2 py-0.5 rounded border border-neutral-300 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-900">
+            {comfyStatus?.available ? (
+              <>
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-emerald-600 dark:text-emerald-400 font-bold">GPU Sẵn Sàng</span>
+              </>
+            ) : (
+              <>
+                <span className="h-1.5 w-1.5 rounded-full bg-neutral-400" />
+                <span className="text-neutral-500">ComfyUI Offline</span>
+              </>
+            )}
           </div>
         </div>
 
-        {/* Status Badges & Continue Button */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* ComfyUI GPU Status Badge */}
-          <div
-            className="hidden items-center gap-1.5 rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 px-2.5 py-1 text-xs font-mono font-bold lg:inline-flex"
-            title={comfyStatus?.available ? "ComfyUI GPU đang kết nối qua ngrok" : "Đang kết nối ComfyUI qua ngrok"}
-          >
-            <span className={`w-2 h-2 rounded-full ${comfyStatus?.available ? "bg-black dark:bg-white" : "bg-neutral-400 animate-pulse"}`} />
-            <span>{comfyStatus?.available ? "COMFYUI GPU: SẴN SÀNG" : "COMFYUI GPU: ĐANG KẾT NỐI"}</span>
+        {/* Right: View switcher & Actions */}
+        <div className="flex items-center gap-2 font-mono text-xs">
+          {/* Page vs Panel View Toggle */}
+          <div className="hidden sm:flex rounded-lg border border-neutral-300 dark:border-white/10 p-0.5 bg-neutral-100 dark:bg-neutral-900">
+            <button
+              type="button"
+              onClick={() => setViewMode("page")}
+              className={`px-2.5 py-1 rounded text-[11px] font-bold uppercase transition-colors flex items-center gap-1.5 ${
+                viewMode === "page"
+                  ? "bg-white dark:bg-black text-black dark:text-white shadow-xs"
+                  : "text-neutral-500 hover:text-black dark:hover:text-white"
+              }`}
+            >
+              <Columns className="w-3.5 h-3.5" />
+              <span>Trang Truyện</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("panel")}
+              className={`px-2.5 py-1 rounded text-[11px] font-bold uppercase transition-colors flex items-center gap-1.5 ${
+                viewMode === "panel"
+                  ? "bg-white dark:bg-black text-black dark:text-white shadow-xs"
+                  : "text-neutral-500 hover:text-black dark:hover:text-white"
+              }`}
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span>Chi Tiết Khung</span>
+            </button>
           </div>
-          {/* Free / Paid Progress Badge */}
-          {isFreeTier ? (
-            <span className="hidden items-center rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 px-2.5 py-1 text-xs font-mono font-bold text-black dark:text-white md:inline-flex">
-              {lang === "vi" ? `[MIỄN PHÍ: ${totalPanels}/12 KHUNG]` : `[FREE: ${totalPanels}/12 PANELS]`}
-            </span>
-          ) : (
-            <span className="hidden items-center rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 px-2.5 py-1 text-xs font-mono font-bold text-black dark:text-white md:inline-flex">
-              {lang === "vi" ? `[100 XU / 4 KHUNG TIẾP THEO]` : `[100 COINS / NEXT 4 PANELS]`}
-            </span>
-          )}
 
-          {/* User Coin Balance */}
-          {onOpenCoinModal && (
-            <button
-              type="button"
-              onClick={onOpenCoinModal}
-              className="flex items-center gap-1.5 rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-900 dark:hover:bg-neutral-800 px-2.5 py-1.5 text-xs font-mono font-bold text-black dark:text-white transition-colors"
-              title={lang === "vi" ? "Nạp thêm xu" : "Top up coins"}
-            >
-              <Coins className="w-3.5 h-3.5" />
-              <span>{coinBalance} XU</span>
-            </button>
-          )}
-
-          {/* Header Action Button */}
-          {hasMore && (
-            <button
-              type="button"
-              onClick={handleContinueClick}
-              disabled={loadingMore}
-              className="flex items-center gap-1.5 rounded px-3.5 py-1.5 text-xs font-mono font-bold uppercase tracking-wider bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-colors shadow disabled:opacity-50"
-            >
+          {/* Continue Next Batch (4 Panels) */}
+          <button
+            type="button"
+            onClick={onContinueComic}
+            disabled={loadingMore}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-colors shadow-sm disabled:opacity-40"
+          >
+            {loadingMore ? (
+              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+            ) : (
               <Sparkles className="w-3.5 h-3.5" />
-              <span>
-                {loadingMore
-                  ? (lang === "vi" ? "Đang vẽ tranh..." : "Rendering...")
-                  : isFreeTier
-                    ? (lang === "vi" ? `Tạo tiếp 4 khung (Lần ${currentBatchNumber}/3 Free)` : `Next 4 Panels (Batch ${currentBatchNumber}/3 Free)`)
-                    : (lang === "vi" ? "Tạo tiếp 4 khung (100 Xu)" : "Next 4 Panels (100 Coins)")}
-              </span>
-            </button>
-          )}
+            )}
+            <span>{loadingMore ? "Đang tạo..." : "Vẽ 4 Khung Tiếp"}</span>
+          </button>
         </div>
       </header>
 
-      {/* Main Manga Gallery */}
-      <main className="flex-1 overflow-y-auto px-3 py-5 sm:px-8 sm:py-8">
-        <div className="manga-pages">
-          {pages.map((page, pageIndex) => (
-            <section className="manga-page" key={`page-${pageIndex + 1}`} aria-label={`Trang ${pageIndex + 1}`}>
-              <div className="col-span-full mb-1 flex items-center justify-between border-b border-neutral-800 pb-1.5 text-[11px] font-mono text-neutral-400">
-                <span className="flex items-center gap-2 text-white font-bold">
-                  <span>[TRANG {pageIndex + 1}]</span>
-                  <span>(Khung {pageIndex * 4 + 1} - {pageIndex * 4 + page.length})</span>
-                </span>
-                <span className="text-neutral-500">NarrAI 2D Manga Studio</span>
-              </div>
-              {page.map((panel, panelIndex) => {
-                const globalIndex = pageIndex * 4 + panelIndex;
+      {/* ========================================================= */}
+      {/* 3-COLUMN WORKSPACE BODY */}
+      {/* ========================================================= */}
+      <div className="flex-1 flex min-h-0 overflow-hidden">
+        
+        {/* ========================================================= */}
+        {/* B. LEFT SIDEBAR — SCENE & PANEL NAVIGATOR */}
+        {/* ========================================================= */}
+        <aside className="w-64 border-r border-neutral-200 dark:border-white/10 bg-white dark:bg-[#111111] p-3.5 hidden md:flex flex-col justify-between shrink-0 overflow-y-auto select-none">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-neutral-200 dark:border-neutral-800">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-neutral-500">
+                Phân Cảnh Manga
+              </span>
+              <span className="text-[10px] font-mono text-neutral-400">
+                [{panels.length} Khung]
+              </span>
+            </div>
+
+            {/* List of Panels */}
+            <div className="space-y-1.5">
+              {panels.map((p, idx) => {
+                const isLoaded = loadedPanels[idx];
+                const isError = errorPanels[idx];
+                const isRendering = activeQueueIndex === idx && !isLoaded && !isError;
+                const isSelected = selectedPanelIdx === idx;
+
+                const pId = p.id || p.panel_id;
+                const rUrl = p.image_url || (pId ? `/api/comic/image/${pId}` : "");
+                const fUrl = rUrl ? api.getComicImageUrl(rUrl) : "";
+
                 return (
-                  <ComicPanelFrame
-                    key={panel.id || panel.panel_id || `${pageIndex}-${panelIndex}`}
-                    panel={panel}
-                    t={t}
-                    lang={lang}
-                    slot={panelIndex + 1}
-                    globalIndex={globalIndex}
-                    canLoad={globalIndex <= activeQueueIndex}
-                    activeQueueIndex={activeQueueIndex}
-                    onPanelDone={() => handlePanelDone(globalIndex)}
-                  />
-                );
-              })}
-            </section>
-          ))}
-        </div>
-
-        {/* Loading Indicator */}
-        {loadingMore && (
-          <div className="my-8 flex flex-col items-center justify-center gap-3 rounded border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 p-8 text-center shadow-lg font-mono" role="status">
-            <span className="text-sm font-bold uppercase tracking-widest text-black dark:text-white">
-              [ĐANG PHÂN TÍCH KỊCH BẢN VÀ VẼ TIẾP 4 KHUNG TRANH...]
-            </span>
-            <p className="text-xs text-neutral-500 max-w-md">
-              {lang === "vi" 
-                ? "Hệ thống đang bảo toàn Visual DNA nhân vật và bối cảnh lịch sử qua ComfyUI GPU..." 
-                : "Rendering sequential manga panels with consistent Visual DNA..."}
-            </p>
-          </div>
-        )}
-
-        {/* Continuation Action Banner at bottom of pages */}
-        {!loadingMore && (
-          <div className="mx-auto my-8 max-w-2xl">
-            {hasMore ? (
-              <div className="rounded border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-950 p-6 text-center shadow font-mono">
-                {isFreeTier ? (
-                  <>
-                    <div className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2">
-                      [QUYỀN LỢI MIỄN PHÍ]
-                    </div>
-                    <h3 className="text-base font-bold text-black dark:text-white">
-                      {lang === "vi" 
-                        ? `Còn ${remainingFreeBatches} đợt tạo tranh MIỄN PHÍ!` 
-                        : `You have ${remainingFreeBatches} FREE panel batches remaining!`}
-                    </h3>
-                    <p className="mt-1.5 text-xs text-neutral-600 dark:text-neutral-400">
-                      {lang === "vi" 
-                        ? `Đã tạo ${totalPanels}/12 khung miễn phí. Sau 12 khung, mỗi đợt 4 khung tiếp theo sẽ có phí 100 xu.` 
-                        : `${totalPanels}/12 free panels generated. After 12 panels, each batch costs 100 coins.`}
-                    </p>
-                    <div className="mt-5 flex justify-center">
-                      <button
-                        type="button"
-                        onClick={handleContinueClick}
-                        className="rounded px-6 py-2.5 text-xs font-mono font-bold uppercase tracking-wider bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-colors shadow"
-                      >
-                        <span>{lang === "vi" ? `[TẠO TIẾP 4 KHUNG TRANH - ĐỢT ${currentBatchNumber}/3 FREE]` : `[GENERATE NEXT 4 PANELS - BATCH ${currentBatchNumber}/3 FREE]`}</span>
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2">
-                      [GIA HẠN MANGA]
-                    </div>
-                    <h3 className="text-base font-bold text-black dark:text-white">
-                      {lang === "vi" ? "Tiếp tục sáng tác 4 khung tranh Manga" : "Continue Manga with 4 Next Panels"}
-                    </h3>
-                    <p className="mt-1.5 text-xs text-neutral-600 dark:text-neutral-400">
-                      {lang === "vi" 
-                        ? `Đã hoàn thành 12 khung miễn phí. Chi phí cho 4 khung tiếp theo: 100 xu (Số dư hiện tại: ${coinBalance} xu).` 
-                        : `Free tier completed. Next 4 panels cost 100 coins (Your balance: ${coinBalance} coins).`}
-                    </p>
-                    <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
-                      {coinBalance < 100 ? (
-                        <button
-                          type="button"
-                          onClick={onOpenCoinModal}
-                          className="rounded px-6 py-2.5 text-xs font-mono font-bold uppercase tracking-wider bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-colors shadow"
-                        >
-                          <span>{lang === "vi" ? `[NẠP THÊM XU - HIỆN CÓ ${coinBalance}/100 XU]` : `[TOP UP COINS - HAVE ${coinBalance}/100 COINS]`}</span>
-                        </button>
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setSelectedPanelIdx(idx)}
+                    className={`w-full text-left p-2 rounded-lg border transition-all flex items-center gap-2.5 ${
+                      isSelected
+                        ? "border-black dark:border-white bg-neutral-100 dark:bg-[#171717] shadow-sm"
+                        : "border-neutral-200 dark:border-neutral-800/80 hover:bg-neutral-50 dark:hover:bg-neutral-900"
+                    }`}
+                  >
+                    {/* Thumbnail preview */}
+                    <div className="relative w-10 h-10 rounded bg-black overflow-hidden shrink-0 border border-neutral-700">
+                      {fUrl && isLoaded ? (
+                        <img src={fUrl} alt="" className="w-full h-full object-cover" />
                       ) : (
-                        <button
-                          type="button"
-                          onClick={handleContinueClick}
-                          className="rounded px-6 py-2.5 text-xs font-mono font-bold uppercase tracking-wider bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-colors shadow"
-                        >
-                          <span>{lang === "vi" ? "[DÙNG 100 XU ĐỂ TẠO TIẾP 4 KHUNG TRANH]" : "[SPEND 100 COINS TO CREATE NEXT 4 PANELS]"}</span>
-                        </button>
+                        <div className="w-full h-full flex items-center justify-center text-[9px] font-mono text-neutral-500 font-bold">
+                          #{idx + 1}
+                        </div>
                       )}
                     </div>
-                  </>
-                )}
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between text-[10px] font-mono">
+                        <span className="font-bold text-black dark:text-white">Khung {idx + 1}</span>
+                        {isLoaded ? (
+                          <span className="text-emerald-500 font-bold">Xong</span>
+                        ) : isRendering ? (
+                          <span className="text-amber-500 font-bold animate-pulse">Đang vẽ</span>
+                        ) : isError ? (
+                          <span className="text-red-500 font-bold">Lỗi</span>
+                        ) : (
+                          <span className="text-neutral-500">Chờ</span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-neutral-500 truncate mt-0.5">
+                        {p.dialogue_text || p.image_prompt || "Không có thoại"}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Bottom batch info */}
+          <div className="pt-3 border-t border-neutral-200 dark:border-neutral-800 text-[10px] font-mono text-neutral-500">
+            Trang manga đen trắng · Định dạng 4 panel / trang.
+          </div>
+        </aside>
+
+        {/* ========================================================= */}
+        {/* C. CENTER — MANGA CANVAS */}
+        {/* ========================================================= */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-8 flex justify-center">
+          <div className="w-full max-w-4xl space-y-10">
+            {pages.map((pagePanels, pageIndex) => (
+              <article
+                key={pageIndex}
+                className="rounded-2xl border border-neutral-300 dark:border-white/10 bg-white dark:bg-[#111111] p-5 sm:p-10 shadow-xl"
+              >
+                {/* Manga Page Header */}
+                <div className="flex items-center justify-between pb-4 mb-6 border-b border-neutral-200 dark:border-neutral-800 text-xs font-mono text-neutral-500">
+                  <span className="uppercase tracking-widest font-bold">
+                    [TRANG {pageIndex + 1}] · BẢN THẢO TRUYỆN TRANH ĐẠI VIỆT
+                  </span>
+                  <span>4 Khung / Trang</span>
+                </div>
+
+                {/* 2-Column Sequential Manga Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  {pagePanels.map((panel, pIdx) => {
+                    const globalIdx = pageIndex * 4 + pIdx;
+                    const parsed = parseComicDialogue(panel.dialogue_text || "");
+                    const dialogueText = parsed.text || sanitizeComicCaption(panel.dialogue_text || "");
+                    const speakerName = parsed.speaker;
+                    const isDialogue = parsed.isDialogue;
+
+                    const pIdentifier = panel.id || panel.panel_id;
+                    const rawUrl = panel.image_url || (pIdentifier ? `/api/comic/image/${pIdentifier}` : "");
+                    const fullUrl = rawUrl ? api.getComicImageUrl(rawUrl) : "";
+                    const retryKey = retryKeys[globalIdx] || 0;
+
+                    const canLoad = activeQueueIndex >= globalIdx;
+                    const isLoaded = loadedPanels[globalIdx];
+                    const isError = errorPanels[globalIdx];
+                    const shouldFetch = canLoad && !!fullUrl;
+                    const imageUrl = shouldFetch
+                      ? `${fullUrl}${fullUrl.includes("?") ? "&" : "?"}v=${retryKey}`
+                      : "";
+
+                    return (
+                      <figure
+                        key={pIdx}
+                        onClick={() => setSelectedPanelIdx(globalIdx)}
+                        className={`group relative rounded-xl border-2 transition-all p-3 cursor-pointer ${
+                          selectedPanelIdx === globalIdx
+                            ? "border-black dark:border-white bg-neutral-50 dark:bg-[#171717] shadow-md"
+                            : "border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#080808]"
+                        }`}
+                      >
+                        {/* Artwork container */}
+                        <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-black border border-neutral-800">
+                          {/* Rendering / Queue state */}
+                          {!shouldFetch && !isLoaded && !isError && (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center bg-neutral-900/90 font-mono z-10">
+                              <Clock className="w-5 h-5 text-neutral-500 mb-1.5 animate-pulse" />
+                              <span className="text-[11px] font-bold text-neutral-400 uppercase">
+                                [XẾP HÀNG GPU: KHUNG {globalIdx + 1}]
+                              </span>
+                            </div>
+                          )}
+
+                          {shouldFetch && imageUrl && !isLoaded && !isError && (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center bg-neutral-900/90 font-mono z-10">
+                              <RefreshCw className="w-5 h-5 animate-spin text-white mb-1.5" />
+                              <span className="text-[11px] font-bold text-white uppercase">
+                                Đang vẽ ComfyUI...
+                              </span>
+                            </div>
+                          )}
+
+                          {shouldFetch && imageUrl && !isError ? (
+                            <img
+                              src={imageUrl}
+                              alt={`Khung ${globalIdx + 1}`}
+                              loading="eager"
+                              onLoad={() => handlePanelDone(globalIdx)}
+                              onError={() => handlePanelError(globalIdx)}
+                              className={`w-full h-full object-cover transition-opacity duration-300 ${
+                                isLoaded ? "opacity-100" : "opacity-0"
+                              }`}
+                            />
+                          ) : null}
+
+                          {isError && (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center bg-neutral-950 font-mono">
+                              <AlertCircle className="w-5 h-5 text-red-500 mb-1.5" />
+                              <span className="text-[11px] font-bold text-neutral-400">
+                                Chưa tải được ảnh
+                              </span>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  retrySinglePanel(globalIdx);
+                                }}
+                                className="mt-2 px-2.5 py-1 rounded text-[10px] font-bold uppercase bg-white text-black hover:bg-neutral-200"
+                              >
+                                Thử lại
+                              </button>
+                            </div>
+                          )}
+
+                          {/* Index Badge */}
+                          <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-black/80 border border-white/20 text-[9px] font-mono font-bold text-white">
+                            #{globalIdx + 1}
+                          </span>
+                        </div>
+
+                        {/* Speech Balloon / Caption */}
+                        {dialogueText && (
+                          <div className="mt-3 p-2.5 rounded-lg bg-neutral-100 dark:bg-[#171717] border border-neutral-200 dark:border-white/10 text-xs">
+                            {speakerName ? (
+                              <p className="font-sans leading-relaxed text-black dark:text-[#F5F5F5]">
+                                <strong className="font-bold uppercase tracking-wider font-mono mr-1">
+                                  {speakerName}:
+                                </strong>
+                                <span>{dialogueText}</span>
+                              </p>
+                            ) : isDialogue ? (
+                              <p className="italic font-serif leading-relaxed text-black dark:text-[#F5F5F5]">
+                                “{dialogueText}”
+                              </p>
+                            ) : (
+                              <p className="font-sans leading-relaxed text-neutral-700 dark:text-neutral-300">
+                                {dialogueText}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </figure>
+                    );
+                  })}
+                </div>
+              </article>
+            ))}
+          </div>
+        </main>
+
+        {/* ========================================================= */}
+        {/* D. RIGHT SIDEBAR — SCENE INSPECTOR */}
+        {/* ========================================================= */}
+        <aside className="w-80 border-l border-neutral-200 dark:border-white/10 bg-white dark:bg-[#111111] p-4 hidden lg:flex flex-col justify-between shrink-0 overflow-y-auto select-none">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-neutral-200 dark:border-neutral-800">
+              <div className="flex items-center gap-2">
+                <Info className="w-4 h-4 text-neutral-500" />
+                <span className="text-xs font-mono font-bold uppercase tracking-wider text-black dark:text-white">
+                  Thông Tin Cảnh (Khung {selectedPanelIdx + 1})
+                </span>
+              </div>
+            </div>
+
+            {selectedPanel ? (
+              <div className="space-y-3.5 text-xs font-mono">
+                {/* Dialogue */}
+                <div className="p-3 rounded-lg bg-neutral-50 dark:bg-[#171717] border border-neutral-200 dark:border-white/10 space-y-1">
+                  <span className="text-[10px] text-neutral-500 uppercase font-bold block">
+                    Lời Thoại / Caption
+                  </span>
+                  <p className="text-black dark:text-[#F5F5F5] font-sans leading-relaxed">
+                    {parsedSelected?.text || selectedPanel.dialogue_text || "Không có lời thoại."}
+                  </p>
+                  {parsedSelected?.speaker && (
+                    <span className="text-[10px] text-neutral-400 block pt-1 border-t border-neutral-200 dark:border-neutral-800">
+                      Nhân vật: <strong>{parsedSelected.speaker}</strong>
+                    </span>
+                  )}
+                </div>
+
+                {/* ComfyUI Image Prompt */}
+                <div className="p-3 rounded-lg bg-neutral-50 dark:bg-[#171717] border border-neutral-200 dark:border-white/10 space-y-1">
+                  <span className="text-[10px] text-neutral-500 uppercase font-bold block">
+                    ComfyUI Prompt
+                  </span>
+                  <p className="text-[11px] text-neutral-700 dark:text-neutral-300 leading-relaxed break-words font-mono">
+                    {selectedPanel.image_prompt || "manga style, black and white ink, dynamic camera angle"}
+                  </p>
+                </div>
+
+                {/* Layout Type */}
+                <div className="p-3 rounded-lg bg-neutral-50 dark:bg-[#171717] border border-neutral-200 dark:border-white/10 flex items-center justify-between">
+                  <span className="text-[10px] text-neutral-500 uppercase font-bold">
+                    Tỷ Lệ Khung
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-black text-white dark:bg-white dark:text-black font-bold text-[10px]">
+                    {selectedPanel.layout_type?.toUpperCase() || "SQUARE"}
+                  </span>
+                </div>
+
+                {/* Single Panel Action */}
+                <button
+                  type="button"
+                  onClick={() => retrySinglePanel(selectedPanelIdx)}
+                  className="w-full py-2 rounded-lg border border-neutral-300 dark:border-white/10 hover:bg-neutral-100 dark:hover:bg-neutral-800 font-bold uppercase tracking-wider text-black dark:text-white transition-colors flex items-center justify-center gap-1.5"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Vẽ Lại Khung Này</span>
+                </button>
               </div>
             ) : (
-              <div className="rounded border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-950 p-6 text-center shadow font-mono">
-                <div className="text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2">
-                  [HOÀN TẤT CHUYỂN THỂ]
-                </div>
-                <h3 className="text-base font-bold text-black dark:text-white">
-                  {lang === "vi" ? "Đã chuyển thể toàn bộ nội dung bản thảo hiện tại!" : "All current manuscript text has been adapted!"}
-                </h3>
-                <p className="mt-1 text-xs text-neutral-600 dark:text-neutral-400">
-                  {lang === "vi" 
-                    ? "Hãy quay lại Bản thảo chữ để viết tiếp chương tiếp theo trước khi vẽ thêm tranh." 
-                    : "Return to the text editor to draft the next chapter before rendering more panels."}
-                </p>
-                <div className="mt-4 flex justify-center">
-                  <button
-                    type="button"
-                    onClick={onBackToEditor}
-                    className="rounded px-5 py-2 text-xs font-mono font-bold uppercase tracking-wider bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-colors shadow"
-                  >
-                    <span>{lang === "vi" ? "[QUAY LẠI SÁNG TÁC BẢN THẢO]" : "[BACK TO MANUSCRIPT EDITOR]"}</span>
-                  </button>
-                </div>
+              <div className="p-4 text-center text-xs text-neutral-500">
+                Hãy chọn một khung truyện để xem thông số chi tiết.
               </div>
             )}
           </div>
-        )}
-      </main>
+
+          <div className="p-2.5 rounded border border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-[#171717] text-[10px] font-mono text-neutral-500">
+            Mỗi khung truyện được tối ưu hóa cho mô hình sinh tranh đen trắng ComfyUI.
+          </div>
+        </aside>
+
+      </div>
     </div>
   );
 }
+
+export default ComicViewer;

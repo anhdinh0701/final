@@ -28,8 +28,8 @@ interface Props {
   onOpenCoinTopup?: () => void;
   onOpenMessenger?: () => void;
   unreadCount?: number;
-  activeTab?: "setup" | "editor" | "comic" | "posts" | "pipeline";
-  onTabChange?: (tab: "setup" | "editor" | "comic" | "posts" | "pipeline") => void;
+  activeTab?: "setup" | "editor" | "comic" | "lore" | "motion" | "posts" | "pipeline";
+  onTabChange?: (tab: "setup" | "editor" | "comic" | "lore" | "motion" | "posts" | "pipeline") => void;
   hasActiveStory?: boolean;
   hasActiveComic?: boolean;
 }

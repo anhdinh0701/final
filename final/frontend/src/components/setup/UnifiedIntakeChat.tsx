@@ -20,6 +20,7 @@ import { Language, translations } from "@/lib/i18n";
 import { ChatMessage, StoryLength } from "@/lib/types";
 import { api } from "@/lib/api";
 import type { ModelTier } from "@/components/morphicons/ModelSelectorMorphicon";
+import { AnimatedWeavesilkBackground } from "@/components/canvas/AnimatedWeavesilkBackground";
 
 
 /**
@@ -766,8 +767,11 @@ export function UnifiedIntakeChat({
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-neutral-50 dark:bg-black text-black dark:text-white relative font-sans">
-      <header className="h-14 border-b border-neutral-200 dark:border-neutral-800 px-4 sm:px-6 flex items-center justify-between shrink-0 bg-white dark:bg-black z-10">
+    <div className="flex flex-col h-full w-full bg-neutral-50 dark:bg-black text-black dark:text-white relative font-sans overflow-hidden">
+      {/* Animated WeaveSilk Generative Art Background */}
+      <AnimatedWeavesilkBackground intensity={0.85} interactive={true} />
+
+      <header className="h-14 border-b border-neutral-200/80 dark:border-neutral-800/80 px-4 sm:px-6 flex items-center justify-between shrink-0 bg-white/70 dark:bg-black/70 backdrop-blur-md z-10">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 text-black dark:text-white flex items-center justify-center shrink-0">
             <Bot className="w-4 h-4" />
@@ -837,19 +841,19 @@ export function UnifiedIntakeChat({
       </header>
 
       {/* Main Conversation Scroll Area */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-8 pb-6">
+      <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-8 pb-6 relative z-10">
         <div className="max-w-4xl mx-auto w-full px-4 flex flex-col min-h-full justify-between">
 
           {/* Empty State: Warm Hero & 4 Starter Prompt Pills */}
           {messages.length === 0 && (
             <div className="my-auto py-6 sm:py-10 text-center flex flex-col items-center animate-fadeIn">
-              <div className="px-3 py-1 rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 text-black dark:text-white font-mono text-sm font-bold mb-4">
+              <div className="px-3 py-1 rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100/90 dark:bg-neutral-900/90 backdrop-blur-md text-black dark:text-white font-mono text-sm font-bold mb-4 shadow-sm">
                 [NARR AI]
               </div>
-              <h1 className="text-xl sm:text-2xl font-extrabold text-black dark:text-white tracking-tight mb-2">
+              <h1 className="text-xl sm:text-2xl font-extrabold text-black dark:text-white tracking-tight mb-2 drop-shadow-sm">
                 {t.intake_welcome_title || (lang === "vi" ? "Bạn đang ấp ủ câu chuyện gì hôm nay?" : "What story are you dreaming of today?")}
               </h1>
-              <p className="text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 max-w-lg mb-8 leading-relaxed">
+              <p className="text-xs sm:text-sm text-neutral-600 dark:text-neutral-300 max-w-lg mb-8 leading-relaxed">
                 {t.intake_welcome_subtitle || (lang === "vi"
                   ? "Trò chuyện tự do bằng bất kỳ ý tưởng nào. NarrAI am hiểu mọi thể loại văn học, tôn trọng sự thật lịch sử và đồng hành cùng bạn từ ý niệm đầu tiên đến tác phẩm hoàn chỉnh."
                   : "Chat freely with any premise. NarrAI understands all literary genres, honors historical truth, and walks with you from initial spark to complete masterpiece.")}
@@ -863,7 +867,7 @@ export function UnifiedIntakeChat({
                     <button
                       key={item.id}
                       onClick={() => handleSend(item.prompt)}
-                      className="p-5 rounded min-h-[140px] border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:border-black dark:hover:border-white transition-colors text-left group shadow-xs flex flex-col justify-between"
+                      className="p-5 rounded min-h-[140px] border border-neutral-200/80 dark:border-neutral-800/80 bg-white/85 dark:bg-neutral-950/80 hover:bg-white dark:hover:bg-neutral-900/95 hover:border-black dark:hover:border-white transition-all backdrop-blur-md text-left group shadow-xs hover:shadow-md flex flex-col justify-between"
                     >
                       <div>
                         <div className="flex items-center gap-2 mb-2 font-sans">
@@ -1022,7 +1026,7 @@ export function UnifiedIntakeChat({
       </div>
 
       {/* Bottom Input Dock */}
-      <div className="shrink-0 p-3 sm:p-4 bg-neutral-50 dark:bg-black border-t border-neutral-200 dark:border-neutral-800 z-20">
+      <div className="shrink-0 p-3 sm:p-4 bg-neutral-50/75 dark:bg-black/75 backdrop-blur-md border-t border-neutral-200/80 dark:border-neutral-800/80 z-20">
         <div className="max-w-4xl mx-auto w-full px-4">
 
           {/* Quick Guidance & Readiness Notification Banner if ready */}
@@ -1047,7 +1051,7 @@ export function UnifiedIntakeChat({
           )}
 
           {/* Input Capsule */}
-          <div className="bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded p-2.5 sm:p-3 flex flex-col gap-2.5">
+          <div className="bg-white/90 dark:bg-neutral-950/90 backdrop-blur-md border border-neutral-200 dark:border-neutral-800 rounded p-2.5 sm:p-3 flex flex-col gap-2.5 shadow-sm">
 
             {/* Controls Bar: Model Tier Selector & Story Length Pill */}
             <div className="flex items-center justify-between gap-2 flex-wrap border-b border-neutral-200 dark:border-neutral-800 pb-2 px-1 font-mono text-xs">

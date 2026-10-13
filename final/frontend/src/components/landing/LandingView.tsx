@@ -3,17 +3,18 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { translations, Language } from "@/lib/i18n";
-import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
+import { VietnamFlagHeroBackground } from "@/components/canvas/VietnamFlagHeroBackground";
 
 interface Props {
   lang: Language;
   onLanguageChange: (lang: Language) => void;
   onOpenAuth: () => void;
   onExploreCommunity?: () => void;
+  onNavigateStudio?: (studio: "editor" | "comic" | "lore" | "motion") => void;
 }
 
-export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommunity }: Props) {
+export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommunity, onNavigateStudio }: Props) {
   const t = translations[lang];
   const [activeHeroTab, setActiveHeroTab] = useState<"prose" | "manga">("manga");
   const [activeWorldIdx, setActiveWorldIdx] = useState<number>(0);
@@ -106,13 +107,24 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
   ];
 
   return (
-    <main className="landing-backdrop min-h-screen px-2.5 py-2.5 sm:px-6 sm:py-6 text-black dark:text-white bg-neutral-100 dark:bg-black font-sans transition-colors">
-      <div className="landing-shell mx-auto max-w-[1440px] overflow-hidden rounded-2xl border border-neutral-200/80 bg-white/95 shadow-2xl dark:border-neutral-800/80 dark:bg-neutral-950/95 backdrop-blur-sm">
+    <main
+      className="landing-backdrop min-h-screen px-2.5 py-2.5 sm:px-6 sm:py-6 text-neutral-900 bg-[#F4EFE6] font-sans relative overflow-hidden"
+      style={{ backgroundColor: "#F4EFE6" }}
+    >
+      <div
+        className="landing-shell relative mx-auto max-w-[1440px] overflow-hidden rounded-2xl border border-neutral-300/80 bg-[#FAF7F2] shadow-2xl backdrop-blur-sm"
+        style={{ backgroundColor: "#FAF7F2" }}
+      >
         
+        {/* ========================================================= */}
+        {/* VIETNAM FLAG LIGHT RIBBONS GENERATIVE HERO BACKGROUND */}
+        {/* ========================================================= */}
+        <VietnamFlagHeroBackground />
+
         {/* ========================================================= */}
         {/* HEADER / NAVIGATION BAR */}
         {/* ========================================================= */}
-        <header className="sticky top-0 z-40 border-b border-neutral-200/90 dark:border-neutral-800/90 bg-white/90 dark:bg-neutral-950/90 backdrop-blur-md">
+        <header className="sticky top-0 z-40 border-b border-neutral-200/80 bg-[#FAF7F2]/90 backdrop-blur-md">
           <nav
             aria-label={lang === "vi" ? "Điều hướng chính" : "Main navigation"}
             className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3.5 sm:px-8 lg:px-10"
@@ -128,53 +140,53 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
               title={lang === "vi" ? "Nhấp để phát lại hiệu ứng WeaveSilk Intro" : "Click to replay WeaveSilk cinematic intro"}
               aria-label="NarrAI Home"
             >
-              <div className="relative h-9 w-9 rounded-md overflow-hidden bg-black border border-neutral-800 group-hover:border-neutral-500 transition-colors">
+              <div className="relative h-9 w-9 rounded-md overflow-hidden bg-white border border-neutral-300 group-hover:border-neutral-500 transition-colors shadow-sm">
                 <Image
                   src="/assets/narrai_emblem.png"
                   alt="NARR AI Official Emblem"
                   fill
-                  className="object-contain p-0.5 group-hover:scale-105 transition-transform"
+                  className="object-contain p-0.5 filter brightness-[0.2] contrast-[1.4] group-hover:scale-105 transition-transform"
                   priority
                 />
               </div>
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-lg sm:text-xl font-bold tracking-widest uppercase">
+                  <span className="font-mono text-lg sm:text-xl font-bold tracking-widest uppercase text-neutral-950">
                     NarrAI
                   </span>
-                  <span className="rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 px-1.5 py-0.2 text-[9px] font-mono font-bold uppercase tracking-wider text-black dark:text-white">
+                  <span className="rounded border border-amber-400/60 bg-amber-50 px-1.5 py-0.2 text-[9px] font-mono font-bold uppercase tracking-wider text-amber-900">
                     {t.pro_badge}
                   </span>
                 </div>
-                <span className="hidden sm:inline text-[9px] font-mono tracking-wider text-neutral-500 uppercase">
+                <span className="hidden sm:inline text-[9px] font-mono tracking-wider text-neutral-600 uppercase">
                   AI Novel & Manga Studio
                 </span>
               </div>
             </button>
 
             {/* Quick In-page Navigation Anchors (Desktop) */}
-            <div className="hidden lg:flex items-center gap-6 font-mono text-xs uppercase tracking-wider text-neutral-600 dark:text-neutral-400">
+            <div className="hidden lg:flex items-center gap-6 font-mono text-xs uppercase tracking-wider text-neutral-700">
               <a
                 href="#studios"
-                className="hover:text-black dark:hover:text-white transition-colors"
+                className="hover:text-black transition-colors"
               >
                 {t.nav_studios}
               </a>
               <a
                 href="#recent-projects"
-                className="hover:text-black dark:hover:text-white transition-colors"
+                className="hover:text-black transition-colors"
               >
                 {t.nav_recent_projects}
               </a>
               <a
                 href="#featured-worlds"
-                className="hover:text-black dark:hover:text-white transition-colors"
+                className="hover:text-black transition-colors"
               >
                 {t.nav_featured_worlds}
               </a>
               <a
                 href="#heritage"
-                className="hover:text-black dark:hover:text-white transition-colors"
+                className="hover:text-black transition-colors"
               >
                 {t.nav_heritage}
               </a>
@@ -183,11 +195,10 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
             {/* Controls & Primary Action */}
             <div className="flex items-center gap-2 sm:gap-3">
               <LanguageSwitcher currentLang={lang} onLanguageChange={onLanguageChange} />
-              <ThemeToggle lang={lang} />
               <button
                 type="button"
                 onClick={onOpenAuth}
-                className="rounded-lg px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 shadow-md transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black dark:focus:ring-white"
+                className="rounded-lg px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider bg-neutral-950 text-white hover:bg-neutral-800 shadow-md transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-900"
               >
                 {t.login}
               </button>
@@ -198,23 +209,23 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
         {/* ========================================================= */}
         {/* HERO SECTION */}
         {/* ========================================================= */}
-        <section className="relative mx-auto max-w-7xl px-4 pb-14 pt-8 sm:px-8 sm:pb-20 sm:pt-12 lg:px-10 lg:pb-24 lg:pt-14">
+        <section className="relative z-10 mx-auto max-w-7xl px-4 pb-14 pt-8 sm:px-8 sm:pb-20 sm:pt-12 lg:px-10 lg:pb-24 lg:pt-14">
           <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
             
             {/* Left: Headline, Value Proposition, Action CTAs */}
             <div className="text-center lg:text-left">
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-neutral-300 dark:border-neutral-800 bg-neutral-100/70 dark:bg-neutral-900/70 px-3.5 py-1 text-[11px] font-mono font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-neutral-300 bg-white/90 px-3.5 py-1 text-[11px] font-mono font-bold uppercase tracking-wider text-neutral-800 shadow-sm backdrop-blur-sm">
+                <span className="h-1.5 w-1.5 rounded-full bg-red-600 animate-pulse" />
                 <span>[GEN-AI NARRATIVE PLATFORM]</span>
                 <span>—</span>
                 <span>{t.hero_badge}</span>
               </div>
 
-              <h1 className="font-serif text-3xl font-bold leading-[1.2] tracking-tight sm:text-5xl lg:text-6xl text-black dark:text-white">
+              <h1 className="font-serif text-3xl font-bold leading-[1.2] tracking-tight sm:text-5xl lg:text-6xl text-neutral-950">
                 {t.hero_title}
               </h1>
 
-              <p className="mt-5 max-w-xl mx-auto lg:mx-0 text-base leading-relaxed text-neutral-600 dark:text-neutral-400 sm:text-lg">
+              <p className="mt-5 max-w-xl mx-auto lg:mx-0 text-base leading-relaxed text-neutral-700 font-medium sm:text-lg">
                 {t.hero_sub}
               </p>
 
@@ -223,42 +234,42 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
                 <button
                   type="button"
                   onClick={onOpenAuth}
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg px-7 py-3.5 text-sm font-mono font-bold uppercase tracking-wider bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-all shadow-xl cursor-pointer"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg px-7 py-3.5 text-sm font-mono font-bold uppercase tracking-wider bg-neutral-950 text-white hover:bg-neutral-800 transition-all shadow-xl cursor-pointer"
                 >
                   <span>{t.hero_cta}</span>
                   <span className="text-xs">➔</span>
                 </button>
                 <a
                   href="#recent-projects"
-                  className="inline-flex min-h-12 items-center justify-center rounded-lg border border-neutral-300 dark:border-neutral-700 bg-transparent px-5 py-3.5 text-sm font-mono font-bold uppercase tracking-wider text-black dark:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors text-center"
+                  className="inline-flex min-h-12 items-center justify-center rounded-lg border border-neutral-300 bg-white/90 px-5 py-3.5 text-sm font-mono font-bold uppercase tracking-wider text-neutral-900 hover:bg-white shadow-sm transition-colors text-center"
                 >
                   {lang === "vi" ? "Xem Dự Án Mẫu" : "View Sample Works"}
                 </a>
               </div>
 
               {/* Verified Trust Stats */}
-              <div className="mt-8 grid grid-cols-3 gap-3 border-t border-neutral-200 dark:border-neutral-800 pt-5 text-center lg:text-left">
+              <div className="mt-8 grid grid-cols-3 gap-3 border-t border-neutral-300/80 pt-5 text-center lg:text-left">
                 <div>
-                  <div className="font-serif text-lg sm:text-xl font-bold text-black dark:text-white">
+                  <div className="font-serif text-lg sm:text-xl font-bold text-neutral-950">
                     35,000+
                   </div>
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-500">
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-600 font-medium">
                     {lang === "vi" ? "Từ bản thảo AI" : "Prose drafted"}
                   </div>
                 </div>
                 <div>
-                  <div className="font-serif text-lg sm:text-xl font-bold text-black dark:text-white">
+                  <div className="font-serif text-lg sm:text-xl font-bold text-neutral-950">
                     1,200+
                   </div>
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-500">
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-600 font-medium">
                     {lang === "vi" ? "Khung manga mực" : "Manga panels"}
                   </div>
                 </div>
                 <div>
-                  <div className="font-serif text-lg sm:text-xl font-bold text-black dark:text-white">
+                  <div className="font-serif text-lg sm:text-xl font-bold text-neutral-950">
                     100%
                   </div>
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-500">
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-600 font-medium">
                     {lang === "vi" ? "Bản quyền tác giả" : "Creator IP"}
                   </div>
                 </div>
@@ -267,28 +278,28 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
 
             {/* Right: Integrated Dual-Media Showcase Preview (Prose + Manga Panel) */}
             <div className="relative mx-auto w-full max-w-[540px]">
-              <div className="relative rounded-2xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 p-3 sm:p-5 shadow-2xl overflow-hidden">
+              <div className="relative rounded-2xl border border-neutral-200/90 bg-white/92 backdrop-blur-md p-3 sm:p-5 shadow-2xl overflow-hidden">
                 
                 {/* Live Preview Header with Tabs */}
-                <div className="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 pb-3 mb-3">
+                <div className="flex items-center justify-between border-b border-neutral-200/80 pb-3 mb-3">
                   <div className="flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-red-500/80" />
-                    <span className="h-2 w-2 rounded-full bg-amber-500/80" />
-                    <span className="h-2 w-2 rounded-full bg-emerald-500/80" />
-                    <span className="ml-2 font-mono text-[10px] uppercase tracking-widest text-neutral-500 font-bold">
+                    <span className="h-2 w-2 rounded-full bg-red-500" />
+                    <span className="h-2 w-2 rounded-full bg-yellow-400" />
+                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                    <span className="ml-2 font-mono text-[10px] uppercase tracking-widest text-neutral-600 font-bold">
                       {t.live_preview_badge}
                     </span>
                   </div>
 
                   {/* Mode switcher tab buttons */}
-                  <div className="flex rounded-md border border-neutral-300 dark:border-neutral-700 bg-neutral-200/50 dark:bg-neutral-800/50 p-0.5 text-[10px] font-mono font-bold">
+                  <div className="flex rounded-md border border-neutral-200 bg-neutral-100 p-0.5 text-[10px] font-mono font-bold">
                     <button
                       type="button"
                       onClick={() => setActiveHeroTab("manga")}
                       className={`px-2.5 py-1 rounded transition-colors ${
                         activeHeroTab === "manga"
-                          ? "bg-white dark:bg-black text-black dark:text-white shadow-sm"
-                          : "text-neutral-500 hover:text-black dark:hover:text-white"
+                          ? "bg-neutral-950 text-white shadow-sm"
+                          : "text-neutral-600 hover:text-neutral-950"
                       }`}
                     >
                       Manga Panel
@@ -298,8 +309,8 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
                       onClick={() => setActiveHeroTab("prose")}
                       className={`px-2.5 py-1 rounded transition-colors ${
                         activeHeroTab === "prose"
-                          ? "bg-white dark:bg-black text-black dark:text-white shadow-sm"
-                          : "text-neutral-500 hover:text-black dark:hover:text-white"
+                          ? "bg-neutral-950 text-white shadow-sm"
+                          : "text-neutral-600 hover:text-neutral-950"
                       }`}
                     >
                       Bản Thảo
@@ -310,8 +321,8 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
                 {/* Tab A: Manga Adaptation Interactive View */}
                 {activeHeroTab === "manga" ? (
                   <div className="space-y-3">
-                    {/* Main Establishing Battle Panel (Image 4: manga_battle_scene.png) */}
-                    <div className="relative aspect-[16/10] w-full rounded-xl overflow-hidden border border-neutral-300 dark:border-neutral-700 bg-black group">
+                    {/* Main Establishing Battle Panel */}
+                    <div className="relative aspect-[16/10] w-full rounded-xl overflow-hidden border border-neutral-200 bg-black group shadow-sm">
                       <Image
                         src="/assets/landing/manga_battle_scene.png"
                         alt="Chiến trận bãi cọc Bạch Đằng - Manga Studio"
@@ -329,15 +340,15 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
                             "Mặt nước dậy sóng, hàng cọc nhọn vươn lên đón đợi đại quân..."
                           </p>
                         </div>
-                        <span className="text-[10px] font-mono text-neutral-400 font-bold">
+                        <span className="text-[10px] font-mono text-neutral-300 font-bold">
                           100% INK
                         </span>
                       </div>
                     </div>
 
-                    {/* Secondary Dual Inset Strip (Image 1: Character Lore & Image 3: Heroine Portrait) */}
+                    {/* Secondary Dual Inset Strip */}
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="relative aspect-[4/3] rounded-lg overflow-hidden border border-neutral-300 dark:border-neutral-700 bg-neutral-900 group">
+                      <div className="relative aspect-[4/3] rounded-lg overflow-hidden border border-neutral-200 bg-neutral-900 group shadow-sm">
                         <Image
                           src="/assets/landing/hero_character_aodai.png"
                           alt="Nhân vật cổ trang Việt - Character Lore"
@@ -350,7 +361,7 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
                         </span>
                       </div>
 
-                      <div className="relative aspect-[4/3] rounded-lg overflow-hidden border border-neutral-300 dark:border-neutral-700 bg-neutral-900 group">
+                      <div className="relative aspect-[4/3] rounded-lg overflow-hidden border border-neutral-200 bg-neutral-900 group shadow-sm">
                         <Image
                           src="/assets/landing/manga_heroine_portrait.png"
                           alt="Chân dung manga hiệp nữ"
@@ -366,39 +377,39 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
                   </div>
                 ) : (
                   /* Tab B: Prose Manuscript View */
-                  <div className="rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-black p-4 space-y-3 font-serif">
-                    <div className="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 pb-2">
-                      <span className="text-[10px] font-mono uppercase tracking-widest text-neutral-500 font-bold">
+                  <div className="rounded-xl border border-neutral-200 bg-white p-4 space-y-3 font-serif shadow-sm">
+                    <div className="flex items-center justify-between border-b border-neutral-200 pb-2">
+                      <span className="text-[10px] font-mono uppercase tracking-widest text-neutral-600 font-bold">
                         BẢN THẢO CHƯƠNG 01 · DÃ SỬ
                       </span>
-                      <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">
+                      <span className="text-[10px] font-mono text-emerald-600 font-bold">
                         ● Đang đồng bộ với Copilot
                       </span>
                     </div>
 
-                    <h3 className="text-base font-bold text-black dark:text-white">
+                    <h3 className="text-base font-bold text-neutral-950">
                       Hồi 1: Đêm Trăng Cửa Sông Bạch Đằng
                     </h3>
 
-                    <p className="text-xs leading-relaxed text-neutral-700 dark:text-neutral-300">
+                    <p className="text-xs leading-relaxed text-neutral-700">
                       Mưa lất phất trên bến đò Vạn Kiếp. Nước triều bắt đầu rút về phía biển lớn, để lộ những đầu cọc gỗ lim đen bóng ngâm mình trong dòng phù sa nghìn năm. 
                       Người tráng sĩ khoác chiếc áo tơi nón lá, bàn tay ghì chặt chuôi kiếm cổ. Đôi mắt chàng hướng ra dòng sông mênh mông, nơi gió đông bắc đang dồn dập kéo tới...
                     </p>
 
-                    <div className="rounded border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 p-2.5 font-mono text-[11px] text-neutral-600 dark:text-neutral-400">
-                      <span className="font-bold text-black dark:text-white">🤖 Gợi ý Co-pilot: </span>
+                    <div className="rounded border border-neutral-200 bg-neutral-50 p-2.5 font-mono text-[11px] text-neutral-700">
+                      <span className="font-bold text-neutral-950">🤖 Gợi ý Co-pilot: </span>
                       <span>"Tăng thêm nhịp thở kịch tính của quân sĩ trước giờ phục kích."</span>
                     </div>
                   </div>
                 )}
 
                 {/* Footer conversion prompt */}
-                <div className="mt-3 pt-2.5 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-between text-[11px] font-mono text-neutral-500">
+                <div className="mt-3 pt-2.5 border-t border-neutral-200 flex items-center justify-between text-[11px] font-mono text-neutral-600">
                   <span>[TỰ ĐỘNG CHUYỂN THỂ]</span>
                   <button
                     type="button"
                     onClick={onOpenAuth}
-                    className="text-black dark:text-white font-bold hover:underline cursor-pointer"
+                    className="text-neutral-950 font-bold hover:underline cursor-pointer"
                   >
                     {lang === "vi" ? "Thử nghiệm phân khung ngay ➔" : "Try storyboard now ➔"}
                   </button>
@@ -409,21 +420,22 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
           </div>
         </section>
 
+
         {/* ========================================================= */}
         {/* 4 CORE STUDIOS (THẺ CHỨC NĂNG) */}
         {/* ========================================================= */}
         <section
           id="studios"
-          className="mx-auto max-w-7xl px-4 pb-16 sm:px-8 sm:pb-20 lg:px-10 border-t border-neutral-200 dark:border-neutral-800 pt-12"
+          className="relative z-10 mx-auto max-w-7xl px-4 pb-16 sm:px-8 sm:pb-20 lg:px-10 border-t border-neutral-300/80 pt-12 bg-[#FAF7F2]"
         >
           <div className="mb-10 text-center max-w-3xl mx-auto">
             <p className="text-xs font-mono font-bold uppercase tracking-widest text-neutral-500">
               {t.studios_section_eyebrow}
             </p>
-            <h2 className="mt-2 font-serif text-2xl font-bold tracking-tight text-black dark:text-white sm:text-4xl">
+            <h2 className="mt-2 font-serif text-2xl font-bold tracking-tight text-neutral-950 sm:text-4xl">
               {t.studios_section_title}
             </h2>
-            <p className="mt-3 text-sm sm:text-base text-neutral-600 dark:text-neutral-400">
+            <p className="mt-3 text-sm sm:text-base text-neutral-600">
               {t.studios_section_sub}
             </p>
           </div>
@@ -431,35 +443,35 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             
             {/* Studio 1: Story Lab */}
-            <div className="group rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50 p-5 hover:border-black dark:hover:border-white transition-all shadow-sm hover:shadow-md flex flex-col justify-between">
+            <div className="group rounded-xl border border-neutral-300/80 bg-white/90 p-5 hover:border-neutral-950 transition-all shadow-sm hover:shadow-lg flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between text-[10px] font-mono font-bold text-neutral-500 uppercase tracking-widest mb-3">
                   <span>{t.studio_story_tag}</span>
-                  <span className="rounded bg-neutral-200 dark:bg-neutral-800 px-1.5 py-0.5">[01]</span>
+                  <span className="rounded bg-neutral-100 border border-neutral-200 px-1.5 py-0.5 text-neutral-700">[01]</span>
                 </div>
-                <div className="relative aspect-[16/10] w-full rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black p-3 mb-4 flex flex-col justify-between">
+                <div className="relative aspect-[16/10] w-full rounded-lg overflow-hidden border border-neutral-200 bg-neutral-50/70 p-3 mb-4 flex flex-col justify-between">
                   <div className="space-y-1">
-                    <div className="h-1.5 w-12 bg-neutral-400 dark:bg-neutral-600 rounded" />
-                    <div className="h-2 w-full bg-neutral-200 dark:bg-neutral-800 rounded" />
-                    <div className="h-2 w-4/5 bg-neutral-200 dark:bg-neutral-800 rounded" />
-                    <div className="h-2 w-2/3 bg-neutral-200 dark:bg-neutral-800 rounded" />
+                    <div className="h-1.5 w-12 bg-neutral-400 rounded" />
+                    <div className="h-2 w-full bg-neutral-200 rounded" />
+                    <div className="h-2 w-4/5 bg-neutral-200 rounded" />
+                    <div className="h-2 w-2/3 bg-neutral-200 rounded" />
                   </div>
-                  <div className="rounded bg-neutral-100 dark:bg-neutral-900 p-1.5 text-[9px] font-mono text-neutral-600 dark:text-neutral-400 flex items-center justify-between">
+                  <div className="rounded bg-white border border-neutral-200/80 p-1.5 text-[9px] font-mono text-neutral-600 flex items-center justify-between shadow-xs">
                     <span>AI Co-pilot</span>
-                    <span className="text-emerald-500 font-bold">Ready</span>
+                    <span className="text-emerald-600 font-bold">Ready</span>
                   </div>
                 </div>
-                <h3 className="font-serif text-lg font-bold text-black dark:text-white">
+                <h3 className="font-serif text-lg font-bold text-neutral-950">
                   {t.studio_story_name}
                 </h3>
-                <p className="mt-2 text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">
+                <p className="mt-2 text-xs leading-relaxed text-neutral-600">
                   {t.studio_story_desc}
                 </p>
               </div>
               <button
                 type="button"
-                onClick={onOpenAuth}
-                className="mt-5 inline-flex items-center justify-between text-xs font-mono font-bold uppercase tracking-wider text-black dark:text-white border-t border-neutral-200 dark:border-neutral-800 pt-3 group-hover:underline cursor-pointer"
+                onClick={() => (onNavigateStudio ? onNavigateStudio("editor") : onOpenAuth())}
+                className="mt-5 inline-flex items-center justify-between text-xs font-mono font-bold uppercase tracking-wider text-neutral-950 border-t border-neutral-200 pt-3 group-hover:underline cursor-pointer"
               >
                 <span>{lang === "vi" ? "Mở Story Lab" : "Open Story Lab"}</span>
                 <span>➔</span>
@@ -467,13 +479,13 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
             </div>
 
             {/* Studio 2: Manga Studio */}
-            <div className="group rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50 p-5 hover:border-black dark:hover:border-white transition-all shadow-sm hover:shadow-md flex flex-col justify-between">
+            <div className="group rounded-xl border border-neutral-300/80 bg-white/90 p-5 hover:border-neutral-950 transition-all shadow-sm hover:shadow-lg flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between text-[10px] font-mono font-bold text-neutral-500 uppercase tracking-widest mb-3">
                   <span>{t.studio_manga_tag}</span>
-                  <span className="rounded bg-neutral-200 dark:bg-neutral-800 px-1.5 py-0.5">[02]</span>
+                  <span className="rounded bg-neutral-100 border border-neutral-200 px-1.5 py-0.5 text-neutral-700">[02]</span>
                 </div>
-                <div className="relative aspect-[16/10] w-full rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-800 bg-black mb-4 group-hover:scale-[1.02] transition-transform">
+                <div className="relative aspect-[16/10] w-full rounded-lg overflow-hidden border border-neutral-200 bg-neutral-900 mb-4 group-hover:scale-[1.02] transition-transform">
                   <Image
                     src="/assets/landing/manga_heroine_portrait.png"
                     alt="Manga Studio Showcase"
@@ -485,17 +497,17 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
                     B&W Inking
                   </span>
                 </div>
-                <h3 className="font-serif text-lg font-bold text-black dark:text-white">
+                <h3 className="font-serif text-lg font-bold text-neutral-950">
                   {t.studio_manga_name}
                 </h3>
-                <p className="mt-2 text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">
+                <p className="mt-2 text-xs leading-relaxed text-neutral-600">
                   {t.studio_manga_desc}
                 </p>
               </div>
               <button
                 type="button"
-                onClick={onOpenAuth}
-                className="mt-5 inline-flex items-center justify-between text-xs font-mono font-bold uppercase tracking-wider text-black dark:text-white border-t border-neutral-200 dark:border-neutral-800 pt-3 group-hover:underline cursor-pointer"
+                onClick={() => (onNavigateStudio ? onNavigateStudio("comic") : onOpenAuth())}
+                className="mt-5 inline-flex items-center justify-between text-xs font-mono font-bold uppercase tracking-wider text-neutral-950 border-t border-neutral-200 pt-3 group-hover:underline cursor-pointer"
               >
                 <span>{lang === "vi" ? "Mở Manga Studio" : "Open Manga Studio"}</span>
                 <span>➔</span>
@@ -503,13 +515,13 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
             </div>
 
             {/* Studio 3: Character & Lore */}
-            <div className="group rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50 p-5 hover:border-black dark:hover:border-white transition-all shadow-sm hover:shadow-md flex flex-col justify-between">
+            <div className="group rounded-xl border border-neutral-300/80 bg-white/90 p-5 hover:border-neutral-950 transition-all shadow-sm hover:shadow-lg flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between text-[10px] font-mono font-bold text-neutral-500 uppercase tracking-widest mb-3">
                   <span>{t.studio_lore_tag}</span>
-                  <span className="rounded bg-neutral-200 dark:bg-neutral-800 px-1.5 py-0.5">[03]</span>
+                  <span className="rounded bg-neutral-100 border border-neutral-200 px-1.5 py-0.5 text-neutral-700">[03]</span>
                 </div>
-                <div className="relative aspect-[16/10] w-full rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-800 bg-black mb-4 group-hover:scale-[1.02] transition-transform">
+                <div className="relative aspect-[16/10] w-full rounded-lg overflow-hidden border border-neutral-200 bg-neutral-900 mb-4 group-hover:scale-[1.02] transition-transform">
                   <Image
                     src="/assets/landing/hero_character_aodai.png"
                     alt="Character Lore Showcase"
@@ -521,17 +533,17 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
                     Lore Dossier
                   </span>
                 </div>
-                <h3 className="font-serif text-lg font-bold text-black dark:text-white">
+                <h3 className="font-serif text-lg font-bold text-neutral-950">
                   {t.studio_lore_name}
                 </h3>
-                <p className="mt-2 text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">
+                <p className="mt-2 text-xs leading-relaxed text-neutral-600">
                   {t.studio_lore_desc}
                 </p>
               </div>
               <button
                 type="button"
-                onClick={onOpenAuth}
-                className="mt-5 inline-flex items-center justify-between text-xs font-mono font-bold uppercase tracking-wider text-black dark:text-white border-t border-neutral-200 dark:border-neutral-800 pt-3 group-hover:underline cursor-pointer"
+                onClick={() => (onNavigateStudio ? onNavigateStudio("lore") : onOpenAuth())}
+                className="mt-5 inline-flex items-center justify-between text-xs font-mono font-bold uppercase tracking-wider text-neutral-950 border-t border-neutral-200 pt-3 group-hover:underline cursor-pointer"
               >
                 <span>{lang === "vi" ? "Khám phá Lore" : "Explore Lore"}</span>
                 <span>➔</span>
@@ -539,13 +551,13 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
             </div>
 
             {/* Studio 4: Motion Studio */}
-            <div className="group rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50 p-5 hover:border-black dark:hover:border-white transition-all shadow-sm hover:shadow-md flex flex-col justify-between">
+            <div className="group rounded-xl border border-neutral-300/80 bg-white/90 p-5 hover:border-neutral-950 transition-all shadow-sm hover:shadow-lg flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between text-[10px] font-mono font-bold text-neutral-500 uppercase tracking-widest mb-3">
                   <span>{t.studio_motion_tag}</span>
-                  <span className="rounded bg-neutral-200 dark:bg-neutral-800 px-1.5 py-0.5">[04]</span>
+                  <span className="rounded bg-neutral-100 border border-neutral-200 px-1.5 py-0.5 text-neutral-700">[04]</span>
                 </div>
-                <div className="relative aspect-[16/10] w-full rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-800 bg-black mb-4 group-hover:scale-[1.02] transition-transform">
+                <div className="relative aspect-[16/10] w-full rounded-lg overflow-hidden border border-neutral-200 bg-neutral-900 mb-4 group-hover:scale-[1.02] transition-transform">
                   <Image
                     src="/assets/landing/world_warrior_rain.png"
                     alt="Motion Studio Showcase"
@@ -557,17 +569,17 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
                     Cinematic FX
                   </span>
                 </div>
-                <h3 className="font-serif text-lg font-bold text-black dark:text-white">
+                <h3 className="font-serif text-lg font-bold text-neutral-950">
                   {t.studio_motion_name}
                 </h3>
-                <p className="mt-2 text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">
+                <p className="mt-2 text-xs leading-relaxed text-neutral-600">
                   {t.studio_motion_desc}
                 </p>
               </div>
               <button
                 type="button"
-                onClick={onOpenAuth}
-                className="mt-5 inline-flex items-center justify-between text-xs font-mono font-bold uppercase tracking-wider text-black dark:text-white border-t border-neutral-200 dark:border-neutral-800 pt-3 group-hover:underline cursor-pointer"
+                onClick={() => (onNavigateStudio ? onNavigateStudio("motion") : onOpenAuth())}
+                className="mt-5 inline-flex items-center justify-between text-xs font-mono font-bold uppercase tracking-wider text-neutral-950 border-t border-neutral-200 pt-3 group-hover:underline cursor-pointer"
               >
                 <span>{lang === "vi" ? "Trải nghiệm Motion" : "Try Motion FX"}</span>
                 <span>➔</span>
@@ -582,24 +594,24 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
         {/* ========================================================= */}
         <section
           id="recent-projects"
-          className="mx-auto max-w-7xl px-4 pb-16 sm:px-8 sm:pb-20 lg:px-10 border-t border-neutral-200 dark:border-neutral-800 pt-12"
+          className="relative z-10 mx-auto max-w-7xl px-4 pb-16 sm:px-8 sm:pb-20 lg:px-10 border-t border-neutral-300/80 pt-12 bg-[#FAF7F2]"
         >
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
             <div>
               <p className="text-xs font-mono font-bold uppercase tracking-widest text-neutral-500">
                 {t.recent_projects_eyebrow}
               </p>
-              <h2 className="mt-2 font-serif text-2xl font-bold tracking-tight text-black dark:text-white sm:text-3xl">
+              <h2 className="mt-2 font-serif text-2xl font-bold tracking-tight text-neutral-950 sm:text-3xl">
                 {t.recent_projects_title}
               </h2>
-              <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400 max-w-xl">
+              <p className="mt-2 text-sm text-neutral-600 max-w-xl">
                 {t.recent_projects_sub}
               </p>
             </div>
             <button
               type="button"
               onClick={onOpenAuth}
-              className="inline-flex items-center gap-2 rounded-lg border border-neutral-300 dark:border-neutral-700 px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider text-black dark:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors shrink-0"
+              className="inline-flex items-center gap-2 rounded-lg border border-neutral-300 bg-white px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider text-neutral-900 hover:bg-neutral-100 hover:border-neutral-900 transition-colors shrink-0 shadow-sm cursor-pointer"
             >
               <span>{lang === "vi" ? "Bắt đầu dự án mới" : "Start New Project"}</span>
               <span>➔</span>
@@ -611,10 +623,10 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
               <div
                 key={idx}
                 onClick={onOpenAuth}
-                className="group rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 overflow-hidden shadow-sm hover:shadow-xl transition-all cursor-pointer flex flex-col justify-between"
+                className="group rounded-xl border border-neutral-300/80 bg-white overflow-hidden shadow-sm hover:shadow-xl hover:border-neutral-900 transition-all cursor-pointer flex flex-col justify-between"
               >
                 <div>
-                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-black">
+                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-neutral-900">
                     <Image
                       src={project.image}
                       alt={project.title}
@@ -625,7 +637,7 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
                     <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded bg-black/80 text-[9px] font-mono font-bold text-white border border-white/20">
                       {project.tag}
                     </span>
-                    <span className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-white/90 dark:bg-black/90 text-[9px] font-mono font-bold text-black dark:text-white">
+                    <span className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-white/95 text-[9px] font-mono font-bold text-neutral-900 shadow-sm">
                       {project.progress}
                     </span>
                   </div>
@@ -634,18 +646,18 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
                     <span className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider block">
                       {project.genre}
                     </span>
-                    <h3 className="font-serif text-base font-bold text-black dark:text-white mt-1 group-hover:underline">
+                    <h3 className="font-serif text-base font-bold text-neutral-950 mt-1 group-hover:underline">
                       {project.title}
                     </h3>
-                    <p className="mt-2 text-xs leading-relaxed text-neutral-600 dark:text-neutral-400 line-clamp-2">
+                    <p className="mt-2 text-xs leading-relaxed text-neutral-600 line-clamp-2">
                       {project.synopsis}
                     </p>
                   </div>
                 </div>
 
-                <div className="px-4 pb-4 pt-2 border-t border-neutral-100 dark:border-neutral-800/80 flex items-center justify-between text-[11px] font-mono text-neutral-500">
+                <div className="px-4 pb-4 pt-2 border-t border-neutral-100 flex items-center justify-between text-[11px] font-mono text-neutral-500">
                   <span>{project.stats}</span>
-                  <span className="font-bold text-black dark:text-white group-hover:translate-x-1 transition-transform">
+                  <span className="font-bold text-neutral-950 group-hover:translate-x-1 transition-transform">
                     {lang === "vi" ? "Xem ➔" : "View ➔"}
                   </span>
                 </div>
@@ -659,16 +671,16 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
         {/* ========================================================= */}
         <section
           id="featured-worlds"
-          className="mx-auto max-w-7xl px-4 pb-16 sm:px-8 sm:pb-20 lg:px-10 border-t border-neutral-200 dark:border-neutral-800 pt-12"
+          className="relative z-10 mx-auto max-w-7xl px-4 pb-16 sm:px-8 sm:pb-20 lg:px-10 border-t border-neutral-300/80 pt-12 bg-[#FAF7F2]"
         >
           <div className="mb-8">
             <p className="text-xs font-mono font-bold uppercase tracking-widest text-neutral-500">
               {t.featured_worlds_eyebrow}
             </p>
-            <h2 className="mt-2 font-serif text-2xl font-bold tracking-tight text-black dark:text-white sm:text-3xl">
+            <h2 className="mt-2 font-serif text-2xl font-bold tracking-tight text-neutral-950 sm:text-3xl">
               {t.featured_worlds_title}
             </h2>
-            <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400 max-w-2xl">
+            <p className="mt-2 text-sm text-neutral-600 max-w-2xl">
               {t.featured_worlds_sub}
             </p>
           </div>
@@ -683,12 +695,12 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
                 }}
                 className={`group relative rounded-xl border overflow-hidden p-5 transition-all cursor-pointer flex flex-col justify-between ${
                   activeWorldIdx === idx
-                    ? "border-black dark:border-white bg-neutral-50 dark:bg-neutral-900 shadow-xl"
-                    : "border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 hover:border-neutral-400 dark:hover:border-neutral-600 shadow-sm"
+                    ? "border-neutral-950 bg-[#FDFBF7] shadow-xl ring-1 ring-neutral-950/10"
+                    : "border-neutral-300/80 bg-white hover:border-neutral-500 shadow-sm"
                 }`}
               >
                 <div>
-                  <div className="relative aspect-[16/9] w-full rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-800 bg-black mb-4 group-hover:scale-[1.02] transition-transform duration-500">
+                  <div className="relative aspect-[16/9] w-full rounded-lg overflow-hidden border border-neutral-200 bg-neutral-900 mb-4 group-hover:scale-[1.02] transition-transform duration-500">
                     <Image
                       src={world.image}
                       alt={world.title}
@@ -701,26 +713,26 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
                     </span>
                   </div>
 
-                  <h3 className="font-serif text-lg font-bold text-black dark:text-white group-hover:underline">
+                  <h3 className="font-serif text-lg font-bold text-neutral-950 group-hover:underline">
                     {world.title}
                   </h3>
-                  <p className="mt-2 text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">
+                  <p className="mt-2 text-xs leading-relaxed text-neutral-600">
                     {world.desc}
                   </p>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-neutral-200 dark:border-neutral-800 space-y-3">
+                <div className="mt-4 pt-3 border-t border-neutral-200 space-y-3">
                   <div className="flex flex-wrap gap-1.5">
                     {world.tags.map((tag, tIdx) => (
                       <span
                         key={tIdx}
-                        className="rounded border border-neutral-200 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 text-[9px] font-mono font-bold text-neutral-700 dark:text-neutral-300"
+                        className="rounded border border-neutral-200 bg-neutral-100 px-2 py-0.5 text-[9px] font-mono font-bold text-neutral-700"
                       >
                         #{tag}
                       </span>
                     ))}
                   </div>
-                  <div className="flex items-center justify-between text-[11px] font-mono font-bold text-black dark:text-white">
+                  <div className="flex items-center justify-between text-[11px] font-mono font-bold text-neutral-950">
                     <span>{lang === "vi" ? "Áp dụng vào bản thảo" : "Load World Preset"}</span>
                     <span>➔</span>
                   </div>
@@ -736,7 +748,7 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
         <section
           id="heritage"
           aria-labelledby="heritage-heading"
-          className="mx-auto max-w-7xl px-4 pb-14 sm:px-8 sm:pb-16 lg:px-10 border-t border-neutral-200 dark:border-neutral-800 pt-12"
+          className="relative z-10 mx-auto max-w-7xl px-4 pb-14 sm:px-8 sm:pb-16 lg:px-10 border-t border-neutral-300/80 pt-12 bg-[#FAF7F2]"
         >
           <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14">
             <div className="max-w-xl">
@@ -745,24 +757,24 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
               </p>
               <h2
                 id="heritage-heading"
-                className="mt-3 font-serif text-2xl font-bold leading-tight tracking-tight text-black dark:text-white sm:text-3xl"
+                className="mt-3 font-serif text-2xl font-bold leading-tight tracking-tight text-neutral-950 sm:text-3xl"
               >
                 {t.heritage_title}
               </h2>
-              <p className="mt-4 text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+              <p className="mt-4 text-sm leading-relaxed text-neutral-600">
                 {t.heritage_desc}
               </p>
               <button
                 type="button"
                 onClick={onOpenAuth}
-                className="mt-5 inline-flex items-center gap-2 text-sm font-mono font-bold uppercase tracking-wider text-black dark:text-white underline hover:opacity-80 transition-opacity cursor-pointer"
+                className="mt-5 inline-flex items-center gap-2 text-sm font-mono font-bold uppercase tracking-wider text-neutral-950 underline hover:opacity-80 transition-opacity cursor-pointer"
               >
                 <span>{t.heritage_cta}</span>
                 <span>➔</span>
               </button>
             </div>
 
-            <div className="divide-y divide-neutral-200 dark:divide-neutral-800">
+            <div className="divide-y divide-neutral-200">
               {[
                 { number: "[01]", title: t.heritage_history_title, description: t.heritage_history_desc },
                 { number: "[02]", title: t.heritage_culture_title, description: t.heritage_culture_desc },
@@ -773,10 +785,10 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
                     {item.number}
                   </span>
                   <div>
-                    <h3 className="font-serif text-base font-bold text-black dark:text-white">
+                    <h3 className="font-serif text-base font-bold text-neutral-950">
                       {item.title}
                     </h3>
-                    <p className="mt-1 text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+                    <p className="mt-1 text-sm leading-relaxed text-neutral-600">
                       {item.description}
                     </p>
                   </div>
@@ -786,16 +798,16 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
           </div>
 
           {/* Bottom Security Assurance Banner */}
-          <div className="mt-10 flex flex-col items-start justify-between gap-4 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-50/70 dark:bg-neutral-900/70 p-5 sm:flex-row sm:items-center">
+          <div className="mt-10 flex flex-col items-start justify-between gap-4 rounded-xl border border-amber-300/80 bg-[#FFFDF8] p-5 sm:flex-row sm:items-center shadow-sm">
             <div className="flex items-start gap-3">
-              <span className="px-2 py-0.5 text-xs font-mono font-bold border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-black text-black dark:text-white rounded shrink-0">
+              <span className="px-2 py-0.5 text-xs font-mono font-bold border border-amber-300 bg-amber-50 text-amber-900 rounded shrink-0">
                 [BẢO ĐẢM IP]
               </span>
               <div>
-                <h3 className="font-serif text-base font-bold text-black dark:text-white">
+                <h3 className="font-serif text-base font-bold text-neutral-950">
                   {lang === "vi" ? "Sáng tác với sự an tâm tuyệt đối" : "Create with complete confidence"}
                 </h3>
-                <p className="mt-1 text-xs sm:text-sm text-neutral-600 dark:text-neutral-400">
+                <p className="mt-1 text-xs sm:text-sm text-neutral-600">
                   {lang === "vi"
                     ? "Toàn bộ cốt truyện, nhân vật và khung manga thuộc quyền sở hữu trí tuệ 100% của tác giả. Hệ thống có cơ chế kiểm duyệt nội dung văn hóa và tự động lưu dự phòng."
                     : "All narratives, characters, and manga storyboards are 100% owned by the creator. Cultural guardrails and automated draft backups ensure safe storytelling."}
@@ -805,7 +817,7 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
             <button
               type="button"
               onClick={onExploreCommunity ?? onOpenAuth}
-              className="inline-flex shrink-0 items-center rounded-lg border border-neutral-300 dark:border-neutral-700 px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider text-black dark:text-white hover:bg-white dark:hover:bg-black transition-colors"
+              className="inline-flex shrink-0 items-center rounded-lg border border-neutral-300 bg-white px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider text-neutral-900 hover:bg-neutral-100 transition-colors shadow-sm cursor-pointer"
             >
               {lang === "vi" ? "Gặp gỡ cộng đồng" : "Meet Community"}
             </button>
@@ -815,14 +827,14 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
         {/* ========================================================= */}
         {/* FOOTER */}
         {/* ========================================================= */}
-        <footer className="border-t border-neutral-200 dark:border-neutral-800 px-5 py-6 text-center text-xs font-mono text-neutral-500">
+        <footer className="relative z-10 border-t border-neutral-300/80 px-5 py-6 text-center text-xs font-mono text-neutral-600 bg-[#FAF7F2]">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 max-w-7xl mx-auto">
             <span>{t.footer_copyright}</span>
-            <div className="flex items-center gap-4 text-[11px]">
-              <a href="#studios" className="hover:underline">Story Lab</a>
-              <a href="#studios" className="hover:underline">Manga Studio</a>
-              <a href="#studios" className="hover:underline">Character Lore</a>
-              <a href="#studios" className="hover:underline">Motion Studio</a>
+            <div className="flex items-center gap-4 text-[11px] text-neutral-600">
+              <a href="#studios" className="hover:text-neutral-950 hover:underline">Story Lab</a>
+              <a href="#studios" className="hover:text-neutral-950 hover:underline">Manga Studio</a>
+              <a href="#studios" className="hover:text-neutral-950 hover:underline">Character Lore</a>
+              <a href="#studios" className="hover:text-neutral-950 hover:underline">Motion Studio</a>
             </div>
           </div>
         </footer>

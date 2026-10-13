@@ -1041,7 +1041,7 @@ export default function WorkspacePage() {
 
   // If on workspace view
   return (
-    <div className="flex h-screen w-screen flex-col overflow-hidden bg-[#f2eee7] dark:bg-[#211d19] text-[#342722] dark:text-[#eee6d9] relative z-10 lg:flex-row">
+    <div className="flex h-screen w-screen flex-col overflow-hidden bg-[#FAF7F2] text-neutral-900 relative z-10 lg:flex-row">
       {/* Left Sidebar */}
       <Sidebar
         username={user?.username || ""}

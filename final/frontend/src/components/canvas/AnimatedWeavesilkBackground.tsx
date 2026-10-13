@@ -166,10 +166,10 @@ export function AnimatedWeavesilkBackground({
           ctx.quadraticCurveTo(cpx, cpy, x2, y2);
 
           const glowAlpha = s.alpha * (0.6 + 0.4 * Math.sin(time * 1.5 + s.seed));
-          ctx.strokeStyle = `rgba(255, 255, 255, ${glowAlpha.toFixed(3)})`;
+          ctx.strokeStyle = `rgba(180, 140, 90, ${(glowAlpha * 0.35).toFixed(3)})`;
           ctx.lineWidth = 0.8;
-          ctx.shadowColor = "rgba(255, 255, 255, 0.4)";
-          ctx.shadowBlur = 4;
+          ctx.shadowColor = "rgba(200, 160, 100, 0.25)";
+          ctx.shadowBlur = 3;
           ctx.stroke();
         }
 
@@ -194,31 +194,36 @@ export function AnimatedWeavesilkBackground({
   return (
     <div
       ref={containerRef}
-      className={`absolute inset-0 pointer-events-none overflow-hidden select-none ${className}`}
+      className={`absolute inset-0 pointer-events-none overflow-hidden select-none bg-[#FAF7F2] ${className}`}
       aria-hidden="true"
     >
-      {/* 1. LAYER A: Primary WeaveSilk Base Layer (Breathing scale & soft pan) */}
+      {/* 1. LAYER A: Primary WeaveSilk Base Layer (Inverted warm lacquer threads on milky white paper) */}
       <div
         className="absolute inset-0 bg-center bg-cover bg-no-repeat transition-all duration-1000 ease-out"
         style={{
           backgroundImage: "url('/assets/weavesilk_bg.png')",
           backgroundPosition: "center center",
+          filter: "invert(0.96) sepia(0.2) hue-rotate(350deg) contrast(1.1)",
+          mixBlendMode: "multiply",
+          opacity: 0.16,
           animation: reducedMotion
             ? "none"
             : "weavesilk-breathe 14s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate",
         }}
       />
 
-      {/* 2. LAYER B: Secondary Undulating Silk Ribbon Currents (Moiré & light shimmer) */}
+      {/* 2. LAYER B: Secondary Undulating Silk Ribbon Currents */}
       {!reducedMotion && (
         <div
-          className="absolute inset-0 bg-center bg-cover bg-no-repeat mix-blend-screen opacity-45 dark:opacity-55"
+          className="absolute inset-0 bg-center bg-cover bg-no-repeat"
           style={{
             backgroundImage: "url('/assets/weavesilk_bg.png')",
             backgroundPosition: "center center",
             animation:
               "weavesilk-undulate 18s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate",
-            filter: "brightness(1.15) contrast(1.1)",
+            filter: "invert(0.96) sepia(0.25) contrast(1.15)",
+            mixBlendMode: "multiply",
+            opacity: 0.12,
           }}
         />
       )}
@@ -227,25 +232,25 @@ export function AnimatedWeavesilkBackground({
       {!reducedMotion && (
         <canvas
           ref={canvasRef}
-          className="absolute inset-0 w-full h-full opacity-65 dark:opacity-85 mix-blend-screen"
+          className="absolute inset-0 w-full h-full opacity-60 pointer-events-none"
         />
       )}
 
-      {/* 4. LAYER D: Pulsing Central Mandala Aura (breathing heart of AI) */}
+      {/* 4. LAYER D: Pulsing Central Mandala Aura (soft warm glow) */}
       <div
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 sm:w-96 sm:h-96 rounded-full pointer-events-none"
         style={{
           background:
-            "radial-gradient(circle, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 35%, transparent 70%)",
+            "radial-gradient(circle, rgba(212,175,55,0.14) 0%, rgba(212,175,55,0.04) 35%, transparent 70%)",
           animation: reducedMotion
             ? "none"
             : "weavesilk-core-pulse 6s ease-in-out infinite",
         }}
       />
 
-      {/* 5. LAYER E: Vignette & Lighting Gradients (Ensures high text readability) */}
-      <div className="absolute inset-0 bg-gradient-to-t from-neutral-50/75 via-transparent to-neutral-50/75 dark:from-black/75 dark:via-transparent dark:to-black/75" />
-      <div className="absolute inset-0 bg-radial-gradient from-transparent via-black/10 to-black/60 dark:via-black/20 dark:to-black/80 pointer-events-none" />
+      {/* 5. LAYER E: Vignette & Lighting Gradients (Seamless blending into #FAF7F2) */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#FAF7F2]/90 via-transparent to-[#FAF7F2]/80 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#FAF7F2]/60 via-transparent to-[#FAF7F2]/60 pointer-events-none" />
 
       {/* Global Embedded Keyframes for buttery-smooth GPU animation */}
       <style jsx global>{`

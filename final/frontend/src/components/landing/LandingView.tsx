@@ -336,7 +336,7 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
                     {/* Main Establishing Battle Panel */}
                     <div className="relative aspect-[16/10] w-full rounded-xl overflow-hidden border border-neutral-200 bg-black group shadow-sm">
                       <Image
-                        src="/assets/landing/manga_battle_scene.png"
+                        src="/assets/landing/hero_preview_panel_01_battle.png"
                         alt="Chiến trận bãi cọc Bạch Đằng - Manga Studio"
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -362,7 +362,7 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
                     <div className="grid grid-cols-2 gap-3">
                       <div className="relative aspect-[4/3] rounded-lg overflow-hidden border border-neutral-200 bg-neutral-900 group shadow-sm">
                         <Image
-                          src="/assets/landing/hero_character_aodai.png"
+                          src="/assets/landing/hero_preview_panel_lore_thiem.png"
                           alt="Nhân vật cổ trang Việt - Character Lore"
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -375,7 +375,7 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
 
                       <div className="relative aspect-[4/3] rounded-lg overflow-hidden border border-neutral-200 bg-neutral-900 group shadow-sm">
                         <Image
-                          src="/assets/landing/manga_heroine_portrait.png"
+                          src="/assets/landing/hero_preview_panel_02_close.png"
                           alt="Chân dung manga hiệp nữ"
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-500"

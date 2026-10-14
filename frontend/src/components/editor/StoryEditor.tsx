@@ -255,18 +255,18 @@ export function StoryEditor({
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden bg-neutral-100 dark:bg-[#080808] text-black dark:text-[#F5F5F5] transition-colors font-sans">
+    <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden bg-[#FAF7F2] text-neutral-900 transition-colors font-sans">
       
       {/* ========================================================= */}
       {/* WORKSPACE HEADER (STORY LAB) */}
       {/* ========================================================= */}
-      <div className="h-14 border-b border-neutral-200 dark:border-white/10 bg-white dark:bg-[#111111] px-3 sm:px-6 flex items-center justify-between gap-3 shrink-0 select-none">
+      <div className="h-14 border-b border-neutral-300/80 bg-[#FAF7F2]/90 backdrop-blur-md px-3 sm:px-6 flex items-center justify-between gap-3 shrink-0 select-none">
         {/* Left: Breadcrumb & Title */}
         <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <button
             type="button"
             onClick={() => setIsOutlineOpen(!isOutlineOpen)}
-            className="hidden lg:flex p-1.5 rounded hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-500 hover:text-black dark:hover:text-white transition-colors"
+            className="hidden lg:flex p-1.5 rounded hover:bg-neutral-200/70 text-neutral-600 hover:text-neutral-950 transition-colors"
             title={isOutlineOpen ? "Thu gọn thanh điều hướng" : "Mở thanh điều hướng"}
           >
             {isOutlineOpen ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeft className="w-4 h-4" />}
@@ -276,29 +276,29 @@ export function StoryEditor({
           <div className="flex items-center gap-1.5 text-xs font-mono text-neutral-500 shrink-0">
             <span>NarrAI</span>
             <ChevronRight className="w-3 h-3 text-neutral-400" />
-            <span className="text-black dark:text-white font-bold uppercase tracking-wider">Story Lab</span>
+            <span className="text-neutral-950 font-bold uppercase tracking-wider">Story Lab</span>
           </div>
 
-          <div className="hidden sm:block h-4 w-px bg-neutral-300 dark:bg-neutral-800 mx-1" />
+          <div className="hidden sm:block h-4 w-px bg-neutral-300 mx-1" />
 
           {/* Editable Story Title */}
           <input
             type="text"
             value={storyTitle}
             onChange={(e) => setStoryTitle(e.target.value)}
-            className="hidden sm:block bg-transparent text-xs font-mono font-bold text-black dark:text-white border-b border-transparent hover:border-neutral-400 focus:border-black dark:focus:border-white outline-none px-1 py-0.5 max-w-[180px] lg:max-w-xs truncate"
+            className="hidden sm:block bg-transparent text-xs font-mono font-bold text-neutral-950 border-b border-transparent hover:border-neutral-400 focus:border-neutral-950 outline-none px-1 py-0.5 max-w-[180px] lg:max-w-xs truncate"
             title="Đổi tiêu đề tác phẩm"
           />
 
           {/* Auto-save Status Badge */}
-          <div className="flex items-center gap-1.5 text-[10px] font-mono px-2 py-0.5 rounded border border-neutral-300 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400">
-            <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+          <div className="flex items-center gap-1.5 text-[10px] font-mono px-2 py-0.5 rounded border border-neutral-300/80 bg-white text-neutral-700 shadow-xs">
+            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
             <span>{savedStatus === "saved" ? (lang === "vi" ? "Đã lưu" : "Saved") : (lang === "vi" ? "Đang lưu..." : "Saving...")}</span>
           </div>
 
           {/* Narrative Mode Badge */}
           <div
-            className="hidden md:inline-flex items-center text-[11px] px-2 py-0.5 rounded border border-neutral-300 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-900 text-black dark:text-white font-mono font-bold"
+            className="hidden md:inline-flex items-center text-[11px] px-2 py-0.5 rounded border border-neutral-300/80 bg-white text-neutral-900 font-mono font-bold shadow-xs"
             title={`Chế độ sáng tác: ${resolvedLabel}`}
           >
             <span>[{resolvedLabel}]</span>
@@ -311,7 +311,7 @@ export function StoryEditor({
           <button
             type="button"
             onClick={() => setIsFocusMode(!isFocusMode)}
-            className="hidden md:flex items-center gap-1 px-2 py-1 rounded border border-neutral-300 dark:border-white/10 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+            className="hidden md:flex items-center gap-1 px-2 py-1 rounded border border-neutral-300 hover:bg-neutral-200/70 text-neutral-700 hover:text-neutral-950 transition-colors"
             title={isFocusMode ? "Thoát chế độ tập trung" : "Chế độ tập trung viết"}
           >
             {isFocusMode ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
@@ -322,7 +322,7 @@ export function StoryEditor({
             <button
               type="button"
               onClick={onToggleCopilot}
-              className="lg:hidden flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-bold uppercase tracking-wider text-black dark:text-white border border-neutral-300 dark:border-white/10 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+              className="lg:hidden flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-bold uppercase tracking-wider text-neutral-900 border border-neutral-300 hover:bg-neutral-200/70 transition-colors"
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span>{lang === "vi" ? "AI Co-pilot" : "Copilot"}</span>
@@ -334,7 +334,7 @@ export function StoryEditor({
             <button
               type="button"
               onClick={onPublish}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider text-black dark:text-white border border-neutral-300 dark:border-white/10 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider text-neutral-900 border border-neutral-300 hover:bg-neutral-200/70 transition-colors"
               title={lang === "vi" ? "Lưu bản thảo và xuất bản lên Bảng tin cộng đồng" : "Save and publish to community feed"}
             >
               <Share2 className="w-3.5 h-3.5" />
@@ -346,7 +346,7 @@ export function StoryEditor({
           <button
             type="button"
             onClick={onAdaptToComic}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-colors shadow-sm"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider bg-neutral-950 text-white hover:bg-neutral-800 transition-colors shadow-sm"
           >
             <ImageIcon className="w-3.5 h-3.5" />
             <span>{t.comic_btn}</span>
@@ -356,7 +356,7 @@ export function StoryEditor({
           <button
             type="button"
             onClick={onDownload}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-neutral-300 dark:border-white/10 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-black dark:text-white transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-neutral-300 hover:bg-neutral-200/70 text-neutral-900 transition-colors"
             title="Tải về bản thảo dạng TXT"
           >
             <Download className="w-3.5 h-3.5" />
@@ -372,21 +372,21 @@ export function StoryEditor({
         
         {/* B. Left Outline & Chapter Sidebar (Collapsible) */}
         {isOutlineOpen && !isFocusMode && (
-          <aside className="w-60 border-r border-neutral-200 dark:border-white/10 bg-white dark:bg-[#111111] p-3.5 flex flex-col justify-between shrink-0 overflow-y-auto hidden lg:flex select-none">
+          <aside className="w-60 border-r border-neutral-300/80 bg-[#FAF7F2] p-3.5 flex flex-col justify-between shrink-0 overflow-y-auto hidden lg:flex select-none">
             <div className="space-y-4">
               {/* Story Overview Card */}
-              <div className="p-3 rounded-lg border border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-[#171717]">
+              <div className="p-3 rounded-lg border border-neutral-300/80 bg-white shadow-xs">
                 <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-neutral-500 mb-2">
                   <span>Tổng quan truyện</span>
                   <BookOpen className="w-3.5 h-3.5" />
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-center">
-                  <div className="p-1.5 rounded bg-white dark:bg-black/50 border border-neutral-200 dark:border-neutral-800">
-                    <span className="text-xs font-bold text-black dark:text-white font-mono">{words}</span>
+                  <div className="p-1.5 rounded bg-neutral-100/90 border border-neutral-200">
+                    <span className="text-xs font-bold text-neutral-950 font-mono">{words}</span>
                     <span className="text-[9px] block text-neutral-500 uppercase">{t.words}</span>
                   </div>
-                  <div className="p-1.5 rounded bg-white dark:bg-black/50 border border-neutral-200 dark:border-neutral-800">
-                    <span className="text-xs font-bold text-black dark:text-white font-mono">~{readTimeMinutes}m</span>
+                  <div className="p-1.5 rounded bg-neutral-100/90 border border-neutral-200">
+                    <span className="text-xs font-bold text-neutral-950 font-mono">~{readTimeMinutes}m</span>
                     <span className="text-[9px] block text-neutral-500 uppercase">Đọc</span>
                   </div>
                 </div>
@@ -405,7 +405,7 @@ export function StoryEditor({
                     <button
                       key={ch.id}
                       type="button"
-                      className="w-full text-left px-2.5 py-2 rounded text-xs font-mono font-medium transition-colors flex items-center justify-between bg-black text-white dark:bg-white dark:text-black font-bold shadow-sm"
+                      className="w-full text-left px-2.5 py-2 rounded-lg text-xs font-mono font-medium transition-colors flex items-center justify-between bg-neutral-950 text-white font-bold shadow-xs"
                     >
                       <span className="truncate">{ch.title}</span>
                       <span className="text-[10px] opacity-75">●</span>
@@ -415,36 +415,36 @@ export function StoryEditor({
               </div>
 
               {/* Character & Lore Shortcuts in Chapter */}
-              <div className="pt-2 border-t border-neutral-200 dark:border-neutral-800">
+              <div className="pt-2 border-t border-neutral-200">
                 <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-neutral-500 block mb-2 px-1">
                   Nhân Vật & Điển Tích
                 </span>
                 <div className="space-y-1.5 text-xs font-mono">
-                  <div className="p-2 rounded bg-neutral-50 dark:bg-[#171717] border border-neutral-200 dark:border-white/10 flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-white border border-neutral-200 shadow-xs flex items-center gap-2">
                     <Users className="w-3.5 h-3.5 text-neutral-500" />
-                    <span className="truncate text-[11px] text-neutral-700 dark:text-neutral-300">Trần Khắc Liêm (Hiệp sĩ)</span>
+                    <span className="truncate text-[11px] text-neutral-800">Trần Khắc Liêm (Hiệp sĩ)</span>
                   </div>
-                  <div className="p-2 rounded bg-neutral-50 dark:bg-[#171717] border border-neutral-200 dark:border-white/10 flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-white border border-neutral-200 shadow-xs flex items-center gap-2">
                     <Compass className="w-3.5 h-3.5 text-neutral-500" />
-                    <span className="truncate text-[11px] text-neutral-700 dark:text-neutral-300">Bến đò Vạn Kiếp (Bối cảnh)</span>
+                    <span className="truncate text-[11px] text-neutral-800">Bến đò Vạn Kiếp (Bối cảnh)</span>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Bottom Quick Advice */}
-            <div className="p-2.5 rounded border border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-[#171717] text-[10px] font-mono text-neutral-500">
+            <div className="p-2.5 rounded-lg border border-neutral-300/80 bg-white text-[10px] font-mono text-neutral-600 shadow-xs">
               💡 Bôi đen đoạn văn để gọi nhanh các lệnh viết lại của AI Co-pilot.
             </div>
           </aside>
         )}
 
         {/* C. Center Editor Manuscript Reading Canvas */}
-        <div className="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8 flex justify-center">
-          <div className="relative w-full max-w-3xl min-h-[85vh] bg-white dark:bg-[#111111] rounded-xl shadow-lg border border-neutral-200 dark:border-white/10 p-6 sm:p-12 lg:p-14 transition-colors">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8 flex justify-center bg-[#FAF7F2]">
+          <div className="relative w-full max-w-3xl min-h-[85vh] bg-white rounded-xl shadow-md border border-neutral-300/80 p-6 sm:p-12 lg:p-14 transition-colors">
             
             {/* Manuscript Header Bar inside paper */}
-            <div className="flex items-center justify-between pb-4 mb-6 border-b border-neutral-200 dark:border-neutral-800 text-xs font-mono text-neutral-500">
+            <div className="flex items-center justify-between pb-4 mb-6 border-b border-neutral-200 text-xs font-mono text-neutral-500">
               <span className="uppercase tracking-widest font-bold">
                 {lang === "vi" ? "BẢN THẢO VĂN HỌC" : "LITERARY MANUSCRIPT"}
               </span>
@@ -460,45 +460,45 @@ export function StoryEditor({
                 className="space-y-6 animate-pulse select-none"
                 data-testid="manuscript-loading-skeleton"
               >
-                <div className="flex items-center justify-between pb-4 border-b border-neutral-200 dark:border-neutral-800">
+                <div className="flex items-center justify-between pb-4 border-b border-neutral-200">
                   <div className="flex items-center gap-3">
-                    <div className="px-2.5 py-1 rounded bg-neutral-100 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 text-xs font-mono font-bold text-black dark:text-white">
+                    <div className="px-2.5 py-1 rounded bg-neutral-100 border border-neutral-300 text-xs font-mono font-bold text-neutral-950">
                       [ĐANG SOẠN]
                     </div>
                     <div>
-                      <h3 className="text-sm font-bold text-black dark:text-white font-serif tracking-wide">
+                      <h3 className="text-sm font-bold text-neutral-950 font-serif tracking-wide">
                         {lang === "vi" ? "Đang khởi tạo bản thảo văn học..." : "Composing literary manuscript..."}
                       </h3>
-                      <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
+                      <p className="text-[11px] text-neutral-600">
                         {lang === "vi"
                           ? "AI đang kiến tạo dàn ý, thiết lập phân cảnh và chấp bút những dòng đầu tiên..."
                           : "AI is structuring narrative beats and drafting opening lines..."}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5 px-3 py-1 rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 text-black dark:text-white text-xs font-mono">
+                  <div className="flex items-center gap-1.5 px-3 py-1 rounded border border-neutral-300 bg-neutral-100 text-neutral-950 text-xs font-mono">
                     <span>[NARR AI]</span>
                   </div>
                 </div>
 
-                <div className="h-9 w-2/3 rounded bg-neutral-200 dark:bg-neutral-800 shadow-sm mb-8" />
+                <div className="h-9 w-2/3 rounded bg-neutral-200 shadow-sm mb-8" />
 
                 <div className="space-y-3.5">
-                  <div className="h-4 w-[90%] rounded bg-neutral-200 dark:bg-neutral-800" />
-                  <div className="h-4 w-[80%] rounded bg-neutral-200 dark:bg-neutral-800" />
-                  <div className="h-4 w-[95%] rounded bg-neutral-200 dark:bg-neutral-800" />
-                  <div className="h-4 w-[70%] rounded bg-neutral-200 dark:bg-neutral-800" />
+                  <div className="h-4 w-[90%] rounded bg-neutral-200" />
+                  <div className="h-4 w-[80%] rounded bg-neutral-200" />
+                  <div className="h-4 w-[95%] rounded bg-neutral-200" />
+                  <div className="h-4 w-[70%] rounded bg-neutral-200" />
                 </div>
 
                 <div className="py-2 flex items-center justify-center opacity-60">
-                  <div className="w-20 h-0.5 bg-neutral-300 dark:bg-neutral-700" />
+                  <div className="w-20 h-0.5 bg-neutral-300" />
                 </div>
 
                 <div className="space-y-3.5">
-                  <div className="h-4 w-[92%] rounded bg-neutral-200 dark:bg-neutral-800" />
-                  <div className="h-4 w-[85%] rounded bg-neutral-200 dark:bg-neutral-800" />
-                  <div className="h-4 w-[90%] rounded bg-neutral-200 dark:bg-neutral-800" />
-                  <div className="h-4 w-[75%] rounded bg-neutral-200 dark:bg-neutral-800" />
+                  <div className="h-4 w-[92%] rounded bg-neutral-200" />
+                  <div className="h-4 w-[85%] rounded bg-neutral-200" />
+                  <div className="h-4 w-[90%] rounded bg-neutral-200" />
+                  <div className="h-4 w-[75%] rounded bg-neutral-200" />
                 </div>
               </div>
             ) : (
@@ -514,7 +514,7 @@ export function StoryEditor({
                   const newTxt = e.currentTarget.innerText;
                   onContentChange(newTxt);
                 }}
-                className="outline-none font-serif text-black dark:text-[#F5F5F5] text-base sm:text-lg leading-[1.85] tracking-wide whitespace-pre-wrap min-h-[70vh] selection:bg-neutral-300 dark:selection:bg-neutral-800"
+                className="outline-none font-serif text-neutral-950 text-base sm:text-lg leading-[1.85] tracking-wide whitespace-pre-wrap min-h-[70vh] selection:bg-neutral-200"
                 data-placeholder={t.editor_placeholder}
               />
             )}

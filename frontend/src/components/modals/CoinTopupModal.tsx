@@ -80,21 +80,21 @@ export function CoinTopupModal({
 
   return (
     <ClientPortal>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto select-none font-sans">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto select-none font-sans">
         <div
           role="dialog"
           aria-modal="true"
           aria-labelledby="coin-modal-title"
-          className="relative w-full max-w-lg bg-white dark:bg-neutral-950 rounded-xl shadow-2xl border border-neutral-300 dark:border-neutral-800 overflow-hidden my-8 text-black dark:text-white"
+          className="relative w-full max-w-lg bg-[#FAF7F2] rounded-xl shadow-2xl border border-neutral-300/80 overflow-hidden my-8 text-neutral-900"
         >
           {/* Header Banner */}
-          <div className="border-b border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-900 px-6 py-4 flex items-center justify-between">
+          <div className="border-b border-neutral-300/80 bg-[#FAF7F2] px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <span className="px-2 py-0.5 rounded border border-neutral-300 dark:border-neutral-700 font-mono text-xs font-bold">
+              <span className="px-2 py-0.5 rounded border border-neutral-300 bg-white font-mono text-xs font-bold text-neutral-800">
                 [XU]
               </span>
               <div>
-                <h2 id="coin-modal-title" className="text-sm font-bold font-mono uppercase tracking-wider">
+                <h2 id="coin-modal-title" className="text-sm font-bold font-mono uppercase tracking-wider text-neutral-900">
                   {lang === 'vi' ? 'Nạp Xu Sáng Tác NarrAI' : 'Top Up NarrAI Coins'}
                 </h2>
                 <p className="text-[11px] font-mono text-neutral-500">
@@ -108,7 +108,7 @@ export function CoinTopupModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-2 py-0.5 text-xs font-mono font-bold uppercase rounded border border-neutral-300 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors"
+              className="px-2 py-0.5 text-xs font-mono font-bold uppercase rounded border border-neutral-300 text-neutral-600 hover:text-black hover:bg-neutral-100 transition-colors"
               aria-label="Close"
             >
               [ĐÓNG]
@@ -117,18 +117,18 @@ export function CoinTopupModal({
 
           <div className="p-6 space-y-5 font-mono">
             {/* Current Balance Bar */}
-            <div className="flex items-center justify-between p-3 rounded border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900">
+            <div className="flex items-center justify-between p-3 rounded border border-neutral-300/80 bg-white shadow-xs">
               <span className="text-xs text-neutral-500 uppercase tracking-wider">
                 {lang === 'vi' ? 'Số dư hiện tại:' : 'Current balance:'}
               </span>
-              <span className="font-bold text-base text-black dark:text-white">
+              <span className="font-bold text-base text-neutral-900">
                 {currentBalance.toLocaleString()} XU
               </span>
             </div>
 
             {/* Package Grid */}
             <div>
-              <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-bold text-neutral-600 uppercase tracking-wider mb-2">
                 {lang === 'vi' ? 'Chọn gói nạp' : 'Select Package'}
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -145,23 +145,23 @@ export function CoinTopupModal({
                       disabled={processing || successNotice}
                       className={`relative p-3 rounded border text-left transition-colors ${
                         isSelected
-                          ? 'border-black bg-neutral-100 dark:border-white dark:bg-neutral-900 font-bold'
-                          : 'border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 hover:bg-neutral-50 dark:hover:bg-neutral-900'
+                          ? 'border-neutral-900 bg-neutral-100 font-bold text-neutral-950 shadow-xs ring-1 ring-neutral-900'
+                          : 'border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-800'
                       }`}
                     >
                       {pkg.popular && (
-                        <span className="absolute -top-2 -right-1 px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-black text-white dark:bg-white dark:text-black">
+                        <span className="absolute -top-2 -right-1 px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-neutral-900 text-white">
                           {lang === 'vi' ? 'Hot' : 'Popular'}
                         </span>
                       )}
-                      <div className="font-bold text-sm text-black dark:text-white">
+                      <div className="font-bold text-sm text-neutral-900">
                         {pkg.coins + pkg.bonus} XU
                       </div>
                       <div className="text-[11px] text-neutral-500 mt-0.5">
                         {pkg.vnd.toLocaleString()} đ
                       </div>
                       {pkg.bonus > 0 && (
-                        <div className="text-[10px] text-neutral-600 dark:text-neutral-400 mt-1 font-bold">
+                        <div className="text-[10px] text-amber-700 mt-1 font-bold">
                           +{pkg.bonus} {lang === 'vi' ? 'thưởng' : 'bonus'}
                         </div>
                       )}
@@ -172,11 +172,11 @@ export function CoinTopupModal({
             </div>
 
             {/* Usage Cost Reference */}
-            <div className="p-3 rounded bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-xs space-y-1.5">
-              <div className="font-bold text-neutral-700 dark:text-neutral-300 uppercase tracking-wider">
+            <div className="p-3 rounded bg-[#F5EFE6] border border-neutral-300/80 text-xs space-y-1.5">
+              <div className="font-bold text-neutral-800 uppercase tracking-wider">
                 {lang === 'vi' ? '[BIỂU PHÍ ĐỊNH GIÁ MINH BẠCH]' : '[PRICING GUIDE]'}
               </div>
-              <div className="grid grid-cols-2 gap-1.5 text-neutral-600 dark:text-neutral-400 text-[11px]">
+              <div className="grid grid-cols-2 gap-1.5 text-neutral-600 text-[11px]">
                 <div>• {lang === 'vi' ? 'Truyện ngắn: 8 xu' : 'Short story: 8 coins'}</div>
                 <div>• {lang === 'vi' ? 'Truyện dài: 16 xu' : 'Long story: 16 coins'}</div>
                 <div>• {lang === 'vi' ? 'Sửa văn bản: 2 xu' : 'Edit prose: 2 coins'}</div>
@@ -185,44 +185,44 @@ export function CoinTopupModal({
             </div>
 
             {/* Demo top-up reference */}
-            <div className="border border-neutral-200 dark:border-neutral-800 rounded p-3.5 space-y-2 bg-white dark:bg-neutral-900">
+            <div className="border border-neutral-300/80 rounded p-3.5 space-y-2 bg-white shadow-xs">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-neutral-500">
+                <span className="text-xs font-bold text-neutral-600">
                   {lang === 'vi' ? 'Mã tham chiếu:' : 'Reference code:'}
                 </span>
                 <button
                   type="button"
                   onClick={handleCopyCode}
-                  className="text-xs font-bold underline text-black dark:text-white"
+                  className="text-xs font-bold underline text-neutral-900 hover:text-black"
                 >
                   {copied ? (lang === 'vi' ? '[Đã sao chép]' : '[Copied]') : (lang === 'vi' ? '[Sao chép]' : '[Copy]')}
                 </button>
               </div>
 
-              <div className="font-mono text-xs font-bold p-2 rounded bg-neutral-100 dark:bg-neutral-800 text-black dark:text-white select-all break-all border border-neutral-200 dark:border-neutral-700">
+              <div className="font-mono text-xs font-bold p-2 rounded bg-[#FAF7F2] text-neutral-900 select-all break-all border border-neutral-300">
                 {transferCode}
               </div>
             </div>
 
             {topupError && (
-              <div role="alert" className="p-3 rounded border border-neutral-400 bg-neutral-100 dark:bg-neutral-900 text-xs font-mono">
+              <div role="alert" className="p-3 rounded border border-red-300 bg-red-50 text-red-800 text-xs font-mono">
                 [LỖI]: {topupError}
               </div>
             )}
 
             {/* Success Notification */}
             {successNotice && (
-              <div className="p-3 rounded border border-neutral-400 bg-neutral-100 dark:bg-neutral-900 text-xs font-mono font-bold">
+              <div className="p-3 rounded border border-emerald-300 bg-emerald-50 text-emerald-800 text-xs font-mono font-bold">
                 [THÀNH CÔNG]: +{selectedPkg.coins + selectedPkg.bonus} XU ĐÃ ĐƯỢC CỘNG VÀO SỐ DƯ!
               </div>
             )}
 
             {/* Actions */}
-            <div className="flex items-center justify-end gap-3 pt-2 border-t border-neutral-200 dark:border-neutral-800">
+            <div className="flex items-center justify-end gap-3 pt-2 border-t border-neutral-300/80">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded text-xs font-mono font-bold uppercase border border-neutral-300 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors"
+                className="px-4 py-2 rounded text-xs font-mono font-bold uppercase border border-neutral-300 text-neutral-700 hover:text-black hover:bg-neutral-100 transition-colors"
               >
                 {lang === 'vi' ? '[Đóng]' : '[Close]'}
               </button>
@@ -230,7 +230,7 @@ export function CoinTopupModal({
                 type="button"
                 onClick={handleTopup}
                 disabled={processing || successNotice}
-                className="px-5 py-2 rounded text-xs font-mono font-bold uppercase tracking-wider bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-colors disabled:opacity-40"
+                className="px-5 py-2 rounded text-xs font-mono font-bold uppercase tracking-wider bg-neutral-900 text-white hover:bg-neutral-800 transition-colors disabled:opacity-40 shadow-xs"
               >
                 {processing
                   ? (lang === 'vi' ? '[Đang nạp xu...]' : '[Processing...]')

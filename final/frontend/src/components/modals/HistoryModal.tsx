@@ -67,20 +67,20 @@ export function HistoryModal({ isOpen, onClose, onSelectStory, lang }: Props) {
   return (
     <ClientPortal zIndex={60}>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 select-none font-sans">
-        <div className="relative w-full max-w-2xl max-h-[85vh] bg-white dark:bg-neutral-950 rounded-xl p-6 shadow-2xl border border-neutral-300 dark:border-neutral-800 flex flex-col text-black dark:text-white">
-          <div className="flex items-center justify-between pb-4 border-b border-neutral-200 dark:border-neutral-800 mb-4">
+        <div className="relative w-full max-w-2xl max-h-[85vh] bg-[#FAF7F2] rounded-xl p-6 shadow-2xl border border-neutral-300/80 flex flex-col text-neutral-900">
+          <div className="flex items-center justify-between pb-4 border-b border-neutral-300/70 mb-4">
             <div className="flex items-center gap-2.5">
-              <span className="px-2 py-0.5 rounded border border-neutral-300 dark:border-neutral-700 font-mono text-xs font-bold uppercase">
+              <span className="px-2 py-0.5 rounded border border-neutral-300/80 bg-white font-mono text-xs font-bold uppercase shadow-xs">
                 [LỊCH SỬ]
               </span>
-              <h2 className="text-base font-bold font-mono uppercase tracking-wider text-black dark:text-white">
+              <h2 className="text-base font-bold font-mono uppercase tracking-wider text-neutral-950">
                 {t.story_history}
               </h2>
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="px-2 py-0.5 text-xs font-mono font-bold uppercase rounded border border-neutral-300 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors"
+              className="px-2 py-0.5 text-xs font-mono font-bold uppercase rounded border border-neutral-300/80 bg-white text-neutral-700 hover:text-neutral-950 hover:bg-neutral-100 transition-colors shadow-xs"
             >
               [ĐÓNG]
             </button>
@@ -94,7 +94,7 @@ export function HistoryModal({ isOpen, onClose, onSelectStory, lang }: Props) {
             )}
 
             {error && (
-              <div className="p-3 rounded border border-neutral-400 bg-neutral-100 dark:bg-neutral-900 text-xs">
+              <div className="p-3 rounded border border-red-300 bg-red-50 text-red-700 text-xs">
                 [LỖI]: {error}
               </div>
             )}
@@ -111,17 +111,17 @@ export function HistoryModal({ isOpen, onClose, onSelectStory, lang }: Props) {
                 <div
                   key={story.id}
                   onClick={() => handleStoryClick(story.id)}
-                  className="p-4 rounded border border-neutral-200 dark:border-neutral-800 bg-neutral-50 hover:bg-neutral-100 dark:bg-neutral-900 dark:hover:bg-neutral-800/80 cursor-pointer transition-colors"
+                  className="p-4 rounded border border-neutral-300/70 bg-white hover:bg-neutral-100/70 cursor-pointer transition-colors shadow-xs"
                 >
                   <div className="flex items-center justify-between mb-1.5">
-                    <h3 className="font-bold text-sm text-black dark:text-white line-clamp-1">
+                    <h3 className="font-bold text-sm text-neutral-950 line-clamp-1">
                       {story.title || story.refined_prompt || (lang === 'vi' ? "Bản thảo không tên" : "Untitled Manuscript")}
                     </h3>
                     <span className="text-xs text-neutral-500 font-mono">
                       {story.word_count || 0} {t.words}
                     </span>
                   </div>
-                  <p className="text-xs text-neutral-600 dark:text-neutral-400 line-clamp-2 mb-2 font-sans">
+                  <p className="text-xs text-neutral-600 line-clamp-2 mb-2 font-sans">
                     {(story.snippet || story.story_content || "").replace(/<[^>]*>/g, "").replace(/&nbsp;/gi, " ").trim()}
                   </p>
                   <div className="text-[11px] text-neutral-500 font-mono">

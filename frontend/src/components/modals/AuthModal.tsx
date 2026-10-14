@@ -142,22 +142,22 @@ export function AuthModal({ isOpen, onClose, onSuccess, lang }: Props) {
 
   return (
     <ClientPortal>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto select-none font-sans">
-        <div className="relative w-full max-w-md bg-white dark:bg-neutral-950 rounded-xl p-6 shadow-2xl border border-neutral-300 dark:border-neutral-800 my-8 text-black dark:text-white">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto select-none font-sans">
+        <div className="relative w-full max-w-md bg-[#FAF7F2] rounded-xl p-6 shadow-2xl border border-neutral-300/80 my-8 text-neutral-900">
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-4 right-4 px-2 py-0.5 text-xs font-mono font-bold uppercase rounded border border-neutral-300 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors"
+            className="absolute top-4 right-4 px-2 py-0.5 text-xs font-mono font-bold uppercase rounded border border-neutral-300 text-neutral-600 hover:text-black hover:bg-neutral-100 transition-colors"
             aria-label="Close"
           >
             [ĐÓNG]
           </button>
 
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2 py-0.5 text-[10px] font-mono font-bold uppercase rounded border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900">
+            <span className="px-2 py-0.5 text-[10px] font-mono font-bold uppercase rounded border border-neutral-300 bg-white text-neutral-800">
               [TÀI KHOẢN]
             </span>
-            <h2 className="text-lg font-bold font-mono uppercase tracking-wider text-black dark:text-white">
+            <h2 className="text-lg font-bold font-mono uppercase tracking-wider text-neutral-900">
               {isLogin ? t.login : t.register}
             </h2>
           </div>
@@ -167,7 +167,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, lang }: Props) {
 
           {/* Lockout Banner */}
           {lockoutSeconds > 0 && (
-            <div className="mb-4 p-3 rounded border border-neutral-400 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 text-xs font-mono flex items-center gap-2">
+            <div className="mb-4 p-3 rounded border border-amber-300 bg-amber-50 text-amber-900 text-xs font-mono flex items-center gap-2">
               <span className="font-bold">[KHÓA TẠM THỜI]</span>
               <div className="flex-1">
                 {t.lockout_notice}{" "}
@@ -178,7 +178,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, lang }: Props) {
 
           {/* Error Banner */}
           {error && (
-            <div className="mb-4 p-3 rounded border border-neutral-400 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 text-xs font-mono text-black dark:text-white">
+            <div className="mb-4 p-3 rounded border border-red-300 bg-red-50 text-red-800 text-xs font-mono">
               <span className="font-bold mr-1.5">[LỖI]:</span>
               <span>{error}</span>
             </div>
@@ -186,7 +186,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, lang }: Props) {
 
           {/* Success Banner */}
           {successMsg && (
-            <div className="mb-4 p-3 rounded border border-neutral-400 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 text-xs font-mono text-black dark:text-white">
+            <div className="mb-4 p-3 rounded border border-emerald-300 bg-emerald-50 text-emerald-800 text-xs font-mono">
               <span className="font-bold mr-1.5">[THÀNH CÔNG]:</span>
               <span>{successMsg}</span>
             </div>
@@ -196,7 +196,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, lang }: Props) {
             {/* Full Name (Register Only) */}
             {!isLogin && (
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-neutral-600 mb-1.5">
                   {t.full_name}
                 </label>
                 <input
@@ -205,14 +205,14 @@ export function AuthModal({ isOpen, onClose, onSuccess, lang }: Props) {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder={t.full_name_placeholder}
-                  className="w-full px-3.5 py-2.5 rounded border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-black dark:text-white text-xs focus:outline-none focus:border-black dark:focus:border-white transition-colors"
+                  className="w-full px-3.5 py-2.5 rounded border border-neutral-300 bg-white text-neutral-900 text-xs focus:outline-none focus:border-neutral-900 transition-colors"
                 />
               </div>
             )}
 
             {/* Username */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-600 mb-1.5">
                 {t.username}
               </label>
               <input
@@ -221,13 +221,13 @@ export function AuthModal({ isOpen, onClose, onSuccess, lang }: Props) {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder={t.username}
-                className="w-full px-3.5 py-2.5 rounded border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-black dark:text-white text-xs focus:outline-none focus:border-black dark:focus:border-white transition-colors"
+                className="w-full px-3.5 py-2.5 rounded border border-neutral-300 bg-white text-neutral-900 text-xs focus:outline-none focus:border-neutral-900 transition-colors"
               />
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-600 mb-1.5">
                 {t.password}
               </label>
               <div className="relative">
@@ -237,12 +237,12 @@ export function AuthModal({ isOpen, onClose, onSuccess, lang }: Props) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={t.password}
-                  className="w-full px-3.5 pr-14 py-2.5 rounded border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-black dark:text-white text-xs focus:outline-none focus:border-black dark:focus:border-white transition-colors"
+                  className="w-full px-3.5 pr-14 py-2.5 rounded border border-neutral-300 bg-white text-neutral-900 text-xs focus:outline-none focus:border-neutral-900 transition-colors"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-2.5 text-xs text-neutral-500 hover:text-black dark:hover:text-white"
+                  className="absolute right-3 top-2.5 text-xs text-neutral-500 hover:text-black"
                 >
                   {showPassword ? "[Ẩn]" : "[Hiện]"}
                 </button>
@@ -253,18 +253,18 @@ export function AuthModal({ isOpen, onClose, onSuccess, lang }: Props) {
             {!isLogin && password.length > 0 && (
               <div className="space-y-3 pt-1">
                 <div>
-                  <div className="flex justify-between items-center text-xs mb-1 font-bold text-neutral-600 dark:text-neutral-400">
+                  <div className="flex justify-between items-center text-xs mb-1 font-bold text-neutral-600">
                     <span>{t.strength_meter_title}</span>
                     <span>{strength.label}</span>
                   </div>
-                  <div className="w-full h-1.5 rounded bg-neutral-200 dark:bg-neutral-800 overflow-hidden">
+                  <div className="w-full h-1.5 rounded bg-neutral-200 overflow-hidden">
                     <div
                       className={`h-full transition-all duration-300 rounded ${strength.color}`}
                       style={{ width: `${strength.percent}%` }}
                     />
                   </div>
                 </div>
-                <div className="p-3 rounded bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 space-y-1.5 text-xs">
+                <div className="p-3 rounded bg-white border border-neutral-300 space-y-1.5 text-xs">
                   <CheckItem passed={rules.length} label={t.rule_length} />
                   <CheckItem passed={rules.uppercase} label={t.rule_uppercase} />
                   <CheckItem passed={rules.lowercase} label={t.rule_lowercase} />
@@ -278,7 +278,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, lang }: Props) {
             {/* Confirm Password (Register Only) */}
             {!isLogin && (
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400 mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-neutral-600 mb-1.5">
                   {t.confirm_password}
                 </label>
                 <div className="relative">
@@ -288,12 +288,12 @@ export function AuthModal({ isOpen, onClose, onSuccess, lang }: Props) {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder={t.confirm_password_placeholder}
-                    className="w-full px-3.5 pr-14 py-2.5 rounded border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-black dark:text-white text-xs focus:outline-none focus:border-black dark:focus:border-white transition-colors"
+                    className="w-full px-3.5 pr-14 py-2.5 rounded border border-neutral-300 bg-white text-neutral-900 text-xs focus:outline-none focus:border-neutral-900 transition-colors"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-2.5 text-xs text-neutral-500 hover:text-black dark:hover:text-white"
+                    className="absolute right-3 top-2.5 text-xs text-neutral-500 hover:text-black"
                   >
                     {showConfirmPassword ? "[Ẩn]" : "[Hiện]"}
                   </button>
@@ -309,7 +309,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, lang }: Props) {
             <button
               type="submit"
               disabled={loading || lockoutSeconds > 0 || (!isLogin && (!allRulesPassed || !passwordsMatch))}
-              className="w-full py-2.5 rounded font-bold text-xs uppercase tracking-wider bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed mt-2"
+              className="w-full py-2.5 rounded font-bold text-xs uppercase tracking-wider bg-neutral-900 text-white hover:bg-neutral-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed mt-2 shadow-xs"
             >
               {loading ? t.loading : isLogin ? `[${t.login}]` : `[${t.register}]`}
             </button>
@@ -324,7 +324,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, lang }: Props) {
                 setError("");
                 setSuccessMsg("");
               }}
-              className="font-bold underline text-black dark:text-white"
+              className="font-bold underline text-neutral-900 hover:text-black"
             >
               {isLogin ? t.register_now : t.login_now}
             </button>

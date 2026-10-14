@@ -220,27 +220,27 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
   ];
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#080808] text-[#F5F5F5] select-none overflow-hidden font-sans">
+    <div className="flex-1 flex flex-col h-full bg-[#FAF7F2] text-neutral-900 select-none overflow-hidden font-sans">
       {/* 1. Header Toolbar */}
-      <header className="h-14 border-b border-white/10 px-4 flex items-center justify-between shrink-0 bg-[#0d0d0d]">
+      <header className="h-14 border-b border-neutral-300/80 px-4 flex items-center justify-between shrink-0 bg-[#FAF7F2]/90 backdrop-blur-md">
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 text-xs font-mono text-neutral-400">
+          <div className="flex items-center gap-2 text-xs font-mono text-neutral-500">
             <span>NarrAI</span>
-            <ChevronRight className="w-3.5 h-3.5 text-neutral-600" />
-            <span className="text-white font-semibold flex items-center gap-1.5">
-              <Clapperboard className="w-4 h-4 text-white" />
+            <ChevronRight className="w-3.5 h-3.5 text-neutral-400" />
+            <span className="text-neutral-950 font-semibold flex items-center gap-1.5">
+              <Clapperboard className="w-4 h-4 text-neutral-950" />
               Motion Studio
             </span>
           </div>
 
-          <div className="h-4 w-px bg-white/10 hidden sm:block" />
+          <div className="h-4 w-px bg-neutral-300/80 hidden sm:block" />
 
           {/* Current scene selector */}
           <div className="hidden md:flex items-center gap-2">
-            <span className="text-xs font-mono text-neutral-400">
+            <span className="text-xs font-mono text-neutral-500">
               {lang === "vi" ? "Phân cảnh:" : "Scene:"}
             </span>
-            <span className="text-xs font-medium text-white px-2 py-0.5 rounded bg-white/5 border border-white/10 font-mono">
+            <span className="text-xs font-medium text-neutral-900 px-2 py-0.5 rounded bg-white border border-neutral-300/80 font-mono shadow-xs">
               {currentScene.title}
             </span>
           </div>
@@ -249,7 +249,7 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
         {/* Right Header Controls */}
         <div className="flex items-center gap-2">
           {/* Aspect Ratio Selector */}
-          <div className="flex items-center rounded-lg border border-white/10 bg-black/40 p-0.5 text-[11px] font-mono">
+          <div className="flex items-center rounded-lg border border-neutral-300/80 bg-neutral-200/50 p-0.5 text-[11px] font-mono">
             {(["16:9", "9:16", "1:1"] as const).map((ratio) => (
               <button
                 key={ratio}
@@ -257,8 +257,8 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
                 onClick={() => setAspectRatio(ratio)}
                 className={`px-2 py-1 rounded transition-colors ${
                   aspectRatio === ratio
-                    ? "bg-white text-black font-bold"
-                    : "text-neutral-400 hover:text-white"
+                    ? "bg-white text-neutral-950 font-bold shadow-xs"
+                    : "text-neutral-600 hover:text-neutral-950"
                 }`}
               >
                 {ratio}
@@ -267,7 +267,7 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
           </div>
 
           {/* FPS Selector */}
-          <div className="hidden sm:flex items-center rounded-lg border border-white/10 bg-black/40 p-0.5 text-[11px] font-mono">
+          <div className="hidden sm:flex items-center rounded-lg border border-neutral-300/80 bg-neutral-200/50 p-0.5 text-[11px] font-mono">
             {(["24", "30", "60"] as const).map((val) => (
               <button
                 key={val}
@@ -275,8 +275,8 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
                 onClick={() => setFps(val)}
                 className={`px-2 py-1 rounded transition-colors ${
                   fps === val
-                    ? "bg-white text-black font-bold"
-                    : "text-neutral-400 hover:text-white"
+                    ? "bg-white text-neutral-950 font-bold shadow-xs"
+                    : "text-neutral-600 hover:text-neutral-950"
                 }`}
               >
                 {val}fps
@@ -288,7 +288,7 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
           <button
             type="button"
             onClick={() => setShowExportModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white text-black font-mono text-xs font-bold hover:bg-neutral-200 transition-colors shadow"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-900 text-white font-mono text-xs font-bold hover:bg-neutral-800 transition-colors shadow-xs"
           >
             <Download className="w-3.5 h-3.5" />
             <span>{lang === "vi" ? "Xuất Video" : "Export MP4"}</span>
@@ -299,9 +299,9 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
       {/* 2. Main 3-Column Motion Workspace */}
       <div className="flex-1 flex min-h-0 overflow-hidden">
         {/* LEFT COLUMN: Scene & Keyframe Timeline (Hidden on small mobile) */}
-        <aside className="w-64 border-r border-white/10 bg-[#0d0d0d] flex-col shrink-0 hidden md:flex">
-          <div className="p-3 border-b border-white/10 flex items-center justify-between">
-            <div className="flex items-center gap-1.5 text-xs font-mono text-neutral-400 uppercase tracking-wider">
+        <aside className="w-64 border-r border-neutral-300/80 bg-[#FAF7F2] flex-col shrink-0 hidden md:flex">
+          <div className="p-3 border-b border-neutral-300/70 flex items-center justify-between">
+            <div className="flex items-center gap-1.5 text-xs font-mono text-neutral-600 uppercase tracking-wider">
               <Film className="w-3.5 h-3.5" />
               <span>{lang === "vi" ? "Phân Cảnh" : "Scenes"}</span>
             </div>
@@ -324,12 +324,12 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
                   }}
                   className={`group relative rounded-lg border p-2 cursor-pointer transition-all ${
                     isSelected
-                      ? "border-white bg-[#171717] shadow"
-                      : "border-white/10 bg-[#111111] hover:border-white/20"
+                      ? "border-neutral-900 bg-white shadow-xs"
+                      : "border-neutral-300/60 bg-white/70 hover:bg-white"
                   }`}
                 >
                   <div className="flex gap-2.5 items-center">
-                    <div className="relative w-16 h-12 rounded overflow-hidden shrink-0 bg-black border border-white/10">
+                    <div className="relative w-16 h-12 rounded overflow-hidden shrink-0 bg-black border border-neutral-700">
                       <Image
                         src={scene.image}
                         alt={scene.title}
@@ -342,17 +342,17 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs font-medium text-white truncate font-sans">
+                      <div className="text-xs font-medium text-neutral-900 truncate font-sans">
                         {scene.title}
                       </div>
-                      <div className="flex items-center gap-1 mt-1 text-[10px] font-mono text-neutral-400">
+                      <div className="flex items-center gap-1 mt-1 text-[10px] font-mono text-neutral-500">
                         <Camera className="w-2.5 h-2.5" />
                         <span className="capitalize">{scene.cameraMovement}</span>
                       </div>
                     </div>
                   </div>
                   {isSelected && (
-                    <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                    <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-neutral-900 animate-pulse" />
                   )}
                 </div>
               );
@@ -381,7 +381,7 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
                 setSelectedSceneIndex(scenes.length);
                 setCurrentTime(0);
               }}
-              className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-lg border border-dashed border-white/20 text-neutral-400 hover:text-white hover:border-white/40 text-xs font-mono transition-colors"
+              className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-lg border border-dashed border-neutral-400 bg-white/50 text-neutral-600 hover:text-neutral-950 hover:border-neutral-600 text-xs font-mono transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>{lang === "vi" ? "Thêm Phân Cảnh" : "Add Scene"}</span>
@@ -389,12 +389,12 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
           </div>
 
           {/* Quick link to Manga / Story Lab */}
-          <div className="p-3 border-t border-white/10 text-xs font-mono space-y-1.5">
+          <div className="p-3 border-t border-neutral-300/70 text-xs font-mono space-y-1.5">
             {onBackToManga && (
               <button
                 type="button"
                 onClick={onBackToManga}
-                className="w-full flex items-center justify-between text-neutral-400 hover:text-white py-1 transition-colors"
+                className="w-full flex items-center justify-between text-neutral-600 hover:text-neutral-950 py-1 transition-colors"
               >
                 <span>{lang === "vi" ? "➔ Nhập từ Manga Studio" : "➔ From Manga Studio"}</span>
               </button>
@@ -403,7 +403,7 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
               <button
                 type="button"
                 onClick={onBackToEditor}
-                className="w-full flex items-center justify-between text-neutral-400 hover:text-white py-1 transition-colors"
+                className="w-full flex items-center justify-between text-neutral-600 hover:text-neutral-950 py-1 transition-colors"
               >
                 <span>{lang === "vi" ? "➔ Xem Bản thảo Story" : "➔ View Story Draft"}</span>
               </button>
@@ -412,12 +412,12 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
         </aside>
 
         {/* CENTER COLUMN: Cinematic Canvas & Timeline Scrubber */}
-        <div className="flex-1 flex flex-col min-h-0 bg-[#080808] overflow-hidden">
+        <div className="flex-1 flex flex-col min-h-0 bg-[#FAF7F2] overflow-hidden">
           {/* Main Visual Preview Canvas */}
-          <div className="flex-1 flex items-center justify-center p-4 relative overflow-hidden bg-black/60">
+          <div className="flex-1 flex items-center justify-center p-4 relative overflow-hidden bg-neutral-200/40">
             {/* Aspect Ratio Bounding Container */}
             <div
-              className={`relative rounded-xl overflow-hidden border border-white/15 bg-black shadow-2xl transition-all duration-300 flex items-center justify-center ${
+              className={`relative rounded-xl overflow-hidden border border-neutral-800 bg-black shadow-2xl transition-all duration-300 flex items-center justify-center ${
                 aspectRatio === "16:9"
                   ? "w-full max-w-4xl aspect-video"
                   : aspectRatio === "9:16"
@@ -471,18 +471,18 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
           </div>
 
           {/* Timeline & Player Bar */}
-          <div className="h-24 border-t border-white/10 bg-[#0d0d0d] px-6 py-3 flex flex-col justify-between shrink-0">
+          <div className="h-24 border-t border-neutral-300/80 bg-[#FAF7F2] px-6 py-3 flex flex-col justify-between shrink-0">
             {/* Scrubber slider and time marks */}
             <div className="space-y-1">
-              <div className="flex items-center justify-between text-[11px] font-mono text-neutral-400">
+              <div className="flex items-center justify-between text-[11px] font-mono text-neutral-600">
                 <div className="flex items-center gap-2">
-                  <span className="text-white font-bold">
+                  <span className="text-neutral-950 font-bold">
                     00:0{Math.floor(currentTime)}:
                     {Math.floor((currentTime % 1) * 30)
                       .toString()
                       .padStart(2, "0")}
                   </span>
-                  <span className="text-neutral-600">/</span>
+                  <span className="text-neutral-400">/</span>
                   <span>
                     00:0{currentScene.duration}:00
                   </span>
@@ -501,7 +501,7 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
                   step={0.01}
                   value={currentTime}
                   onChange={handleSeek}
-                  className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-white"
+                  className="w-full h-1.5 bg-neutral-300 rounded-lg appearance-none cursor-pointer accent-neutral-900"
                 />
               </div>
             </div>
@@ -513,7 +513,7 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
                 <button
                   type="button"
                   onClick={handleRestart}
-                  className="p-1.5 rounded hover:bg-white/10 text-neutral-400 hover:text-white transition-colors"
+                  className="p-1.5 rounded hover:bg-white text-neutral-600 hover:text-neutral-950 transition-colors shadow-xs"
                   title={lang === "vi" ? "Xem lại từ đầu" : "Restart"}
                 >
                   <RotateCcw className="w-4 h-4" />
@@ -523,16 +523,16 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
                 <button
                   type="button"
                   onClick={handleTogglePlay}
-                  className="px-3 py-1 rounded bg-white text-black hover:bg-neutral-200 transition-colors flex items-center gap-1.5 text-xs font-mono font-bold"
+                  className="px-3 py-1 rounded bg-neutral-900 text-white hover:bg-neutral-800 transition-colors flex items-center gap-1.5 text-xs font-mono font-bold shadow-xs"
                 >
                   {isPlaying ? (
                     <>
-                      <Pause className="w-3.5 h-3.5 fill-black" />
+                      <Pause className="w-3.5 h-3.5 fill-white" />
                       <span>Tạm dừng</span>
                     </>
                   ) : (
                     <>
-                      <Play className="w-3.5 h-3.5 fill-black" />
+                      <Play className="w-3.5 h-3.5 fill-white" />
                       <span>Phát</span>
                     </>
                   )}
@@ -544,8 +544,8 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
                   onClick={() => setIsLooping(!isLooping)}
                   className={`p-1.5 rounded transition-colors ${
                     isLooping
-                      ? "text-white bg-white/15"
-                      : "text-neutral-500 hover:text-neutral-300"
+                      ? "text-neutral-950 bg-white border border-neutral-300/80 shadow-xs"
+                      : "text-neutral-500 hover:text-neutral-900"
                   }`}
                   title={lang === "vi" ? "Lặp lại liên tục" : "Loop"}
                 >
@@ -560,7 +560,7 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
                     const nextIndex = (speeds.indexOf(playbackSpeed) + 1) % speeds.length;
                     setPlaybackSpeed(speeds[nextIndex]);
                   }}
-                  className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[11px] font-mono text-neutral-300 hover:text-white transition-colors"
+                  className="px-2 py-0.5 rounded bg-white border border-neutral-300/80 text-[11px] font-mono text-neutral-700 hover:text-neutral-950 transition-colors shadow-xs"
                 >
                   {playbackSpeed}x
                 </button>
@@ -575,13 +575,13 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
         </div>
 
         {/* RIGHT COLUMN: Camera Parameters & Motion Prompt Inspector */}
-        <aside className="w-80 border-l border-white/10 bg-[#0d0d0d] flex-col shrink-0 overflow-y-auto hidden lg:flex">
-          <div className="p-3 border-b border-white/10 flex items-center justify-between">
-            <div className="flex items-center gap-1.5 text-xs font-mono text-neutral-400 uppercase tracking-wider">
+        <aside className="w-80 border-l border-neutral-300/80 bg-[#FAF7F2] flex-col shrink-0 overflow-y-auto hidden lg:flex">
+          <div className="p-3 border-b border-neutral-300/70 flex items-center justify-between">
+            <div className="flex items-center gap-1.5 text-xs font-mono text-neutral-600 uppercase tracking-wider">
               <Sliders className="w-3.5 h-3.5" />
               <span>{lang === "vi" ? "Đạo Diễn Chuyển Động" : "Motion Director"}</span>
             </div>
-            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-neutral-400">
+            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white border border-neutral-300/80 text-neutral-600 shadow-xs">
               {currentScene.focalLength}
             </span>
           </div>
@@ -589,7 +589,7 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
           <div className="p-4 space-y-5">
             {/* 1. Camera Movement Presets */}
             <div>
-              <label className="text-xs font-mono text-neutral-300 block mb-2 font-semibold">
+              <label className="text-xs font-mono text-neutral-800 block mb-2 font-semibold">
                 {lang === "vi" ? "Quỹ Đạo Máy Quay (Camera Trajectory)" : "Camera Trajectory"}
               </label>
               <div className="grid grid-cols-2 gap-1.5">
@@ -606,8 +606,8 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
                       }
                       className={`flex items-center gap-2 p-2 rounded-lg border text-xs font-mono transition-all text-left ${
                         isActive
-                          ? "border-white bg-[#1a1a1a] text-white font-bold shadow"
-                          : "border-white/10 bg-[#121212] text-neutral-400 hover:border-white/20 hover:text-white"
+                          ? "border-neutral-900 bg-white text-neutral-950 font-bold shadow-xs"
+                          : "border-neutral-300/60 bg-white/60 text-neutral-600 hover:border-neutral-400 hover:text-neutral-950"
                       }`}
                     >
                       <span>{preset.icon}</span>
@@ -621,10 +621,10 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
             {/* 2. Motion Strength Slider */}
             <div>
               <div className="flex items-center justify-between text-xs font-mono mb-1.5">
-                <span className="text-neutral-300">
+                <span className="text-neutral-700">
                   {lang === "vi" ? "Cường Độ Chuyển Động" : "Motion Strength"}
                 </span>
-                <span className="text-white font-bold">{currentScene.motionStrength} / 10</span>
+                <span className="text-neutral-950 font-bold">{currentScene.motionStrength} / 10</span>
               </div>
               <input
                 type="range"
@@ -634,20 +634,20 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
                 onChange={(e) =>
                   handleUpdateCurrentScene({ motionStrength: parseInt(e.target.value) })
                 }
-                className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-white"
+                className="w-full h-1.5 bg-neutral-300 rounded-lg appearance-none cursor-pointer accent-neutral-900"
               />
             </div>
 
             {/* 3. Focal Length & Motion Blur */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs font-mono text-neutral-400 block mb-1.5">
+                <label className="text-xs font-mono text-neutral-600 block mb-1.5">
                   {lang === "vi" ? "Tiêu Cự Ống Kính" : "Focal Length"}
                 </label>
                 <select
                   value={currentScene.focalLength}
                   onChange={(e) => handleUpdateCurrentScene({ focalLength: e.target.value })}
-                  className="w-full rounded-lg border border-white/10 bg-[#141414] px-2.5 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-white"
+                  className="w-full rounded-lg border border-neutral-300/80 bg-white px-2.5 py-1.5 text-xs font-mono text-neutral-900 focus:outline-none focus:border-neutral-900 shadow-xs"
                 >
                   <option value="24mm">24mm (Ultra Wide)</option>
                   <option value="35mm">35mm (Cinematic)</option>
@@ -657,7 +657,7 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
               </div>
 
               <div>
-                <label className="text-xs font-mono text-neutral-400 block mb-1.5">
+                <label className="text-xs font-mono text-neutral-600 block mb-1.5">
                   {lang === "vi" ? "Motion Blur" : "Motion Blur"}
                 </label>
                 <button
@@ -665,10 +665,10 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
                   onClick={() =>
                     handleUpdateCurrentScene({ motionBlur: !currentScene.motionBlur })
                   }
-                  className={`w-full py-1.5 rounded-lg border text-xs font-mono transition-colors ${
+                  className={`w-full py-1.5 rounded-lg border text-xs font-mono transition-colors shadow-xs ${
                     currentScene.motionBlur
-                      ? "border-white bg-white text-black font-bold"
-                      : "border-white/10 bg-[#141414] text-neutral-400 hover:text-white"
+                      ? "border-neutral-900 bg-neutral-900 text-white font-bold"
+                      : "border-neutral-300/80 bg-white text-neutral-600 hover:text-neutral-950"
                   }`}
                 >
                   {currentScene.motionBlur ? "BẬT (ON)" : "TẮT (OFF)"}
@@ -679,8 +679,8 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
             {/* 4. Motion Prompt Area */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-mono text-neutral-300 font-semibold flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-neutral-400" />
+                <label className="text-xs font-mono text-neutral-800 font-semibold flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-neutral-600" />
                   <span>{lang === "vi" ? "Kịch Bản Chuyển Động" : "Motion Prompt"}</span>
                 </label>
                 <button
@@ -690,7 +690,7 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
                     setIsCopiedPrompt(true);
                     setTimeout(() => setIsCopiedPrompt(false), 2000);
                   }}
-                  className="text-[10px] font-mono text-neutral-400 hover:text-white transition-colors"
+                  className="text-[10px] font-mono text-neutral-500 hover:text-neutral-950 transition-colors"
                 >
                   {isCopiedPrompt ? "✓ Đã chép" : "Sao chép"}
                 </button>
@@ -699,7 +699,7 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
                 value={currentScene.prompt}
                 onChange={(e) => handleUpdateCurrentScene({ prompt: e.target.value })}
                 rows={4}
-                className="w-full rounded-lg border border-white/10 bg-[#141414] p-2.5 text-xs font-sans text-white focus:outline-none focus:border-white leading-relaxed resize-none"
+                className="w-full rounded-lg border border-neutral-300/80 bg-white p-2.5 text-xs font-sans text-neutral-900 focus:outline-none focus:border-neutral-900 leading-relaxed resize-none shadow-xs"
                 placeholder={
                   lang === "vi"
                     ? "Mô tả chi tiết chuyển động nhân vật, ánh sáng, máy quay..."
@@ -725,7 +725,7 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
                         });
                       }
                     }}
-                    className="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 border border-white/10 text-[10px] font-mono text-neutral-400 hover:text-white transition-colors"
+                    className="px-2 py-0.5 rounded bg-white hover:bg-neutral-100 border border-neutral-300/70 text-[10px] font-mono text-neutral-700 hover:text-neutral-950 transition-colors shadow-xs"
                   >
                     +{tag}
                   </button>
@@ -734,19 +734,19 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
             </div>
 
             {/* 5. Pipeline Reality Notice (No fake generation states!) */}
-            <div className="rounded-lg border border-white/10 bg-[#121212] p-3 text-xs space-y-2">
-              <div className="flex items-center gap-2 text-neutral-300 font-mono font-semibold">
-                <Info className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+            <div className="rounded-lg border border-neutral-300/80 bg-white p-3 text-xs space-y-2 shadow-xs">
+              <div className="flex items-center gap-2 text-neutral-800 font-mono font-semibold">
+                <Info className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
                 <span>ComfyUI AnimateDiff Pipeline</span>
               </div>
-              <p className="text-[11px] text-neutral-400 leading-relaxed font-sans">
+              <p className="text-[11px] text-neutral-600 leading-relaxed font-sans">
                 {lang === "vi"
                   ? "Hạ tầng render video đang trong lộ trình tích hợp pipeline ComfyUI AnimateDiff v3 & SVD. Không gian Motion Studio hiện đang hoạt động ở chế độ Preview trực quan thời gian thực, cho phép bạn thiết lập hoàn chỉnh kịch bản camera và dòng thời gian."
                   : "The video rendering engine is actively integrating ComfyUI AnimateDiff v3 & SVD. Motion Studio is operating in real-time interactive preview mode, letting you direct camera timelines and motion parameters."}
               </p>
-              <div className="pt-1 flex items-center justify-between text-[10px] font-mono text-neutral-500 border-t border-white/5">
+              <div className="pt-1 flex items-center justify-between text-[10px] font-mono text-neutral-500 border-t border-neutral-200">
                 <span>GPU Cluster: ComfyUI SVD Node</span>
-                <span className="text-emerald-400">● Sẵn sàng đồng bộ</span>
+                <span className="text-emerald-700 font-bold">● Sẵn sàng đồng bộ</span>
               </div>
             </div>
           </div>
@@ -755,44 +755,44 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
 
       {/* 3. Export Modal / Drawer */}
       {showExportModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-xl border border-white/15 bg-[#121212] p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-xl border border-neutral-300/80 bg-[#FAF7F2] p-6 shadow-2xl space-y-4 text-neutral-900">
+            <div className="flex items-center justify-between border-b border-neutral-300/70 pb-3">
               <div className="flex items-center gap-2">
-                <Film className="w-4 h-4 text-white" />
-                <h3 className="font-bold text-sm text-white font-mono uppercase tracking-wider">
+                <Film className="w-4 h-4 text-neutral-900" />
+                <h3 className="font-bold text-sm text-neutral-950 font-mono uppercase tracking-wider">
                   {lang === "vi" ? "Xuất Video Phân Cảnh" : "Export Scene Video"}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowExportModal(false)}
-                className="text-neutral-400 hover:text-white text-xs font-mono"
+                className="text-neutral-500 hover:text-neutral-950 text-xs font-mono"
               >
                 [✕]
               </button>
             </div>
 
             <div className="space-y-3 text-xs font-mono">
-              <div className="flex justify-between py-1 border-b border-white/5 text-neutral-400">
+              <div className="flex justify-between py-1 border-b border-neutral-200 text-neutral-600">
                 <span>{lang === "vi" ? "Độ phân giải:" : "Resolution:"}</span>
-                <span className="text-white font-bold">1920 × 1080 (Full HD)</span>
+                <span className="text-neutral-950 font-bold">1920 × 1080 (Full HD)</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-white/5 text-neutral-400">
+              <div className="flex justify-between py-1 border-b border-neutral-200 text-neutral-600">
                 <span>{lang === "vi" ? "Tỷ lệ & Tốc độ:" : "Aspect & FPS:"}</span>
-                <span className="text-white font-bold">{aspectRatio} · {fps} FPS</span>
+                <span className="text-neutral-950 font-bold">{aspectRatio} · {fps} FPS</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-white/5 text-neutral-400">
+              <div className="flex justify-between py-1 border-b border-neutral-200 text-neutral-600">
                 <span>{lang === "vi" ? "Thời lượng phân cảnh:" : "Duration:"}</span>
-                <span className="text-white font-bold">{currentScene.duration} giây</span>
+                <span className="text-neutral-950 font-bold">{currentScene.duration} giây</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-white/5 text-neutral-400">
+              <div className="flex justify-between py-1 border-b border-neutral-200 text-neutral-600">
                 <span>{lang === "vi" ? "Quỹ đạo máy quay:" : "Camera:"}</span>
-                <span className="text-white font-bold capitalize">{currentScene.cameraMovement}</span>
+                <span className="text-neutral-950 font-bold capitalize">{currentScene.cameraMovement}</span>
               </div>
             </div>
 
-            <div className="p-3 rounded-lg bg-black/60 border border-white/10 text-[11px] text-neutral-400 leading-relaxed font-sans">
+            <div className="p-3 rounded-lg bg-white border border-neutral-300/70 text-[11px] text-neutral-600 leading-relaxed font-sans shadow-xs">
               {lang === "vi"
                 ? "Bản dựng kịch bản camera và các thông số keyframe đã được đóng gói chuẩn bị cho cụm render GPU. Bạn có thể xuất kịch bản JSON hoặc lưu phiên bản làm việc này vào dự án."
                 : "Camera keyframe configurations and trajectory parameters have been bundled. You can export the scene manifest or save it to your project library."}
@@ -812,14 +812,14 @@ export function MotionStudio({ lang, onBackToManga, onBackToEditor }: Props) {
                   URL.revokeObjectURL(url);
                   setShowExportModal(false);
                 }}
-                className="flex-1 py-2.5 rounded-lg border border-white/20 text-white hover:bg-white/10 text-xs font-mono transition-colors text-center"
+                className="flex-1 py-2.5 rounded-lg border border-neutral-300/80 bg-white text-neutral-900 hover:bg-neutral-100 text-xs font-mono transition-colors text-center shadow-xs"
               >
                 {lang === "vi" ? "Tải File Kịch Bản JSON" : "Download JSON Manifest"}
               </button>
               <button
                 type="button"
                 onClick={() => setShowExportModal(false)}
-                className="flex-1 py-2.5 rounded-lg bg-white text-black font-bold text-xs font-mono hover:bg-neutral-200 transition-colors text-center"
+                className="flex-1 py-2.5 rounded-lg bg-neutral-900 text-white font-bold text-xs font-mono hover:bg-neutral-800 transition-colors text-center shadow-xs"
               >
                 {lang === "vi" ? "Đóng" : "Done"}
               </button>

@@ -147,18 +147,18 @@ export function ComicViewer({
   const parsedSelected = selectedPanel ? parseComicDialogue(selectedPanel.dialogue_text || "") : null;
 
   return (
-    <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden bg-neutral-100 dark:bg-[#080808] text-black dark:text-[#F5F5F5] font-sans transition-colors">
+    <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden bg-[#FAF7F2] text-neutral-900 font-sans transition-colors">
       
       {/* ========================================================= */}
       {/* MANGA STUDIO WORKSPACE HEADER */}
       {/* ========================================================= */}
-      <header className="h-14 border-b border-neutral-200 dark:border-white/10 bg-white dark:bg-[#111111] px-3 sm:px-6 flex items-center justify-between gap-3 shrink-0 select-none">
+      <header className="h-14 border-b border-neutral-300/80 bg-[#FAF7F2]/90 backdrop-blur-md px-3 sm:px-6 flex items-center justify-between gap-3 shrink-0 select-none">
         {/* Left: Breadcrumbs & Status */}
         <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <button
             type="button"
             onClick={onBackToEditor}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-neutral-300 dark:border-white/10 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-xs font-mono font-bold uppercase tracking-wider text-black dark:text-white transition-colors"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-neutral-300/80 hover:bg-white text-xs font-mono font-bold uppercase tracking-wider text-neutral-900 transition-colors shadow-xs"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Story Lab</span>
@@ -167,17 +167,17 @@ export function ComicViewer({
           <div className="flex items-center gap-1.5 text-xs font-mono text-neutral-500">
             <span>Dự án</span>
             <ChevronRight className="w-3 h-3 text-neutral-400" />
-            <span className="font-bold text-black dark:text-white uppercase tracking-wider">Manga Studio</span>
+            <span className="font-bold text-neutral-950 uppercase tracking-wider">Manga Studio</span>
           </div>
 
-          <div className="hidden sm:block h-4 w-px bg-neutral-300 dark:border-white/10 mx-1" />
+          <div className="hidden sm:block h-4 w-px bg-neutral-300/80 mx-1" />
 
           {/* ComfyUI GPU Status Badge */}
-          <div className="flex items-center gap-1.5 text-[10px] font-mono px-2 py-0.5 rounded border border-neutral-300 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-900">
+          <div className="flex items-center gap-1.5 text-[10px] font-mono px-2 py-0.5 rounded border border-neutral-300/80 bg-white shadow-xs">
             {comfyStatus?.available ? (
               <>
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-emerald-600 dark:text-emerald-400 font-bold">GPU Sẵn Sàng</span>
+                <span className="text-emerald-700 font-bold">GPU Sẵn Sàng</span>
               </>
             ) : (
               <>
@@ -191,14 +191,14 @@ export function ComicViewer({
         {/* Right: View switcher & Actions */}
         <div className="flex items-center gap-2 font-mono text-xs">
           {/* Page vs Panel View Toggle */}
-          <div className="hidden sm:flex rounded-lg border border-neutral-300 dark:border-white/10 p-0.5 bg-neutral-100 dark:bg-neutral-900">
+          <div className="hidden sm:flex rounded-lg border border-neutral-300/80 p-0.5 bg-neutral-200/50">
             <button
               type="button"
               onClick={() => setViewMode("page")}
               className={`px-2.5 py-1 rounded text-[11px] font-bold uppercase transition-colors flex items-center gap-1.5 ${
                 viewMode === "page"
-                  ? "bg-white dark:bg-black text-black dark:text-white shadow-xs"
-                  : "text-neutral-500 hover:text-black dark:hover:text-white"
+                  ? "bg-white text-neutral-950 shadow-xs"
+                  : "text-neutral-600 hover:text-neutral-950"
               }`}
             >
               <Columns className="w-3.5 h-3.5" />
@@ -209,8 +209,8 @@ export function ComicViewer({
               onClick={() => setViewMode("panel")}
               className={`px-2.5 py-1 rounded text-[11px] font-bold uppercase transition-colors flex items-center gap-1.5 ${
                 viewMode === "panel"
-                  ? "bg-white dark:bg-black text-black dark:text-white shadow-xs"
-                  : "text-neutral-500 hover:text-black dark:hover:text-white"
+                  ? "bg-white text-neutral-950 shadow-xs"
+                  : "text-neutral-600 hover:text-neutral-950"
               }`}
             >
               <LayoutGrid className="w-3.5 h-3.5" />
@@ -223,7 +223,7 @@ export function ComicViewer({
             type="button"
             onClick={onContinueComic}
             disabled={loadingMore}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-colors shadow-sm disabled:opacity-40"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider bg-neutral-900 text-white hover:bg-neutral-800 transition-colors shadow-xs disabled:opacity-40"
           >
             {loadingMore ? (
               <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -243,9 +243,9 @@ export function ComicViewer({
         {/* ========================================================= */}
         {/* B. LEFT SIDEBAR — SCENE & PANEL NAVIGATOR */}
         {/* ========================================================= */}
-        <aside className="w-64 border-r border-neutral-200 dark:border-white/10 bg-white dark:bg-[#111111] p-3.5 hidden md:flex flex-col justify-between shrink-0 overflow-y-auto select-none">
+        <aside className="w-64 border-r border-neutral-300/80 bg-[#FAF7F2] p-3.5 hidden md:flex flex-col justify-between shrink-0 overflow-y-auto select-none">
           <div className="space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-neutral-200 dark:border-neutral-800">
+            <div className="flex items-center justify-between pb-2 border-b border-neutral-300/70">
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-neutral-500">
                 Phân Cảnh Manga
               </span>
@@ -273,8 +273,8 @@ export function ComicViewer({
                     onClick={() => setSelectedPanelIdx(idx)}
                     className={`w-full text-left p-2 rounded-lg border transition-all flex items-center gap-2.5 ${
                       isSelected
-                        ? "border-black dark:border-white bg-neutral-100 dark:bg-[#171717] shadow-sm"
-                        : "border-neutral-200 dark:border-neutral-800/80 hover:bg-neutral-50 dark:hover:bg-neutral-900"
+                        ? "border-neutral-900 bg-white shadow-xs"
+                        : "border-neutral-300/60 bg-white/60 hover:bg-white"
                     }`}
                   >
                     {/* Thumbnail preview */}
@@ -290,18 +290,18 @@ export function ComicViewer({
 
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between text-[10px] font-mono">
-                        <span className="font-bold text-black dark:text-white">Khung {idx + 1}</span>
+                        <span className="font-bold text-neutral-900">Khung {idx + 1}</span>
                         {isLoaded ? (
-                          <span className="text-emerald-500 font-bold">Xong</span>
+                          <span className="text-emerald-600 font-bold">Xong</span>
                         ) : isRendering ? (
-                          <span className="text-amber-500 font-bold animate-pulse">Đang vẽ</span>
+                          <span className="text-amber-600 font-bold animate-pulse">Đang vẽ</span>
                         ) : isError ? (
-                          <span className="text-red-500 font-bold">Lỗi</span>
+                          <span className="text-red-600 font-bold">Lỗi</span>
                         ) : (
                           <span className="text-neutral-500">Chờ</span>
                         )}
                       </div>
-                      <p className="text-[11px] text-neutral-500 truncate mt-0.5">
+                      <p className="text-[11px] text-neutral-600 truncate mt-0.5">
                         {p.dialogue_text || p.image_prompt || "Không có thoại"}
                       </p>
                     </div>
@@ -312,7 +312,7 @@ export function ComicViewer({
           </div>
 
           {/* Bottom batch info */}
-          <div className="pt-3 border-t border-neutral-200 dark:border-neutral-800 text-[10px] font-mono text-neutral-500">
+          <div className="pt-3 border-t border-neutral-300/70 text-[10px] font-mono text-neutral-500">
             Trang manga đen trắng · Định dạng 4 panel / trang.
           </div>
         </aside>
@@ -320,15 +320,15 @@ export function ComicViewer({
         {/* ========================================================= */}
         {/* C. CENTER — MANGA CANVAS */}
         {/* ========================================================= */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-8 flex justify-center">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-8 flex justify-center bg-[#FAF7F2]">
           <div className="w-full max-w-4xl space-y-10">
             {pages.map((pagePanels, pageIndex) => (
               <article
                 key={pageIndex}
-                className="rounded-2xl border border-neutral-300 dark:border-white/10 bg-white dark:bg-[#111111] p-5 sm:p-10 shadow-xl"
+                className="rounded-2xl border border-neutral-300/80 bg-white p-5 sm:p-10 shadow-md"
               >
                 {/* Manga Page Header */}
-                <div className="flex items-center justify-between pb-4 mb-6 border-b border-neutral-200 dark:border-neutral-800 text-xs font-mono text-neutral-500">
+                <div className="flex items-center justify-between pb-4 mb-6 border-b border-neutral-200 text-xs font-mono text-neutral-500">
                   <span className="uppercase tracking-widest font-bold">
                     [TRANG {pageIndex + 1}] · BẢN THẢO TRUYỆN TRANH ĐẠI VIỆT
                   </span>
@@ -363,8 +363,8 @@ export function ComicViewer({
                         onClick={() => setSelectedPanelIdx(globalIdx)}
                         className={`group relative rounded-xl border-2 transition-all p-3 cursor-pointer ${
                           selectedPanelIdx === globalIdx
-                            ? "border-black dark:border-white bg-neutral-50 dark:bg-[#171717] shadow-md"
-                            : "border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#080808]"
+                            ? "border-neutral-900 bg-[#FAF7F2] shadow-md"
+                            : "border-neutral-200 hover:border-neutral-400 bg-white"
                         }`}
                       >
                         {/* Artwork container */}
@@ -428,20 +428,20 @@ export function ComicViewer({
 
                         {/* Speech Balloon / Caption */}
                         {dialogueText && (
-                          <div className="mt-3 p-2.5 rounded-lg bg-neutral-100 dark:bg-[#171717] border border-neutral-200 dark:border-white/10 text-xs">
+                          <div className="mt-3 p-2.5 rounded-lg bg-[#FAF7F2] border border-neutral-300/80 text-xs">
                             {speakerName ? (
-                              <p className="font-sans leading-relaxed text-black dark:text-[#F5F5F5]">
+                              <p className="font-sans leading-relaxed text-neutral-900">
                                 <strong className="font-bold uppercase tracking-wider font-mono mr-1">
                                   {speakerName}:
                                 </strong>
                                 <span>{dialogueText}</span>
                               </p>
                             ) : isDialogue ? (
-                              <p className="italic font-serif leading-relaxed text-black dark:text-[#F5F5F5]">
+                              <p className="italic font-serif leading-relaxed text-neutral-900">
                                 “{dialogueText}”
                               </p>
                             ) : (
-                              <p className="font-sans leading-relaxed text-neutral-700 dark:text-neutral-300">
+                              <p className="font-sans leading-relaxed text-neutral-800">
                                 {dialogueText}
                               </p>
                             )}
@@ -459,12 +459,12 @@ export function ComicViewer({
         {/* ========================================================= */}
         {/* D. RIGHT SIDEBAR — SCENE INSPECTOR */}
         {/* ========================================================= */}
-        <aside className="w-80 border-l border-neutral-200 dark:border-white/10 bg-white dark:bg-[#111111] p-4 hidden lg:flex flex-col justify-between shrink-0 overflow-y-auto select-none">
+        <aside className="w-80 border-l border-neutral-300/80 bg-[#FAF7F2] p-4 hidden lg:flex flex-col justify-between shrink-0 overflow-y-auto select-none">
           <div className="space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-neutral-200 dark:border-neutral-800">
+            <div className="flex items-center justify-between pb-2 border-b border-neutral-300/70">
               <div className="flex items-center gap-2">
                 <Info className="w-4 h-4 text-neutral-500" />
-                <span className="text-xs font-mono font-bold uppercase tracking-wider text-black dark:text-white">
+                <span className="text-xs font-mono font-bold uppercase tracking-wider text-neutral-900">
                   Thông Tin Cảnh (Khung {selectedPanelIdx + 1})
                 </span>
               </div>
@@ -473,36 +473,36 @@ export function ComicViewer({
             {selectedPanel ? (
               <div className="space-y-3.5 text-xs font-mono">
                 {/* Dialogue */}
-                <div className="p-3 rounded-lg bg-neutral-50 dark:bg-[#171717] border border-neutral-200 dark:border-white/10 space-y-1">
+                <div className="p-3 rounded-lg bg-white border border-neutral-300/70 space-y-1">
                   <span className="text-[10px] text-neutral-500 uppercase font-bold block">
                     Lời Thoại / Caption
                   </span>
-                  <p className="text-black dark:text-[#F5F5F5] font-sans leading-relaxed">
+                  <p className="text-neutral-900 font-sans leading-relaxed">
                     {parsedSelected?.text || selectedPanel.dialogue_text || "Không có lời thoại."}
                   </p>
                   {parsedSelected?.speaker && (
-                    <span className="text-[10px] text-neutral-400 block pt-1 border-t border-neutral-200 dark:border-neutral-800">
+                    <span className="text-[10px] text-neutral-400 block pt-1 border-t border-neutral-200">
                       Nhân vật: <strong>{parsedSelected.speaker}</strong>
                     </span>
                   )}
                 </div>
 
                 {/* ComfyUI Image Prompt */}
-                <div className="p-3 rounded-lg bg-neutral-50 dark:bg-[#171717] border border-neutral-200 dark:border-white/10 space-y-1">
+                <div className="p-3 rounded-lg bg-white border border-neutral-300/70 space-y-1">
                   <span className="text-[10px] text-neutral-500 uppercase font-bold block">
                     ComfyUI Prompt
                   </span>
-                  <p className="text-[11px] text-neutral-700 dark:text-neutral-300 leading-relaxed break-words font-mono">
+                  <p className="text-[11px] text-neutral-700 leading-relaxed break-words font-mono">
                     {selectedPanel.image_prompt || "manga style, black and white ink, dynamic camera angle"}
                   </p>
                 </div>
 
                 {/* Layout Type */}
-                <div className="p-3 rounded-lg bg-neutral-50 dark:bg-[#171717] border border-neutral-200 dark:border-white/10 flex items-center justify-between">
+                <div className="p-3 rounded-lg bg-white border border-neutral-300/70 flex items-center justify-between">
                   <span className="text-[10px] text-neutral-500 uppercase font-bold">
                     Tỷ Lệ Khung
                   </span>
-                  <span className="px-2 py-0.5 rounded bg-black text-white dark:bg-white dark:text-black font-bold text-[10px]">
+                  <span className="px-2 py-0.5 rounded bg-neutral-900 text-white font-bold text-[10px]">
                     {selectedPanel.layout_type?.toUpperCase() || "SQUARE"}
                   </span>
                 </div>
@@ -511,7 +511,7 @@ export function ComicViewer({
                 <button
                   type="button"
                   onClick={() => retrySinglePanel(selectedPanelIdx)}
-                  className="w-full py-2 rounded-lg border border-neutral-300 dark:border-white/10 hover:bg-neutral-100 dark:hover:bg-neutral-800 font-bold uppercase tracking-wider text-black dark:text-white transition-colors flex items-center justify-center gap-1.5"
+                  className="w-full py-2 rounded-lg border border-neutral-300/80 hover:bg-white font-bold uppercase tracking-wider text-neutral-900 transition-colors flex items-center justify-center gap-1.5 shadow-xs"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
                   <span>Vẽ Lại Khung Này</span>
@@ -524,7 +524,7 @@ export function ComicViewer({
             )}
           </div>
 
-          <div className="p-2.5 rounded border border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-[#171717] text-[10px] font-mono text-neutral-500">
+          <div className="p-2.5 rounded border border-neutral-300/70 bg-white text-[10px] font-mono text-neutral-600">
             Mỗi khung truyện được tối ưu hóa cho mô hình sinh tranh đen trắng ComfyUI.
           </div>
         </aside>

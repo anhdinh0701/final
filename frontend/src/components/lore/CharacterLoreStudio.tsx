@@ -246,16 +246,16 @@ export function CharacterLoreStudio({
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden bg-neutral-100 dark:bg-[#080808] text-black dark:text-[#F5F5F5] font-sans transition-colors">
+    <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden bg-[#FAF7F2] text-neutral-900 font-sans transition-colors">
       
       {/* Header */}
-      <header className="h-14 border-b border-neutral-200 dark:border-white/10 bg-white dark:bg-[#111111] px-4 sm:px-6 flex items-center justify-between gap-3 shrink-0 select-none">
+      <header className="h-14 border-b border-neutral-300/80 bg-[#FAF7F2]/90 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between gap-3 shrink-0 select-none">
         <div className="flex items-center gap-3">
           {onBackToEditor && (
             <button
               type="button"
               onClick={onBackToEditor}
-              className="px-2.5 py-1.5 rounded-lg border border-neutral-300 dark:border-white/10 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-xs font-mono font-bold uppercase tracking-wider text-black dark:text-white transition-colors"
+              className="px-2.5 py-1.5 rounded-lg border border-neutral-300/80 hover:bg-white text-xs font-mono font-bold uppercase tracking-wider text-neutral-900 transition-colors shadow-xs"
             >
               Story Lab
             </button>
@@ -264,22 +264,22 @@ export function CharacterLoreStudio({
           <div className="flex items-center gap-1.5 text-xs font-mono text-neutral-500">
             <span>Dự án</span>
             <ChevronRight className="w-3 h-3 text-neutral-400" />
-            <span className="font-bold text-black dark:text-white uppercase tracking-wider">
+            <span className="font-bold text-neutral-950 uppercase tracking-wider">
               Character & Lore
             </span>
           </div>
 
-          <div className="h-4 w-px bg-neutral-300 dark:border-white/10 mx-1" />
+          <div className="h-4 w-px bg-neutral-300/80 mx-1" />
 
           {/* Tab Selector */}
-          <div className="flex rounded-lg border border-neutral-300 dark:border-white/10 p-0.5 bg-neutral-100 dark:bg-neutral-900 font-mono text-xs">
+          <div className="flex rounded-lg border border-neutral-300/80 p-0.5 bg-neutral-200/50 font-mono text-xs">
             <button
               type="button"
               onClick={() => setActiveTab("characters")}
               className={`px-3 py-1 rounded text-[11px] font-bold uppercase transition-colors flex items-center gap-1.5 ${
                 activeTab === "characters"
-                  ? "bg-white dark:bg-black text-black dark:text-white shadow-xs"
-                  : "text-neutral-500 hover:text-black dark:hover:text-white"
+                  ? "bg-white text-neutral-950 shadow-xs"
+                  : "text-neutral-600 hover:text-neutral-950"
               }`}
             >
               <Users className="w-3.5 h-3.5" />
@@ -290,8 +290,8 @@ export function CharacterLoreStudio({
               onClick={() => setActiveTab("lore")}
               className={`px-3 py-1 rounded text-[11px] font-bold uppercase transition-colors flex items-center gap-1.5 ${
                 activeTab === "lore"
-                  ? "bg-white dark:bg-black text-black dark:text-white shadow-xs"
-                  : "text-neutral-500 hover:text-black dark:hover:text-white"
+                  ? "bg-white text-neutral-950 shadow-xs"
+                  : "text-neutral-600 hover:text-neutral-950"
               }`}
             >
               <BookMarked className="w-3.5 h-3.5" />
@@ -308,7 +308,7 @@ export function CharacterLoreStudio({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={activeTab === "characters" ? "Tìm nhân vật..." : "Tìm điển tích..."}
-            className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-neutral-300 dark:border-white/10 bg-neutral-50 dark:bg-[#080808] text-xs outline-none focus:border-black dark:focus:border-white font-sans"
+            className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-neutral-300/80 bg-white text-xs text-neutral-900 outline-none focus:border-neutral-900 font-sans shadow-xs"
           />
         </div>
       </header>
@@ -324,7 +324,7 @@ export function CharacterLoreStudio({
                 <div
                   key={char.id}
                   onClick={() => setSelectedChar(char)}
-                  className="group rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-[#111111] overflow-hidden shadow-sm hover:shadow-xl hover:border-black dark:hover:border-white transition-all cursor-pointer flex flex-col justify-between"
+                  className="group rounded-xl border border-neutral-300/80 bg-white overflow-hidden shadow-xs hover:shadow-md hover:border-neutral-900 transition-all cursor-pointer flex flex-col justify-between"
                 >
                   <div>
                     {/* Character Visual */}
@@ -343,25 +343,25 @@ export function CharacterLoreStudio({
 
                     <div className="p-4 space-y-2">
                       <div className="flex items-center justify-between">
-                        <h3 className="font-serif text-base font-bold text-black dark:text-white group-hover:underline">
+                        <h3 className="font-serif text-base font-bold text-neutral-950 group-hover:underline">
                           {char.name}
                         </h3>
-                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-neutral-100 dark:bg-[#171717] text-neutral-500">
+                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-600 font-bold">
                           {char.status.toUpperCase()}
                         </span>
                       </div>
                       <span className="text-[11px] font-mono text-neutral-500 block">
                         {char.role}
                       </span>
-                      <p className="text-xs text-neutral-600 dark:text-neutral-400 line-clamp-2 leading-relaxed">
+                      <p className="text-xs text-neutral-600 line-clamp-2 leading-relaxed">
                         {char.appearance}
                       </p>
                     </div>
                   </div>
 
-                  <div className="p-4 pt-2 border-t border-neutral-100 dark:border-neutral-800/80 flex items-center justify-between text-xs font-mono">
-                    <span className="text-neutral-400">Xem hồ sơ</span>
-                    <span className="font-bold text-black dark:text-white group-hover:translate-x-1 transition-transform">
+                  <div className="p-4 pt-2 border-t border-neutral-200/80 flex items-center justify-between text-xs font-mono">
+                    <span className="text-neutral-500">Xem hồ sơ</span>
+                    <span className="font-bold text-neutral-950 group-hover:translate-x-1 transition-transform">
                       ➔
                     </span>
                   </div>
@@ -375,37 +375,37 @@ export function CharacterLoreStudio({
                 <div
                   key={item.id}
                   onClick={() => setSelectedLore(item)}
-                  className="group rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-[#111111] p-5 shadow-sm hover:shadow-xl hover:border-black dark:hover:border-white transition-all cursor-pointer flex flex-col justify-between"
+                  className="group rounded-xl border border-neutral-300/80 bg-white p-5 shadow-xs hover:shadow-md hover:border-neutral-900 transition-all cursor-pointer flex flex-col justify-between"
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="px-2 py-0.5 rounded bg-neutral-100 dark:bg-[#171717] border border-neutral-200 dark:border-white/10 text-[9px] font-mono font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">
+                      <span className="px-2 py-0.5 rounded bg-[#FAF7F2] border border-neutral-300/80 text-[9px] font-mono font-bold uppercase tracking-wider text-neutral-700">
                         {item.category.toUpperCase()}
                       </span>
                       <Compass className="w-3.5 h-3.5 text-neutral-400" />
                     </div>
 
-                    <h3 className="font-serif text-lg font-bold text-black dark:text-white group-hover:underline">
+                    <h3 className="font-serif text-lg font-bold text-neutral-950 group-hover:underline">
                       {item.title}
                     </h3>
 
-                    <p className="text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed">
+                    <p className="text-xs text-neutral-600 leading-relaxed">
                       {item.description}
                     </p>
                   </div>
 
-                  <div className="mt-4 pt-3 border-t border-neutral-100 dark:border-neutral-800/80 space-y-2.5">
+                  <div className="mt-4 pt-3 border-t border-neutral-200/80 space-y-2.5">
                     <div className="flex flex-wrap gap-1">
                       {item.tags.map((tg, idx) => (
                         <span
                           key={idx}
-                          className="px-1.5 py-0.5 rounded bg-neutral-100 dark:bg-[#171717] text-[9px] font-mono text-neutral-500"
+                          className="px-1.5 py-0.5 rounded bg-[#FAF7F2] border border-neutral-300/50 text-[9px] font-mono text-neutral-600"
                         >
                           #{tg}
                         </span>
                       ))}
                     </div>
-                    <div className="flex items-center justify-between text-xs font-mono text-black dark:text-white font-bold">
+                    <div className="flex items-center justify-between text-xs font-mono text-neutral-950 font-bold">
                       <span>Chi tiết bối cảnh</span>
                       <span>➔</span>
                     </div>
@@ -423,11 +423,11 @@ export function CharacterLoreStudio({
       {/* ========================================================= */}
       {selectedChar && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="relative w-full max-w-2xl rounded-2xl border border-neutral-300 dark:border-white/20 bg-white dark:bg-[#111111] p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+          <div className="relative w-full max-w-2xl rounded-2xl border border-neutral-300/80 bg-[#FAF7F2] p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto text-neutral-900">
             <button
               type="button"
               onClick={() => setSelectedChar(null)}
-              className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-500 hover:text-black dark:hover:text-white transition-colors"
+              className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-white text-neutral-500 hover:text-neutral-950 transition-colors shadow-xs"
             >
               <X className="w-5 h-5" />
             </button>
@@ -437,13 +437,13 @@ export function CharacterLoreStudio({
                 <Image src={selectedChar.image} alt={selectedChar.name} fill className="object-cover" />
               </div>
               <div className="space-y-1.5 min-w-0">
-                <span className="px-2 py-0.5 rounded bg-neutral-100 dark:bg-[#171717] border border-neutral-200 dark:border-white/10 text-[10px] font-mono font-bold uppercase text-neutral-500">
+                <span className="px-2 py-0.5 rounded bg-white border border-neutral-300/80 text-[10px] font-mono font-bold uppercase text-neutral-600">
                   {selectedChar.status.toUpperCase()}
                 </span>
-                <h2 className="font-serif text-2xl font-bold text-black dark:text-white">
+                <h2 className="font-serif text-2xl font-bold text-neutral-950">
                   {selectedChar.name}
                 </h2>
-                <p className="text-xs font-mono text-neutral-500 font-bold">
+                <p className="text-xs font-mono text-neutral-600 font-bold">
                   {selectedChar.role}
                 </p>
               </div>
@@ -451,38 +451,38 @@ export function CharacterLoreStudio({
 
             {/* Fields */}
             <div className="space-y-3.5 text-xs font-sans">
-              <div className="p-3.5 rounded-lg bg-neutral-50 dark:bg-[#171717] border border-neutral-200 dark:border-white/10 space-y-1">
+              <div className="p-3.5 rounded-lg bg-white border border-neutral-300/70 space-y-1">
                 <span className="font-mono text-[10px] uppercase font-bold text-neutral-500 block">
                   Diện mạo & Phục trang:
                 </span>
-                <p className="leading-relaxed text-black dark:text-[#F5F5F5]">
+                <p className="leading-relaxed text-neutral-900">
                   {selectedChar.appearance}
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-lg bg-neutral-50 dark:bg-[#171717] border border-neutral-200 dark:border-white/10 space-y-1">
+              <div className="p-3.5 rounded-lg bg-white border border-neutral-300/70 space-y-1">
                 <span className="font-mono text-[10px] uppercase font-bold text-neutral-500 block">
                   Tính cách & Chiều sâu:
                 </span>
-                <p className="leading-relaxed text-black dark:text-[#F5F5F5]">
+                <p className="leading-relaxed text-neutral-900">
                   {selectedChar.personality}
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-lg bg-neutral-50 dark:bg-[#171717] border border-neutral-200 dark:border-white/10 space-y-1">
+              <div className="p-3.5 rounded-lg bg-white border border-neutral-300/70 space-y-1">
                 <span className="font-mono text-[10px] uppercase font-bold text-neutral-500 block">
                   Mục tiêu & Xung đột:
                 </span>
-                <p className="leading-relaxed text-black dark:text-[#F5F5F5]">
+                <p className="leading-relaxed text-neutral-900">
                   {selectedChar.goals}
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-lg bg-neutral-50 dark:bg-[#171717] border border-neutral-200 dark:border-white/10 space-y-1">
+              <div className="p-3.5 rounded-lg bg-white border border-neutral-300/70 space-y-1">
                 <span className="font-mono text-[10px] uppercase font-bold text-neutral-500 block">
                   Mối quan hệ:
                 </span>
-                <p className="leading-relaxed text-black dark:text-[#F5F5F5]">
+                <p className="leading-relaxed text-neutral-900">
                   {selectedChar.relationships}
                 </p>
               </div>
@@ -498,9 +498,9 @@ export function CharacterLoreStudio({
                     selectedChar.id
                   )
                 }
-                className="flex-1 py-2.5 rounded-lg border border-neutral-300 dark:border-white/10 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-black dark:text-white transition-colors flex items-center justify-center gap-2 font-bold"
+                className="flex-1 py-2.5 rounded-lg border border-neutral-300/80 bg-white hover:bg-neutral-100 text-neutral-900 transition-colors flex items-center justify-center gap-2 font-bold shadow-xs"
               >
-                {copiedId === selectedChar.id ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                {copiedId === selectedChar.id ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
                 <span>{copiedId === selectedChar.id ? "Đã sao chép prompt" : "Sao chép mô tả nhân vật"}</span>
               </button>
               {onSelectCharacterForPrompt && (
@@ -512,7 +512,7 @@ export function CharacterLoreStudio({
                     );
                     setSelectedChar(null);
                   }}
-                  className="flex-1 py-2.5 rounded-lg bg-black text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 font-bold transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 py-2.5 rounded-lg bg-neutral-900 text-white hover:bg-neutral-800 font-bold transition-colors flex items-center justify-center gap-2 shadow-xs"
                 >
                   <Sparkles className="w-4 h-4" />
                   <span>Đưa vào Story Lab</span>
@@ -528,30 +528,30 @@ export function CharacterLoreStudio({
       {/* ========================================================= */}
       {selectedLore && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="relative w-full max-w-xl rounded-2xl border border-neutral-300 dark:border-white/20 bg-white dark:bg-[#111111] p-6 sm:p-8 shadow-2xl space-y-4">
+          <div className="relative w-full max-w-xl rounded-2xl border border-neutral-300/80 bg-[#FAF7F2] p-6 sm:p-8 shadow-2xl space-y-4 text-neutral-900">
             <button
               type="button"
               onClick={() => setSelectedLore(null)}
-              className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-500 hover:text-black dark:hover:text-white transition-colors"
+              className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-white text-neutral-500 hover:text-neutral-950 transition-colors shadow-xs"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <span className="px-2 py-0.5 rounded bg-neutral-100 dark:bg-[#171717] border border-neutral-200 dark:border-white/10 text-[10px] font-mono font-bold uppercase text-neutral-500">
+            <span className="px-2 py-0.5 rounded bg-white border border-neutral-300/80 text-[10px] font-mono font-bold uppercase text-neutral-600">
               {selectedLore.category.toUpperCase()}
             </span>
-            <h2 className="font-serif text-2xl font-bold text-black dark:text-white">
+            <h2 className="font-serif text-2xl font-bold text-neutral-950">
               {selectedLore.title}
             </h2>
-            <p className="text-xs leading-relaxed text-neutral-600 dark:text-neutral-400 font-sans">
+            <p className="text-xs leading-relaxed text-neutral-600 font-sans">
               {selectedLore.description}
             </p>
 
-            <div className="p-3.5 rounded-lg bg-neutral-50 dark:bg-[#171717] border border-neutral-200 dark:border-white/10 space-y-1 text-xs">
+            <div className="p-3.5 rounded-lg bg-white border border-neutral-300/70 space-y-1 text-xs">
               <span className="font-mono text-[10px] uppercase font-bold text-neutral-500 block">
                 Tài liệu nghiên cứu & Điển tích:
               </span>
-              <p className="leading-relaxed text-black dark:text-[#F5F5F5] font-sans">
+              <p className="leading-relaxed text-neutral-900 font-sans">
                 {selectedLore.details}
               </p>
             </div>
@@ -560,7 +560,7 @@ export function CharacterLoreStudio({
               {selectedLore.tags.map((tg, idx) => (
                 <span
                   key={idx}
-                  className="px-2 py-0.5 rounded bg-neutral-100 dark:bg-[#171717] text-[10px] font-mono text-neutral-600 dark:text-neutral-400"
+                  className="px-2 py-0.5 rounded bg-white border border-neutral-300/60 text-[10px] font-mono text-neutral-700"
                 >
                   #{tg}
                 </span>

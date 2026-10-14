@@ -59,7 +59,7 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
     {
       title: lang === "vi" ? "Chiến Thần Bạch Đằng" : "Warlord of Bach Dang",
       genre: lang === "vi" ? "Dã sử · Thủy chiến · Manga đen trắng" : "Historical Fiction · Naval Battle · B&W Manga",
-      image: "/assets/landing/manga_battle_scene.png",
+      image: "/assets/landing/story_bach_dang_epic.png",
       stats: lang === "vi" ? "4 Chương · 18 Khung manga" : "4 Chapters · 18 Manga panels",
       progress: "92%",
       synopsis:
@@ -71,7 +71,7 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
     {
       title: lang === "vi" ? "Bóng Kiếm Đêm Mưa" : "Sword in the Rain",
       genre: lang === "vi" ? "Kiếm hiệp Cổ phong · Tiểu thuyết" : "Historical Wuxia · Epic Prose",
-      image: "/assets/landing/world_warrior_rain.png",
+      image: "/assets/landing/story_bong_kiem_dem_mua.png",
       stats: lang === "vi" ? "8 Chương · 14,200 từ" : "8 Chapters · 14,200 words",
       progress: "100%",
       synopsis:
@@ -83,7 +83,7 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
     {
       title: lang === "vi" ? "Huyền Tích Nàng Thiềm" : "Legend of Lady Thiem",
       genre: lang === "vi" ? "Dân gian Huyền ảo · Thiết kế nhân vật" : "Mythic Fantasy · Character Dossier",
-      image: "/assets/landing/hero_character_aodai.png",
+      image: "/assets/landing/story_huyen_tich_nang_thiem.png",
       stats: lang === "vi" ? "6 Nhân vật · 1 Lore Bible" : "6 Characters · 1 Lore Bible",
       progress: "85%",
       synopsis:
@@ -95,7 +95,7 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
     {
       title: lang === "vi" ? "Thạch Sanh: Ký Sự Rừng Sâu" : "Thach Sanh: Forest Chronicles",
       genre: lang === "vi" ? "Cổ tích tái hiện · Shonen Manga" : "Folklore Adaptation · Shonen Manga",
-      image: "/assets/landing/folktale_child_roots.png",
+      image: "/assets/landing/story_thach_sanh_hero.png",
       stats: lang === "vi" ? "3 Chương · 12 Khung manga" : "3 Chapters · 12 Manga panels",
       progress: "70%",
       synopsis:

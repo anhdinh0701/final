@@ -695,6 +695,41 @@ def infer_fallback_character_dna(story_text: str) -> dict:
                 "aliases": ["thạch sanh", "chàng", "người dũng sĩ", "chàng trai"]
             }
         }
+    if any(k in text_lower for k in ["sọ dừa", "so dua", "chăn bò", "phú ông", "cô út"]):
+        # Determine whether Sọ Dừa is currently in coconut baby form or handsome flute-playing form
+        is_coconut_baby = any(k in text_lower for k in ["mẹ", "vứt", "sinh ra", "quá dừa", "tròn", "lông lốc", "bụng mẹ", "uống nước"])
+        is_flute_youth = any(k in text_lower for k in ["thổi sáo", "võng", "rặng tre", "chăn bò", "biến hóa", "thanh niên"])
+        is_mandarin = any(k in text_lower for k in ["trạng nguyên", "quan trạng", "thuyền", "đi sứ"])
+
+        if is_coconut_baby:
+            lead_dna = "miraculous mythical Vietnamese baby Sọ Dừa, round spherical coconut-shaped child, innocent round face with expressive pleading dark eyes, resting on rustic woven straw mat in a humble Vietnamese thatched cottage, no arms, no legs, no kimono, no samurai"
+        elif is_flute_youth:
+            lead_dna = "handsome young Vietnamese youth Sọ Dừa, gentle kind eyes, playing bamboo flute while sitting under lush green bamboo grove, simple rustic brown cotton peasant trousers, herd of cows grazing in background, no kimono, no samurai"
+        elif is_mandarin:
+            lead_dna = "handsome noble Vietnamese Mandarin scholar (Trạng nguyên) Sọ Dừa, regal refined face, wearing majestic crimson court robe with embroidered dragon badge and traditional scholar gauze cap (mũ cánh chuồn)"
+        else:
+            lead_dna = "handsome young Vietnamese youth Sọ Dừa, gentle kind eyes, simple rustic brown cotton peasant attire, peaceful rural setting"
+
+        return {
+            "Sọ Dừa": {
+                "gender": "male",
+                "role": "lead",
+                "dna": lead_dna,
+                "aliases": ["sọ dừa", "chàng", "cậu bé", "chàng thanh niên", "con", "người", "quan trạng", "sọ dừa tròn"]
+            },
+            "Cô Út": {
+                "gender": "female",
+                "role": "supporting",
+                "dna": "gentle graceful 18yo Vietnamese maiden Cô Út, innocent kind eyes, long black hair tied in headband, wearing traditional pastel green or brown Áo Tứ Thân with fabric sash, modest graceful beauty",
+                "aliases": ["cô út", "nàng", "tiểu thư", "người con gái út", "út", "vợ", "cô gái"]
+            },
+            "Phú Ông": {
+                "gender": "male",
+                "role": "supporting",
+                "dna": "wealthy elderly Vietnamese village landlord Phú Ông, round calculating face, thin mustache, wearing rich dark silk Áo Ngũ Thân with traditional wrapped head turban (khăn đóng), holding folding bamboo fan",
+                "aliases": ["phú ông", "lão địa chủ", "ông chủ", "cha"]
+            }
+        }
 
     # 2. General Historical / Folklore Context
     hist_cues = ["vua", "tướng", "quân", "giặc", "chiến thuyền", "sa trường", "triều đình", "hoàng cung", "đại việt", "chúa", "thần", "đền", "thôn dã"]
@@ -755,6 +790,12 @@ def infer_fallback_setting_dna(story_text: str) -> dict:
             "location_name": "Hoàng thành Đại Việt",
             "setting_anchor": "grand historic Đại Việt imperial palace hall, carved wooden pillars, ornate dragon motifs, solemn royal court architecture",
             "atmosphere": "majestic solemn imperial manga screentone"
+        }
+    if any(k in text_lower for k in ["sọ dừa", "chăn bò", "phú ông", "cô út"]):
+        return {
+            "location_name": "Làng quê đồng bằng Bắc Bộ (Truyện Sọ Dừa)",
+            "setting_anchor": "tranquil ancient Vietnamese rural village, lush green bamboo grove by dirt path, humble thatched cottages with mud walls, wooden fence, herd of grazing cows under shade, authentic Vietnamese countryside landscape, no fantasy, no neon",
+            "atmosphere": "warm nostalgic Vietnamese folklore comic art atmosphere"
         }
     if any(k in text_lower for k in ["làng", "cây đa", "bến nước", "mái đình", "thôn", "đồng ruộng", "bờ tre"]):
         return {

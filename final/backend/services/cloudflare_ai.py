@@ -55,11 +55,13 @@ MODERN_SCHOOL_EXCLUSIONS = (
     "busy highway, traffic, moving cars, outdoor street, city avenue"
 )
 
-# Color Base Negative Prompt: For full-color anime/comic mode without banning colors
+# Color Base Negative Prompt: For full-color mode, preserving natural palette while banning neon, psychedelic, and electric oversaturation
 COLOR_BASE_NEGATIVE_PROMPT = (
     "worst quality, low quality, bad anatomy, deformed hands, extra fingers, missing fingers, "
     "mutated limbs, distorted face, blurry, low resolution, messy draft, 3d render, photograph, "
-    "western comic, text, watermark, signature, font, letters, speech bubble, dialog balloon"
+    "western comic, text, watermark, signature, font, letters, speech bubble, dialog balloon, "
+    "neon, oversaturated, neon cyan, neon pink, psychedelic, acid colors, electric colors, "
+    "glowing neon, glowing outlines, harsh saturation, oversaturation, chromatic aberration, synthwave, cyberpunk colors"
 )
 
 # Vietnamese Canonical Exclusions: Master negative against Kimono, Obi, Haori, Hakama, Hanfu, Hanbok, Samurai, Ninja for cultural purity
@@ -255,11 +257,13 @@ def get_cached_or_generate_image(
             active_prompt = re.sub(r'\bpeasant\b', 'Vietnamese peasant in brown collarless ao ba ba tunic with button front and loose trousers, no kimono, no obi', active_prompt, flags=re.IGNORECASE)
 
         if color_mode:
-            # Replace monochrome enforcement terms with vivid anime coloring directives
-            active_prompt = re.sub(r'\b(monochrome|black and white|grayscale|greyscale|pure monochrome)\b', 'vibrant colorful', active_prompt, flags=re.IGNORECASE)
-            active_prompt = re.sub(r'\b(black ink on white paper|clean ink lineart|delicate screentone shading|authentic manga screentone)\b', 'vibrant digital anime coloring, rich color palette, cinematic anime lighting', active_prompt, flags=re.IGNORECASE)
-            if "color" not in active_prompt.lower() and "vibrant" not in active_prompt.lower():
-                active_prompt = f"masterpiece, full color anime comic illustration, vibrant digital coloring, cinematic anime lighting, rich colors, {active_prompt}"
+            # Replace monochrome enforcement terms with natural, harmonious Vietnamese artistic palette directives
+            active_prompt = re.sub(r'\b(monochrome|black and white|grayscale|greyscale|pure monochrome)\b', 'natural harmonious colors', active_prompt, flags=re.IGNORECASE)
+            active_prompt = re.sub(r'\b(black ink on white paper|clean ink lineart|delicate screentone shading|authentic manga screentone)\b', 'soft cel shading, authentic Vietnamese traditional color palette, warm natural daylight, gentle muted earth tones', active_prompt, flags=re.IGNORECASE)
+            # Eliminate eye-searing neon and synthetic buzzwords
+            active_prompt = re.sub(r'\b(vibrant digital coloring|vibrant colorful|vibrant|rich colors|cinematic anime lighting)\b', 'natural harmonious colors, soft cel shading, traditional watercolor palette, warm natural daylight, gentle muted earth tones', active_prompt, flags=re.IGNORECASE)
+            if "color" not in active_prompt.lower() and "natural harmonious" not in active_prompt.lower():
+                active_prompt = f"masterpiece, full color authentic Vietnamese comic illustration, natural harmonious colors, soft cel shading, traditional watercolor palette, warm natural daylight, gentle muted earth tones, {active_prompt}"
 
         # 2. Primary Provider: ComfyUI with GPU Acceleration & Dynamic LoRA Chaining
         try:

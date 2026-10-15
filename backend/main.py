@@ -1443,10 +1443,11 @@ def test_comfyui_generation(req: ComfyUITestRequest):
         active_prompt = req.prompt or "masterpiece anime illustration"
         if req.color_mode:
             import re
-            active_prompt = re.sub(r'\b(monochrome|black and white|grayscale|greyscale|pure monochrome)\b', 'vibrant colorful', active_prompt, flags=re.IGNORECASE)
-            active_prompt = re.sub(r'\b(black ink on white paper|clean ink lineart|delicate screentone shading|authentic manga screentone)\b', 'vibrant digital anime coloring, rich color palette, cinematic anime lighting', active_prompt, flags=re.IGNORECASE)
-            if "color" not in active_prompt.lower() and "vibrant" not in active_prompt.lower():
-                active_prompt = f"masterpiece, full color anime comic illustration, vibrant digital coloring, cinematic anime lighting, rich colors, {active_prompt}"
+            active_prompt = re.sub(r'\b(monochrome|black and white|grayscale|greyscale|pure monochrome)\b', 'natural harmonious colors', active_prompt, flags=re.IGNORECASE)
+            active_prompt = re.sub(r'\b(black ink on white paper|clean ink lineart|delicate screentone shading|authentic manga screentone)\b', 'soft cel shading, authentic Vietnamese traditional color palette, warm natural daylight, gentle muted earth tones', active_prompt, flags=re.IGNORECASE)
+            active_prompt = re.sub(r'\b(vibrant digital coloring|vibrant colorful|vibrant|rich colors|cinematic anime lighting)\b', 'natural harmonious colors, soft cel shading, traditional watercolor palette, warm natural daylight, gentle muted earth tones', active_prompt, flags=re.IGNORECASE)
+            if "color" not in active_prompt.lower() and "natural harmonious" not in active_prompt.lower():
+                active_prompt = f"masterpiece, full color authentic Vietnamese comic illustration, natural harmonious colors, soft cel shading, traditional watercolor palette, warm natural daylight, gentle muted earth tones, {active_prompt}"
 
         img_bytes = generate_image_comfyui(
             prompt=active_prompt,

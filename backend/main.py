@@ -1426,10 +1426,11 @@ class ComfyUITestRequest(BaseModel):
     prompt: Optional[str] = "masterpiece monochrome Japanese manga illustration of a heroic protagonist"
     layout_type: Optional[str] = "square"
     loras: Optional[List[Dict[str, Any]]] = None
+    color_mode: Optional[bool] = False
 
 
 @app.post("/api/comic/comfyui/test")
-def test_comfyui_generation(req: ComfyUITestRequest = ComfyUITestRequest()):
+def test_comfyui_generation(req: ComfyUITestRequest):
     """Generates a test image using ComfyUI if available, with optional LoRAs."""
     from services.comfyui_service import get_comfyui_service, generate_image_comfyui
     service = get_comfyui_service()
@@ -1439,10 +1440,19 @@ def test_comfyui_generation(req: ComfyUITestRequest = ComfyUITestRequest()):
             content={"status": "error", "message": f"ComfyUI is not reachable at {service.base_url}. Please ensure ComfyUI is running."}
         )
     try:
+        active_prompt = req.prompt or "masterpiece anime illustration"
+        if req.color_mode:
+            import re
+            active_prompt = re.sub(r'\b(monochrome|black and white|grayscale|greyscale|pure monochrome)\b', 'vibrant colorful', active_prompt, flags=re.IGNORECASE)
+            active_prompt = re.sub(r'\b(black ink on white paper|clean ink lineart|delicate screentone shading|authentic manga screentone)\b', 'vibrant digital anime coloring, rich color palette, cinematic anime lighting', active_prompt, flags=re.IGNORECASE)
+            if "color" not in active_prompt.lower() and "vibrant" not in active_prompt.lower():
+                active_prompt = f"masterpiece, full color anime comic illustration, vibrant digital coloring, cinematic anime lighting, rich colors, {active_prompt}"
+
         img_bytes = generate_image_comfyui(
-            prompt=req.prompt or "masterpiece monochrome Japanese manga illustration",
+            prompt=active_prompt,
             layout_type=req.layout_type or "square",
-            loras=req.loras
+            loras=req.loras,
+            color_mode=bool(req.color_mode)
         )
         media_type = "image/jpeg" if img_bytes[:2] == b'\xff\xd8' else "image/png"
         return Response(content=img_bytes, media_type=media_type)

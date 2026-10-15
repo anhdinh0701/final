@@ -1231,7 +1231,7 @@ def get_comic_image(panel_id: int, retry: int = 0, refresh: bool = False, color:
         bible = getattr(memory, "story_bible", None)
         layout_type = getattr(panel, "layout_type", "square") or "square"
         is_color = bool(color)
-        default_prompt = "full color anime comic illustration of a character in the story setting" if is_color else "monochrome manga illustration of a character in the story setting"
+        default_prompt = "full color authentic Vietnamese comic illustration, Vietnamese character in traditional setting" if is_color else "authentic Vietnamese comic art illustration, Vietnamese character in traditional setting, no kimono, no obi"
         img_bytes, media_type = get_cached_or_generate_image(
             panel_id,
             str(panel.image_prompt or default_prompt),

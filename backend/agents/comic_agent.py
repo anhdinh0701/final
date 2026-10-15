@@ -37,15 +37,15 @@ except ImportError:
         normalize_cultural_tier = lambda x: 1
 
 
-# STRICT style prefix and suffix to force Diffusion model attention to Authentic 2D Monochrome Anime Manga Lineart
+# STRICT style prefix and suffix to force Diffusion model attention to Authentic 2D Comic Lineart without Japanese bias
 STYLE_PREFIX = (
-    "masterpiece 2D Japanese anime manga illustration, clean monochrome black ink lineart, "
-    "official anime comic art, sharp cel shaded line art, "
+    "masterpiece 2D comic art illustration, authentic Vietnamese cultural storytelling, "
+    "clean crisp ink lineart, expressive character design, sharp cel shaded line art, "
 )
 STYLE_SUFFIX = (
-    ", clean G-pen ink lineart, authentic manga screentone shading, fine dot pattern tones, "
-    "high contrast black ink on crisp white paper, pure monochrome, "
-    "2D anime manga drawing, expressive anime character design, sharp contours, single panel composition, no realistic portrait"
+    ", clean G-pen ink lineart, authentic screentone shading, fine dot pattern tones, "
+    "high contrast black ink on crisp white paper, "
+    "expressive 2D comic drawing, sharp contours, single panel composition, no realistic portrait"
 )
 
 
@@ -143,9 +143,10 @@ BEAT_DIRECTOR_PROMPT = """You are a master manga director and storyboard artist 
 YOUR MISSION: Faithfully adapt the provided Vietnamese story text into EXACTLY 4 SEQUENTIAL, COHESIVE MANGA PANELS that tell a single, continuous, connected scene.
 
 ABSOLUTE CRITICAL RULES FOR VISUAL & CHARACTER CONSISTENCY:
-1. UNIFIED 2D ANIME MANGA ART STYLE:
-   - All panels MUST be generated in pure 2D Japanese anime manga style with clean ink lineart, delicate screentone shading, and cel shading.
+1. UNIFIED 2D COMIC GRAPHIC NOVEL ART STYLE:
+   - All panels MUST be generated in authentic 2D comic art graphic novel style with clean ink lineart, delicate screentone shading, and cel shading.
    - Absolutely NO realistic portraits, NO 3D, NO pencil sketch drawings, NO graphite portraits, NO collage or multi-frame layouts in a single panel.
+   - CULTURAL PURITY: Strictly preserve Vietnamese character aesthetics. NEVER depict Japanese Kimono, Obi sashes, Haori coats, Hakama, Samurai armor, or Chinese Hanfu unless explicitly requested.
 2. STRICT CHARACTER CONTINUITY:
    - Identify the characters in the story (e.g. Duy, An, or the protagonist).
    - In `image_prompt`, EVERY panel featuring a character MUST use their EXACT same physical DNA description from the CHARACTER REGISTRY (exact face, hair style/color, age, and signature outfit).
@@ -203,9 +204,9 @@ SPATIAL_ENCLOSURES = {
             "tiết học", "giờ học", "bàn giáo viên", "bàn đầu", "cuối lớp", "bàn cùng bàn"
         ],
         "anchor_description": (
-            "modern Japanese high school classroom interior, neat wooden student desks and chairs, "
-            "large green chalkboard mounted on front wall, tall multi-pane glass windows with sunlight "
-            "streaming across wooden floor, peaceful classroom atmosphere"
+            "modern Vietnamese high school classroom interior, neat wooden student desks and chairs, "
+            "large green chalkboard mounted on front wall, ceiling fan, tall multi-pane windows with sunlight "
+            "streaming across floor, peaceful classroom atmosphere"
         ),
         "forbidden_spatial_tokens": [
             "street", "road", "alley", "highway", "traffic", "car", "bus", "store", "shop",

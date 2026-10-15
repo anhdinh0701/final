@@ -62,11 +62,12 @@ COLOR_BASE_NEGATIVE_PROMPT = (
     "western comic, text, watermark, signature, font, letters, speech bubble, dialog balloon"
 )
 
-# Vietnamese Canonical Exclusions: Master negative against Hanfu, Kimono, Hanbok, Samurai, Ninja for cultural purity
+# Vietnamese Canonical Exclusions: Master negative against Kimono, Obi, Haori, Hakama, Hanfu, Hanbok, Samurai, Ninja for cultural purity
 VIETNAMESE_CANONICAL_NEGATIVE_PROMPT = (
-    "hanfu, kimono, yukata, hanbok, samurai, samurai armor, ninja, katana, geisha, "
-    "qing queue, pigtail hairstyle, chinese traditional clothing, japanese traditional clothing, "
-    "korean traditional clothing, tangzhuang, cheongsam, qipao"
+    "kimono, yukata, obi, obi sash, tied obi, wide sash, haori, haori coat, hakama, "
+    "samurai, samurai armor, ninja, katana, geisha, geta sandals, japanese traditional clothing, "
+    "japanese costume, japanese robes, hanfu, hanbok, qing queue, pigtail hairstyle, "
+    "chinese traditional clothing, korean traditional clothing, tangzhuang, cheongsam, qipao"
 )
 
 def get_master_negative_prompt(
@@ -80,14 +81,14 @@ def get_master_negative_prompt(
     and cultural tier exclusions.
     - If color_mode is True: uses COLOR_BASE_NEGATIVE_PROMPT (preserves full RGB color palette).
     - If color_mode is False: uses BASE_NEGATIVE_PROMPT (enforces monochrome linework).
-    - If cultural_tier is 1 or 2: appends VIETNAMESE_CANONICAL_NEGATIVE_PROMPT.
+    - Cultural purity: ALWAYS appends VIETNAMESE_CANONICAL_NEGATIVE_PROMPT to guarantee no Japanese/Chinese attire leaks.
     - If genre is 'school': appends MODERN_SCHOOL_EXCLUSIONS.
     """
     neg = COLOR_BASE_NEGATIVE_PROMPT if color_mode else BASE_NEGATIVE_PROMPT
     genre_l = (genre or "").lower()
 
-    if cultural_tier in (1, 2) or (narrative_mode and str(narrative_mode).lower() in ("chinh_su", "da_su", "strict_historical", "historical_fiction")):
-        neg = f"{neg}, {VIETNAMESE_CANONICAL_NEGATIVE_PROMPT}"
+    # Always enforce Vietnamese cultural purity across all genres
+    neg = f"{neg}, {VIETNAMESE_CANONICAL_NEGATIVE_PROMPT}"
 
     if genre_l == "school":
         neg = f"{neg}, {MODERN_SCHOOL_EXCLUSIONS}"
@@ -244,8 +245,15 @@ def get_cached_or_generate_image(
         suffix = negative_prompt_suffix or custom_negative_prompt
         img_bytes = None
 
-        # Adapt prompt dynamically for color mode if selected
+        # Adapt prompt dynamically: cleanse Japanese tokens and enforce Vietnamese comic identity
         active_prompt = prompt
+        active_prompt = re.sub(r'\b(Japanese anime manga|Japanese manga|Japanese anime)\b', 'Vietnamese comic art', active_prompt, flags=re.IGNORECASE)
+        active_prompt = re.sub(r'\bJapanese\b', 'Vietnamese', active_prompt, flags=re.IGNORECASE)
+
+        # Enhance generic Vietnamese peasant/character attire if too minimal
+        if "peasant" in active_prompt.lower() and "ao ba ba" not in active_prompt.lower():
+            active_prompt = re.sub(r'\bpeasant\b', 'Vietnamese peasant in brown collarless ao ba ba tunic with button front and loose trousers, no kimono, no obi', active_prompt, flags=re.IGNORECASE)
+
         if color_mode:
             # Replace monochrome enforcement terms with vivid anime coloring directives
             active_prompt = re.sub(r'\b(monochrome|black and white|grayscale|greyscale|pure monochrome)\b', 'vibrant colorful', active_prompt, flags=re.IGNORECASE)

@@ -1214,8 +1214,11 @@ def continue_comic(request: ComicContinueRequest, db: Session = Depends(get_db),
 
 @app.get("/api/comic/image/{panel_id}")
 @app.get("/api/comics/panels/{panel_id}/image")
-def get_comic_image(panel_id: int, retry: int = 0, refresh: bool = False, db: Session = Depends(get_db)):
-    """Proxies comic panel image generation with local disk cache and image-provider fallback."""
+def get_comic_image(panel_id: int, retry: int = 0, refresh: bool = False, color: int = 0, db: Session = Depends(get_db)):
+    """
+    Proxies comic panel image generation with local disk cache and image-provider fallback.
+    Supports color=1 for Full-Color Anime/Comic mode, and color=0 for Monochrome Manga.
+    """
     panel = db.query(ComicPanel).filter(ComicPanel.id == panel_id).first()
     if not panel:
         return Response(status_code=404)
@@ -1227,9 +1230,11 @@ def get_comic_image(panel_id: int, retry: int = 0, refresh: bool = False, db: Se
         memory = _get_story_memory(story, db)
         bible = getattr(memory, "story_bible", None)
         layout_type = getattr(panel, "layout_type", "square") or "square"
+        is_color = bool(color)
+        default_prompt = "full color anime comic illustration of a character in the story setting" if is_color else "monochrome manga illustration of a character in the story setting"
         img_bytes, media_type = get_cached_or_generate_image(
             panel_id,
-            str(panel.image_prompt or "monochrome manga illustration of a character in the story setting"),
+            str(panel.image_prompt or default_prompt),
             seed=comic_seed,
             story_id=story_id,
             layout_type=layout_type,
@@ -1237,6 +1242,7 @@ def get_comic_image(panel_id: int, retry: int = 0, refresh: bool = False, db: Se
             narrative_mode=getattr(bible, "narrative_mode", None),
             genre=str(getattr(bible, "genre", "") or (story.genre if story else "") or ""),
             force_refresh=bool(refresh),
+            color_mode=is_color,
         )
         headers = {"Cache-Control": "public, max-age=86400"}
         return Response(content=img_bytes, media_type=media_type, headers=headers)

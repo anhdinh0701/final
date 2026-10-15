@@ -616,18 +616,21 @@ def generate_image_comfyui(
     cultural_tier: Optional[int] = None,
     narrative_mode: Optional[str] = None,
     genre: str = "",
-    loras: Optional[List[Dict[str, Any]]] = None
+    loras: Optional[List[Dict[str, Any]]] = None,
+    color_mode: bool = False
 ) -> bytes:
     """
     Convenience wrapper to generate a manga panel with ComfyUI,
     incorporating cultural and genre-specific negative prompts and LoRA stack.
+    Supports both Monochrome Manga and Full-Color Anime/Comic modes.
     """
     from services.cloudflare_ai import get_master_negative_prompt
 
     negative_prompt = get_master_negative_prompt(
         genre=genre,
         cultural_tier=cultural_tier,
-        narrative_mode=narrative_mode
+        narrative_mode=narrative_mode,
+        color_mode=color_mode
     )
     suffix = negative_prompt_suffix or custom_negative_prompt
     if suffix:

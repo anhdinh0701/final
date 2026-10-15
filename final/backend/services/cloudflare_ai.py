@@ -55,6 +55,13 @@ MODERN_SCHOOL_EXCLUSIONS = (
     "busy highway, traffic, moving cars, outdoor street, city avenue"
 )
 
+# Color Base Negative Prompt: For full-color anime/comic mode without banning colors
+COLOR_BASE_NEGATIVE_PROMPT = (
+    "worst quality, low quality, bad anatomy, deformed hands, extra fingers, missing fingers, "
+    "mutated limbs, distorted face, blurry, low resolution, messy draft, 3d render, photograph, "
+    "western comic, text, watermark, signature, font, letters, speech bubble, dialog balloon"
+)
+
 # Vietnamese Canonical Exclusions: Master negative against Hanfu, Kimono, Hanbok, Samurai, Ninja for cultural purity
 VIETNAMESE_CANONICAL_NEGATIVE_PROMPT = (
     "hanfu, kimono, yukata, hanbok, samurai, samurai armor, ninja, katana, geisha, "
@@ -65,16 +72,18 @@ VIETNAMESE_CANONICAL_NEGATIVE_PROMPT = (
 def get_master_negative_prompt(
     genre: str = "",
     cultural_tier: Optional[int] = None,
-    narrative_mode: Optional[str] = None
+    narrative_mode: Optional[str] = None,
+    color_mode: bool = False
 ) -> str:
     """
     Returns the master negative prompt combining base exclusions with genre-specific
     and cultural tier exclusions.
-    - If cultural_tier is 1 or 2 (or historical narrative mode): appends VIETNAMESE_CANONICAL_NEGATIVE_PROMPT
-      to ban foreign distortion (Hanfu, Kimono, Hanbok, Samurai, Ninja).
+    - If color_mode is True: uses COLOR_BASE_NEGATIVE_PROMPT (preserves full RGB color palette).
+    - If color_mode is False: uses BASE_NEGATIVE_PROMPT (enforces monochrome linework).
+    - If cultural_tier is 1 or 2: appends VIETNAMESE_CANONICAL_NEGATIVE_PROMPT.
     - If genre is 'school': appends MODERN_SCHOOL_EXCLUSIONS.
     """
-    neg = BASE_NEGATIVE_PROMPT
+    neg = COLOR_BASE_NEGATIVE_PROMPT if color_mode else BASE_NEGATIVE_PROMPT
     genre_l = (genre or "").lower()
 
     if cultural_tier in (1, 2) or (narrative_mode and str(narrative_mode).lower() in ("chinh_su", "da_su", "strict_historical", "historical_fiction")):
@@ -113,7 +122,8 @@ def generate_image_cf(
     custom_negative_prompt: Optional[str] = None,
     cultural_tier: Optional[int] = None,
     narrative_mode: Optional[str] = None,
-    genre: str = ""
+    genre: str = "",
+    color_mode: bool = False
 ) -> bytes:
     """
     Calls Cloudflare Workers AI Text-to-Image model with fallback chain.
@@ -134,7 +144,8 @@ def generate_image_cf(
     negative_prompt = get_master_negative_prompt(
         genre=genre,
         cultural_tier=cultural_tier,
-        narrative_mode=narrative_mode
+        narrative_mode=narrative_mode,
+        color_mode=color_mode
     )
     suffix = negative_prompt_suffix or custom_negative_prompt
     if suffix:
@@ -193,34 +204,34 @@ def get_cached_or_generate_image(
     genre: str = "",
     loras: Optional[List[Dict[str, Any]]] = None,
     force_refresh: bool = False,
+    color_mode: bool = False,
 ) -> tuple[bytes, str]:
     """
     Fetches image from disk cache if available.
+    Supports both Monochrome Manga and Full-Color Anime/Webtoon modes.
     Otherwise generates strictly via ComfyUI with dynamic LoRA chaining (or Cloudflare Workers AI if configured).
-    Pollinations is completely purged to guarantee high-quality 2D Anime Manga without watermark or distortions.
     Returns (image_bytes, media_type).
     """
-    cache_path = os.path.join(CACHE_DIR, f"panel_{panel_id}.jpg")
+    cache_filename = f"panel_{panel_id}_color.jpg" if color_mode else f"panel_{panel_id}.jpg"
+    cache_path = os.path.join(CACHE_DIR, cache_filename)
 
     panel_lock = _get_panel_lock(panel_id)
     with panel_lock:
-        # 1. ALWAYS check local persistent disk cache first.
-        # If a valid image already exists on disk (whether completed in background or cached),
-        # return it immediately (sub-second response) without overloading the GPU/tunnel.
-        if os.path.isfile(cache_path) and os.path.getsize(cache_path) > 1000:
+        # 1. ALWAYS check local persistent disk cache first unless force_refresh is requested
+        if not force_refresh and os.path.isfile(cache_path) and os.path.getsize(cache_path) > 1000:
             try:
                 with open(cache_path, "rb") as f:
                     img_bytes = f.read()
                 if _is_valid_image_payload(img_bytes):
                     media_type = "image/jpeg" if img_bytes[:2] == b'\xff\xd8' else "image/png"
                     return img_bytes, media_type
-                print(f"[Comic Cache] Cached panel_{panel_id} payload is corrupted; purging")
+                print(f"[Comic Cache] Cached {cache_filename} payload is corrupted; purging")
                 try:
                     os.remove(cache_path)
                 except Exception:
                     pass
             except Exception as e:
-                print(f"[Comic Cache] Failed to read cached panel_{panel_id}: {e}")
+                print(f"[Comic Cache] Failed to read cached {cache_filename}: {e}")
 
         # Keep a stable story-level seed while giving each panel a distinct composition.
         if seed is not None:
@@ -233,6 +244,15 @@ def get_cached_or_generate_image(
         suffix = negative_prompt_suffix or custom_negative_prompt
         img_bytes = None
 
+        # Adapt prompt dynamically for color mode if selected
+        active_prompt = prompt
+        if color_mode:
+            # Replace monochrome enforcement terms with vivid anime coloring directives
+            active_prompt = re.sub(r'\b(monochrome|black and white|grayscale|greyscale|pure monochrome)\b', 'vibrant colorful', active_prompt, flags=re.IGNORECASE)
+            active_prompt = re.sub(r'\b(black ink on white paper|clean ink lineart|delicate screentone shading|authentic manga screentone)\b', 'vibrant digital anime coloring, rich color palette, cinematic anime lighting', active_prompt, flags=re.IGNORECASE)
+            if "color" not in active_prompt.lower() and "vibrant" not in active_prompt.lower():
+                active_prompt = f"masterpiece, full color anime comic illustration, vibrant digital coloring, cinematic anime lighting, rich colors, {active_prompt}"
+
         # 2. Primary Provider: ComfyUI with GPU Acceleration & Dynamic LoRA Chaining
         try:
             from services.comfyui_service import is_comfyui_enabled, is_comfyui_available, generate_image_comfyui
@@ -242,23 +262,25 @@ def get_cached_or_generate_image(
                     if active_loras is None:
                         try:
                             from agents.comic_prompt_agent import ComicPromptAgent
-                            active_loras = ComicPromptAgent().detect_scene_loras(prompt, genre=genre)
+                            active_loras = ComicPromptAgent().detect_scene_loras(active_prompt, genre=genre)
                         except Exception:
                             active_loras = None
 
-                    print(f"[Comic Image] Generating panel {panel_id} via ComfyUI (LoRAs: {len(active_loras or [])})...")
+                    mode_str = "COLOR" if color_mode else "MONOCHROME"
+                    print(f"[Comic Image] Generating panel {panel_id} [{mode_str}] via ComfyUI (LoRAs: {len(active_loras or [])})...")
                     img_bytes = generate_image_comfyui(
-                        prompt=prompt,
+                        prompt=active_prompt,
                         seed=panel_seed,
                         negative_prompt_suffix=suffix,
                         layout_type=layout_type,
                         cultural_tier=cultural_tier,
                         narrative_mode=narrative_mode,
                         genre=genre,
-                        loras=active_loras
+                        loras=active_loras,
+                        color_mode=color_mode
                     )
                     if img_bytes and _is_valid_image_payload(img_bytes):
-                        print(f"[Comic Image] Panel {panel_id} generated successfully via ComfyUI!")
+                        print(f"[Comic Image] Panel {panel_id} [{mode_str}] generated successfully via ComfyUI!")
                 except Exception as comfy_err:
                     print(f"[Comic Image] ComfyUI generation error: {comfy_err}")
         except Exception as comfy_wrapper_err:
@@ -272,12 +294,13 @@ def get_cached_or_generate_image(
                 try:
                     print(f"[Comic Image] Falling back to Cloudflare Workers AI for panel {panel_id}...")
                     img_bytes = generate_image_cf(
-                        prompt,
+                        active_prompt,
                         seed=panel_seed,
                         negative_prompt_suffix=suffix,
                         cultural_tier=cultural_tier,
                         narrative_mode=narrative_mode,
-                        genre=genre
+                        genre=genre,
+                        color_mode=color_mode
                     )
                 except Exception as cf_err:
                     print(f"[Comic Image] Cloudflare AI failed: {cf_err}")
@@ -288,18 +311,19 @@ def get_cached_or_generate_image(
                 "Vui lòng kiểm tra ComfyUI và đường dẫn Ngrok."
             )
 
-        # 2.5: Server-side Pillow monochrome enforcement — eliminates color leak from ANY source
-        try:
-            img_bytes = process_manga_monochrome(img_bytes)
-        except Exception as mono_err:
-            print(f"[Comic Image] Monochrome post-processing failed ({mono_err}), using raw bytes")
+        # 2.5: Server-side Pillow monochrome enforcement — only if monochrome mode
+        if not color_mode:
+            try:
+                img_bytes = process_manga_monochrome(img_bytes)
+            except Exception as mono_err:
+                print(f"[Comic Image] Monochrome post-processing failed ({mono_err}), using raw bytes")
 
         # 3. Save to disk cache
         try:
             with open(cache_path, "wb") as f:
                 f.write(img_bytes)
         except Exception as e:
-            print(f"[Comic Cache] Failed to save panel_{panel_id}: {e}")
+            print(f"[Comic Cache] Failed to save {cache_filename}: {e}")
 
         media_type = "image/jpeg" if img_bytes[:2] == b'\xff\xd8' else "image/png"
         return img_bytes, media_type

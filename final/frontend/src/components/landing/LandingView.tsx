@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { translations, Language } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
-import { VietnamFlagHeroBackground } from "@/components/canvas/VietnamFlagHeroBackground";
 
 interface Props {
   lang: Language;
@@ -116,10 +115,7 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
         style={{ backgroundColor: "#FAF7F2" }}
       >
         
-        {/* ========================================================= */}
-        {/* VIETNAM FLAG LIGHT RIBBONS GENERATIVE HERO BACKGROUND */}
-        {/* ========================================================= */}
-        <VietnamFlagHeroBackground />
+
 
         {/* ========================================================= */}
         {/* HEADER / NAVIGATION BAR */}

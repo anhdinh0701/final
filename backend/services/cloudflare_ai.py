@@ -55,21 +55,24 @@ MODERN_SCHOOL_EXCLUSIONS = (
     "busy highway, traffic, moving cars, outdoor street, city avenue"
 )
 
-# Color Base Negative Prompt: For full-color mode, preserving natural palette while banning neon, psychedelic, and electric oversaturation
+# Color Base Negative Prompt: For full-color mode, preserving natural palette while banning neon, psychedelic, split panels, demon faces, and electric oversaturation
 COLOR_BASE_NEGATIVE_PROMPT = (
     "worst quality, low quality, bad anatomy, deformed hands, extra fingers, missing fingers, "
     "mutated limbs, distorted face, blurry, low resolution, messy draft, 3d render, photograph, "
     "western comic, text, watermark, signature, font, letters, speech bubble, dialog balloon, "
+    "multiple frames, collage, split image, multi panel comic, comic strip layout, border frame, divided screen, "
+    "demon, devil, demon face, monster, monster face, oni, evil creature, glowing eyes, fangs, horns, creepy face, "
     "neon, oversaturated, neon cyan, neon pink, psychedelic, acid colors, electric colors, "
     "glowing neon, glowing outlines, harsh saturation, oversaturation, chromatic aberration, synthwave, cyberpunk colors"
 )
 
-# Vietnamese Canonical Exclusions: Master negative against Kimono, Obi, Haori, Hakama, Hanfu, Hanbok, Samurai, Ninja for cultural purity
+# Vietnamese Canonical Exclusions: Master negative against Kimono, Obi, Haori, Hakama, Hanfu, Japanese pagodas, Samurai, Ninja for cultural purity
 VIETNAMESE_CANONICAL_NEGATIVE_PROMPT = (
     "kimono, yukata, obi, obi sash, tied obi, wide sash, haori, haori coat, hakama, "
     "samurai, samurai armor, ninja, katana, geisha, geta sandals, japanese traditional clothing, "
     "japanese costume, japanese robes, hanfu, hanbok, qing queue, pigtail hairstyle, "
-    "chinese traditional clothing, korean traditional clothing, tangzhuang, cheongsam, qipao"
+    "chinese traditional clothing, korean traditional clothing, tangzhuang, cheongsam, qipao, "
+    "japanese pagoda, japanese castle, castle tower, pagoda, asian temple tower, modern skyscraper, high-rise building"
 )
 
 def get_master_negative_prompt(

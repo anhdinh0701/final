@@ -776,12 +776,12 @@ def infer_fallback_character_dna(story_text: str) -> dict:
         is_flute_youth = any(k in text_lower for k in ["thổi sáo", "thoi sao", "võng", "vong", "rặng tre", "rang tre", "chăn bò", "chan bo", "biến hóa", "bien hoa", "thanh niên", "thanh nien"])
         is_mandarin = any(k in text_lower for k in ["trạng nguyên", "trang nguyen", "quan trạng", "quan trang", "thuyền", "thuyen", "đi sứ", "di su"])
 
-        if is_coconut_baby:
-            lead_dna = "miraculous mythical Vietnamese baby Sọ Dừa, round spherical coconut-shaped child, innocent round face with expressive pleading dark eyes, resting on rustic woven straw mat in a humble Vietnamese thatched cottage, no arms, no legs, no kimono, no samurai"
-        elif is_flute_youth:
+        if is_flute_youth:
             lead_dna = "handsome young Vietnamese youth Sọ Dừa, gentle kind eyes, playing bamboo flute while sitting under lush green bamboo grove, simple rustic brown cotton peasant trousers, herd of cows grazing in background, no kimono, no samurai"
         elif is_mandarin:
             lead_dna = "handsome noble Vietnamese Mandarin scholar (Trạng nguyên) Sọ Dừa, regal refined face, wearing majestic crimson court robe with embroidered dragon badge and traditional scholar gauze cap (mũ cánh chuồn)"
+        elif is_coconut_baby and any(k in text_lower for k in ["bụng mẹ", "sinh ra", "uống nước", "uong nuoc", "trong bụng"]):
+            lead_dna = "miraculous mythical Vietnamese baby Sọ Dừa, round spherical coconut-shaped child, innocent round face with expressive pleading dark eyes, resting on rustic woven straw mat in a humble Vietnamese thatched cottage, no arms, no legs, no kimono, no samurai"
         else:
             lead_dna = "handsome young Vietnamese youth Sọ Dừa, gentle kind eyes, simple rustic brown cotton peasant attire, peaceful rural setting"
 
@@ -790,19 +790,19 @@ def infer_fallback_character_dna(story_text: str) -> dict:
                 "gender": "male",
                 "role": "lead",
                 "dna": lead_dna,
-                "aliases": ["sọ dừa", "chàng", "cậu bé", "chàng thanh niên", "con", "người", "quan trạng", "sọ dừa tròn"]
+                "aliases": ["sọ dừa", "so dua", "chàng thanh niên", "quan trạng", "sọ dừa tròn"]
             },
             "Cô Út": {
                 "gender": "female",
                 "role": "supporting",
                 "dna": "gentle graceful 18yo Vietnamese maiden Cô Út, innocent kind eyes, long black hair tied in headband, wearing traditional pastel green or brown Áo Tứ Thân with fabric sash, modest graceful beauty",
-                "aliases": ["cô út", "nàng", "tiểu thư", "người con gái út", "út", "vợ", "cô gái"]
+                "aliases": ["cô út", "co ut", "tiểu thư", "người con gái út", "cô gái"]
             },
             "Phú Ông": {
                 "gender": "male",
                 "role": "supporting",
                 "dna": "wealthy elderly Vietnamese village landlord Phú Ông, round calculating face, thin mustache, wearing rich dark silk Áo Ngũ Thân with traditional wrapped head turban (khăn đóng), holding folding bamboo fan",
-                "aliases": ["phú ông", "lão địa chủ", "ông chủ", "cha"]
+                "aliases": ["phú ông", "phu ong", "lão địa chủ"]
             }
         }
 
@@ -915,8 +915,10 @@ def infer_fallback_action(beat: str, is_dialogue: bool = False) -> str:
     b_lower = str(beat).lower()
     if any(w in b_lower for w in ["cưỡi", "phi", "ngựa"]):
         return "galloping forward heroically on steed with intense momentum, dramatic wide angle"
-    if any(w in b_lower for w in ["nhổ", "tre", "gậy sắt", "vung"]):
-        return "wielding weapon heroically with fierce strength, dynamic action manga lines"
+    if any(w in b_lower for w in ["thổi sáo", "tiếng sáo", "thoi sao"]):
+        return "peacefully playing traditional bamboo flute, gentle melodic posture, rustic serene atmosphere"
+    if any(w in b_lower for w in ["nhổ tre", "chặt tre", "gậy sắt", "vung gậy"]):
+        return "wielding weapon heroically with fierce strength, dynamic action lines"
     if any(w in b_lower for w in ["chém", "đánh", "tiêu diệt", "tấn công", "chiến đấu", "xông"]):
         return "lunging forward in fierce combat stance, dynamic motion blur and battle impact"
     if any(w in b_lower for w in ["bay", "lên trời", "biến mất"]):
@@ -1351,13 +1353,11 @@ class ComicDirectorAgent:
                 "is_male": is_male
             })
 
-        # Feature 17: Map first-person pronouns ("tôi", "mình", "I", "me") to lead protagonist
-        # The first character in dna_map is assumed to be the lead/POV character
+        # Feature 17: Map first-person pronouns ("tôi", "mình") to lead protagonist
         if char_entry_list:
             lead = char_entry_list[0]
             first_person_aliases = [
-                "tôi", "mình", "ta", "tớ",  # Vietnamese first-person
-                "I", "me", "my", "myself",    # English first-person
+                "tôi", "mình", "tớ"
             ]
             existing_aliases = set(a.lower() for a in lead["aliases"])
             for fp in first_person_aliases:
@@ -1759,7 +1759,7 @@ NEW STORY TEXT:
                 if scene_enclosure.get("key") != resolve_spatial_enclosure("", setting_dna=setting_dna).get("key")
                 else bg_anchor
             )
-            prompt = f"{lead_dna}, {shot_desc}, setting: {scene_anchor}"
+            prompt = shot_desc or "standing attentively in scene"
 
             raw_panels.append({
                 "panel_index": idx + 1,

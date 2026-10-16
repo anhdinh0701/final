@@ -81,115 +81,112 @@ LAYOUT_MAP = {
 }
 
 # ==================== CHARACTER DNA EXTRACTOR ====================
-DNA_EXTRACTOR_PROMPT = """You are a lead character designer and visual continuity director for a professional manga studio.
+DNA_EXTRACTOR_PROMPT = """You are a lead character designer and visual continuity director for a professional Vietnamese cultural comic art studio.
 Analyze the Vietnamese story text and extract the EXACT, IMMUTABLE visual physical traits, identifying signature costume, and all aliases/pronouns for each character.
 
 CRITICAL VISUAL CONTINUITY SPECIFICATIONS (MANDATORY EXTREME DETAIL):
 0. CANONICAL STORY DNA: When prior character details are supplied from the Dynamic Scene Graph or Story Bible, treat their appearance, age, hairstyle, and costume as immutable canon. Preserve those details exactly; infer only missing fields and never replace canon with a new design.
-1. Signature Identifying Costume (MANDATORY):
-   - Exact garment type & cut: e.g. crisp button-up short-sleeve school uniform shirt, tailored navy blazer, pleated skirt, tailored trousers, knit vest, trench coat, or Vietnamese traditional attire (Áo Ngũ Thân, Áo Nhật Bình, Áo Tấc, Khăn Đóng, Áo Bà Ba, Nón Lá).
-   - Specific fabric texture & colors: e.g. pure white cotton shirt, dark navy pleated skirt, charcoal grey tailored trousers, dark navy blazer.
-   - Collar, Neck & Chest Accessories (ABSOLUTELY REQUIRED): Specify exact collar style (button-down collar, stiff collar, sailor collar) AND neck/chest accessories (ribbon tie, bow tie, school necktie, brooch, collar pin, chest crest badge, uniform pendant).
-   - Outerwear & layering: knit cardigan, sweater vest, tailored school blazer.
+1. Signature Identifying Costume (MANDATORY & CULTURALLY AUTHENTIC):
+   - For Vietnamese traditional / folk / historical figures: ALWAYS specify authentic Vietnamese garments:
+     * Folk/Rural Peasant: brown or black collarless Áo Bà Ba, loose cotton trousers, checkered scarf (khăn rằn), conical hat (nón lá), barefoot or straw sandals.
+     * Scholar/Landlord/Official: silk Áo Ngũ Thân with standing collar and 5 buttons, wide-sleeved Áo Tấc, wrapped fabric turban (khăn đóng), folding bamboo fan.
+     * Maiden/Woman: traditional pastel Áo Tứ Thân with fabric sash, or Áo Dài with standing collar, hair wrapped in headband or low bun.
+     * Ancient Warrior/King: bronze-age or medieval Đại Việt armor, crimson cape, imperial headband, dragon motifs.
+   - For Modern figures: contemporary Vietnamese clothing, neat collared shirt or casual jacket, natural everyday posture.
+   - NEVER generate Japanese Kimono, Obi sash, Haori coat, Hakama, Samurai armor, Ninja attire, or Chinese Hanfu.
 2. Exact Hairstyle & Head Details (IMMUTABLE):
-   - Specific cut, length, and texture: e.g. straight jet-black hair reaching collarbones, high ponytail tied with ribbon, messy textured dark hair.
-   - Bangs & parting: blunt bangs straight across forehead, curtain bangs parted in center, swept back.
-   - Hair accessories: ribbon tie, hairpins, clips.
+   - Specific cut, length, and texture: e.g. straight jet-black hair tied in low bun, neat dark hair parted neatly, ancient topknot with headband.
 3. Immutable Facial Features:
-   - Age, facial structure, eye shape and color: e.g. 17yo Vietnamese student, gentle almond dark eyes, sharp defined jawline, expressive dark eyes.
-   - Permanent marks: beauty mark under right eye, faint birthmark, glasses.
+   - Age, facial structure, eye shape and color: e.g. Vietnamese youth, gentle dark almond eyes, warm expressive eyes, natural Vietnamese features.
 4. Comprehensive Aliases & Pronoun Registry:
-   - Must include character names, nicknames.
-   - Vietnamese pronouns & generic terms: "cô bé", "cậu bé", "cô gái", "chàng trai", "cậu ấy", "anh ấy", "cô ấy", "nữ sinh", "nam sinh", "học sinh", "anh bạn cùng bàn", "bạn cùng bàn", "bạn cùng lớp", "bạn học", "người bạn", "chị", "em gái", "bé gái", "thiếu niên", "cậu bạn", "chàng", "nàng", "tiểu thư", "công tử", "tướng quân", "nghĩa sĩ", "bệ hạ".
-   - English equivalents: "she", "her", "he", "him", "the girl", "the boy", "schoolgirl", "schoolboy", "student", "classmate", "desk mate".
+   - Must include character names, nicknames, and Vietnamese pronouns: "chàng", "nàng", "cô bé", "cậu bé", "cô gái", "chàng trai", "tiểu thư", "phú ông", "con", "mẹ", "cha", "tướng quân", "vua", "bệ hạ".
 5. Compact Visual DNA Representation:
    - Keep visual DNA representation compact under 30 words per character to strictly preserve CLIP 77 token budget.
-6. Metadata: Specify "gender" ("female" or "male") and primary "role" ("lead", "student", "desk_mate", "supporting").
+6. Metadata: Specify "gender" ("female" or "male") and primary "role" ("lead", "supporting", "antagonist").
 
 OUTPUT FORMAT:
 Return ONLY a valid JSON object:
 {
-  "An": {
+  "Nhân vật": {
     "gender": "female",
     "role": "lead",
-    "aliases": ["An", "cô bé", "nữ sinh", "cô", "cô ấy", "cô gái", "she", "girl", "schoolgirl", "female student", "bạn cùng bàn"],
-    "dna": "17yo Vietnamese schoolgirl, soft oval face, gentle dark almond eyes, sharp jawline, straight jet-black hair with blunt bangs across forehead and shoulder-length bob, wearing crisp white short-sleeve school uniform button-up shirt with stiff collar, small dark navy ribbon tie pinned at collar, pleated dark navy skirt"
+    "aliases": ["tên", "nàng", "cô gái", "she"],
+    "dna": "gentle Vietnamese maiden, kind dark almond eyes, long black hair, wearing authentic pastel green Áo Tứ Thân with vibrant fabric sash, modest grace, no kimono, no obi"
   }
 }
 """
 
 # ==================== SPATIAL SETTING DNA EXTRACTOR ====================
-SETTING_EXTRACTOR_PROMPT = """You are an art director and world-building designer for a manga studio.
-Analyze the story text and extract the PRIMARY SPATIAL SETTING & ENVIRONMENT ANCHOR to guarantee strict background consistency across all manga panels.
+SETTING_EXTRACTOR_PROMPT = """You are an art director and world-building designer for a Vietnamese cultural comic art studio.
+Analyze the story text and extract the PRIMARY SPATIAL SETTING & ENVIRONMENT ANCHOR to guarantee strict background consistency across all comic panels.
 If a canonical setting is supplied from the Dynamic Scene Graph or Story Bible, preserve its location and architectural anchor exactly. Do not replace it with a newly inferred location.
 
 For the primary location, specify:
-1. Location type & time of day/era (e.g. vintage 1990s detective office at night, modern high-tech glass lab, ancient stone fortress)
-2. Architectural details (walls, windows, flooring, distinctive structural columns)
-3. Key persistent props & furniture (e.g. mahogany desk with scattered dossiers, vintage brass lamp, antique bookshelf)
-4. Atmospheric lighting & shadows (e.g. moody chiaroscuro lighting, harsh fluorescent light, rain streaks on window)
+1. Location type & era: e.g. ancient northern Vietnamese village, Đại Việt imperial palace hall, rustic bamboo grove with thatched cottage, tranquil river wharf with banyan tree.
+2. Architectural details: curved tiled roof, carved wooden pillars, mud-plaster walls, thatched straw roof, bamboo fences.
+3. Key persistent props & environment: banyan tree, village well, communal house, wooden boat, ceramic jars, rice paddies.
+4. Atmospheric lighting & tone: warm natural daylight, soft morning mist, nostalgic sunset glow, authentic folk art atmosphere.
 
 Return ONLY a valid JSON object:
 {
   "location_name": "Tên địa điểm ngắn gọn",
   "setting_anchor": "English visual description under 40 words specifying architecture, persistent props, and lighting atmosphere",
-  "atmosphere": "e.g. gloomy noir with heavy shadows, clean sci-fi screentones, rustic vintage ink textures"
+  "atmosphere": "e.g. warm nostalgic Vietnamese folklore comic art atmosphere, tranquil rural ink textures"
 }
 """
 
-# ==================== BEAT-BY-BEAT MANGA DIRECTOR ====================
-BEAT_DIRECTOR_PROMPT = """You are a master manga director and storyboard artist specializing in cohesive sequential storytelling, strict character continuity, and expressive anime manga panel composition.
+# ==================== BEAT-BY-BEAT COMIC DIRECTOR ====================
+BEAT_DIRECTOR_PROMPT = """You are a master comic art director and storyboard artist specializing in authentic Vietnamese cultural storytelling, strict character continuity, and expressive sequential comic composition.
 
-YOUR MISSION: Faithfully adapt the provided Vietnamese story text into EXACTLY 4 SEQUENTIAL, COHESIVE MANGA PANELS that tell a single, continuous, connected scene.
+YOUR MISSION: Faithfully adapt the provided Vietnamese story text into EXACTLY 4 SEQUENTIAL, COHESIVE COMIC PANELS that tell a single, continuous, connected scene.
 
 ABSOLUTE CRITICAL RULES FOR VISUAL & CHARACTER CONSISTENCY:
-1. UNIFIED 2D COMIC GRAPHIC NOVEL ART STYLE:
-   - All panels MUST be generated in authentic 2D comic art graphic novel style with clean ink lineart, delicate screentone shading, and cel shading.
+1. UNIFIED 2D COMIC GRAPHIC NOVEL ART STYLE (AUTHENTIC VIETNAMESE CULTURAL IDENTITY):
+   - All panels MUST be generated in authentic 2D comic art graphic novel style with clean ink lineart, soft cel shading, and natural artistic textures.
    - Absolutely NO realistic portraits, NO 3D, NO pencil sketch drawings, NO graphite portraits, NO collage or multi-frame layouts in a single panel.
-   - CULTURAL PURITY: Strictly preserve Vietnamese character aesthetics. NEVER depict Japanese Kimono, Obi sashes, Haori coats, Hakama, Samurai armor, or Chinese Hanfu unless explicitly requested.
+   - CULTURAL PURITY: Strictly preserve Vietnamese character aesthetics, attire, and architecture. NEVER depict Japanese Kimono, Obi sashes, Haori coats, Hakama, Samurai armor, Ninja gear, Katana, or Chinese Hanfu.
 2. STRICT CHARACTER CONTINUITY:
-   - Identify the characters in the story (e.g. Duy, An, or the protagonist).
-   - In `image_prompt`, EVERY panel featuring a character MUST use their EXACT same physical DNA description from the CHARACTER REGISTRY (exact face, hair style/color, age, and signature outfit).
+   - In `image_prompt`, EVERY panel featuring a character MUST use their EXACT same physical DNA description from the CHARACTER REGISTRY (exact face, hair style, age, and signature Vietnamese outfit).
    - NEVER switch outfits, hairstyles, or artistic styles between panels.
 3. SCENE & ENVIRONMENT CONTINUITY:
-   - The 4 panels MUST depict the sequential flow of the EXACT SAME story scene from the text (e.g. if it is a rainy night by the window with a contract, keep the rain on the window, the moody lighting, and the room environment consistent across all 4 panels).
-   - Panel 1: Establishing scene & mood (wide/medium shot introducing the character in their environment).
-   - Panel 2: Key action / gesture / focus (character holding document, looking intently, starting dialogue).
+   - The 4 panels MUST depict the sequential flow of the EXACT SAME story scene from the text.
+   - Panel 1: Establishing scene & mood (wide/medium shot introducing the character in their authentic Vietnamese environment).
+   - Panel 2: Key action / gesture / focus (character interacting with environment or props, starting dialogue).
    - Panel 3: Emotional dialogue / reaction / rising drama (medium close-up of intense facial expression, interacting).
-   - Panel 4: Impactful turning point / cliffhanger / resolution of this beat (dramatic angle, decisive posture, powerful closing thought).
+   - Panel 4: Impactful turning point / resolution of this beat (dramatic angle, decisive posture, powerful closing thought).
 4. COMPLETE DIALOGUE & CONTEXT SUBTITLE (VIETNAMESE):
    - NO TRUNCATION / NO ELLIPSES (...): Every dialogue and caption MUST be a complete, grammatically sound, expressive Vietnamese sentence ending with (.), (!), or (?).
-   - If there is a speaker, format clearly as: `[Tên nhân vật]: "[Câu thoại trọn vẹn giàu cảm xúc]"` (e.g. `Duy: "Tôi đã ký tên trên tờ giấy, không còn đường quay lại."`).
-   - If it is narrative description, provide a vivid, engaging narrator sentence (e.g. `Mưa rơi không ngớt bên ngoài khung cửa kính mờ, giam hãm mọi thanh âm trong sự tĩnh lặng nặng nề.`).
+   - If there is a speaker, format clearly as: `[Tên nhân vật]: "[Câu thoại trọn vẹn giàu cảm xúc]"` (e.g. `Thạch Sanh: "Ta sẽ xuống hang cứu công chúa trở về."`).
+   - If it is narrative description, provide a vivid, engaging narrator sentence.
 5. IMAGE PROMPT (ENGLISH):
-   - Concise prompt under 55 words: `[Character Visual DNA], [Specific Action & Expression], [Environment details], [Camera framing], [2D manga lineart]`.
-   - Never use "realistic", "pencil sketch", "portrait drawing", "multi-panel".
+   - Concise prompt under 55 words: `[Character Visual DNA with authentic Vietnamese attire], [Specific Action & Expression], [Vietnamese Environment details], [Camera framing], [2D comic lineart]`.
+   - Never use "realistic", "pencil sketch", "portrait drawing", "multi-panel", "kimono", "samurai".
 
 OUTPUT FORMAT:
 Return ONLY a valid JSON array of 4 panel objects:
 [
   {
     "panel_index": 1,
-    "image_prompt": "young Vietnamese protagonist with neat dark hair and expressive dark eyes wearing casual jacket and white shirt, standing near large rain-streaked window looking out at gloomy storm, moody 2D anime manga screentone",
-    "dialogue_text": "Mưa rơi không ngớt, từng giọt va vào kính mờ tạo thành bức tường âm thanh ngăn cách với thế giới bên ngoài.",
+    "image_prompt": "honest young Vietnamese peasant with neat dark hair and kind eyes wearing brown collarless ao ba ba and loose trousers, standing under large leafy starfruit tree laden with golden ripe fruits in peaceful rustic Vietnamese village garden, wide establishing shot, 2D comic art lineart, no kimono, no obi",
+    "dialogue_text": "Dưới bóng cây khế sai trĩu quả vàng mọng, người em hiền hậu ngước nhìn chim phượng hoàng khổng lồ đáp xuống.",
     "layout_type": "wide"
   },
   {
     "panel_index": 2,
-    "image_prompt": "young Vietnamese protagonist with neat dark hair and expressive dark eyes wearing casual jacket and white shirt, sitting at wooden desk holding pen over a signed document with resolute focused gaze, medium shot 2D manga lineart",
-    "dialogue_text": "Duy: \\\"Tôi đã ký tên trên tờ giấy, không còn đường quay lại.\\\"",
+    "image_prompt": "honest young Vietnamese peasant wearing brown ao ba ba, looking up with surprised and reverent expression at majestic giant mythical bird with luminous feathers perched on wooden fence, medium shot 2D comic lineart",
+    "dialogue_text": "Người em: \\\"Cây khế này là sinh kế duy nhất của vợ chồng tôi, xin chim hãy thương tình!\\\"",
     "layout_type": "square"
   },
   {
     "panel_index": 3,
-    "image_prompt": "young Vietnamese protagonist with neat dark hair and expressive dark eyes wearing casual jacket and white shirt, close-up intense profile view, sharp determined eyes, dramatic manga contrast",
-    "dialogue_text": "Duy: \\\"Nếu không có tôi, họ sẽ không bao giờ biết được sự thật phía sau bóng tối này.\\\"",
+    "image_prompt": "majestic giant mythical celestial phoenix with radiant iridescent feathers perched on sturdy branch of starfruit tree, speaking gently with divine aura, close-up dramatic 2D comic art",
+    "dialogue_text": "Chim Thần: \\\"Ăn một quả, trả một cục vàng, may túi ba gang, mang đi mà đựng.\\\"",
     "layout_type": "square"
   },
   {
     "panel_index": 4,
-    "image_prompt": "young Vietnamese protagonist with neat dark hair and expressive dark eyes wearing casual jacket and white shirt, standing tall against the night window, clenching fist with unyielding resolve, dramatic low angle 2D manga",
-    "dialogue_text": "Duy: \\\"Dù phải trả bất cứ giá nào, tôi cũng sẽ đi đến cùng con đường đã chọn!\\\"",
+    "image_prompt": "honest young Vietnamese peasant holding a modest small cloth bag, watching the giant celestial bird spread glorious wings to take flight into sky, warm sunlight, dramatic low angle 2D comic art",
+    "dialogue_text": "Người em vội vào nhà bảo vợ may đúng chiếc túi ba gang, lòng tràn đầy niềm tin vào điều kỳ diệu sắp tới.",
     "layout_type": "tall"
   }
 ]
@@ -686,20 +683,98 @@ def infer_fallback_character_dna(story_text: str) -> dict:
                 "aliases": ["tấm", "cô tấm", "nàng tấm", "cô gái", "nàng", "cô bé"]
             }
         }
-    if any(k in text_lower for k in ["thạch sanh", "chằn tinh"]):
+    if any(k in text_lower for k in ["thạch sanh", "thach sanh", "chằn tinh", "chan tinh"]):
         return {
             "Thạch Sanh": {
                 "gender": "male",
                 "role": "lead",
-                "dna": "brave Vietnamese folk hero Thạch Sanh, muscular woodcutter physique, simple loincloth and fabric wrap, wielding wooden axe or mythical bow, fearless honest eyes",
+                "dna": "brave Vietnamese folk hero Thạch Sanh, muscular woodcutter physique, simple loincloth and fabric wrap, wielding wooden axe or mythical bow, fearless honest eyes, no kimono, no samurai",
                 "aliases": ["thạch sanh", "chàng", "người dũng sĩ", "chàng trai"]
             }
         }
-    if any(k in text_lower for k in ["sọ dừa", "so dua", "chăn bò", "phú ông", "cô út"]):
+    if any(k in text_lower for k in ["ăn khế", "an khe", "cây khế", "cay khe", "túi ba gang", "tui ba gang", "chim thần"]):
+        return {
+            "Người em": {
+                "gender": "male",
+                "role": "lead",
+                "dna": "honest 20yo Vietnamese peasant farmer, kind dark eyes, wearing rustic dark brown collarless ao ba ba and loose trousers, conical leaf hat, modest honest posture, no kimono, no samurai",
+                "aliases": ["người em", "chàng", "người em nghèo", "chàng trai", "người em nhân hậu"]
+            },
+            "Người anh": {
+                "gender": "male",
+                "role": "antagonist",
+                "dna": "greedy wealthy Vietnamese landlord, calculating sharp eyes, wearing rich embroidered silk Áo Ngũ Thân with fabric turban, holding folding fan, arrogant posture",
+                "aliases": ["người anh", "người anh tham lam", "anh"]
+            },
+            "Chim Thần": {
+                "gender": "unknown",
+                "role": "supporting",
+                "dna": "majestic giant mythical celestial phoenix bird, radiant golden and crimson feathers, glowing eyes, divine aura, enormous wingspan",
+                "aliases": ["chim thần", "phượng hoàng", "chim", "con chim"]
+            }
+        }
+    if any(k in text_lower for k in ["cây tre trăm đốt", "cay tre tram dot", "khắc nhập", "khắc xuất", "khac nhap", "khac xuat", "anh khoai"]):
+        return {
+            "Anh Khoai": {
+                "gender": "male",
+                "role": "lead",
+                "dna": "hardworking honest young Vietnamese farmer Khoai, muscular build, kind determined eyes, wearing rustic brown cotton ao ba ba tunic with rolled up sleeves, carrying bamboo stalks, no kimono, no samurai",
+                "aliases": ["anh khoai", "khoai", "chàng trai", "chàng", "người làm công"]
+            },
+            "Phú Ông": {
+                "gender": "male",
+                "role": "antagonist",
+                "dna": "cunning wealthy elderly Vietnamese landlord, round face, thin mustache, wearing dark silk Áo Ngũ Thân and wrapped head turban (khăn đóng), holding folding fan",
+                "aliases": ["phú ông", "lão phú ông", "ông chủ"]
+            },
+            "Bụt": {
+                "gender": "male",
+                "role": "supporting",
+                "dna": "venerable benevolent Vietnamese Buddha deity Bụt, long flowing white beard and hair, gentle compassionate eyes, wearing simple white flowing robes and holding whisk",
+                "aliases": ["bụt", "ông bụt", "đức phật"]
+            }
+        }
+    if any(k in text_lower for k in ["bánh chưng", "banh chung", "bánh giầy", "banh giay", "lang liêu", "lang lieu"]):
+        return {
+            "Lang Liêu": {
+                "gender": "male",
+                "role": "lead",
+                "dna": "modest noble young Vietnamese prince Lang Liêu, gentle filial eyes, wearing ancient Hung King era bronze-age embroidered tunic with fabric sash, holding square sticky rice cake (bánh chưng), no kimono",
+                "aliases": ["lang liêu", "hoàng tử", "chàng", "chàng trai"]
+            },
+            "Vua Hùng": {
+                "gender": "male",
+                "role": "supporting",
+                "dna": "venerable Hung King, stately regal presence, wearing ancient bronze-age royal feathered crown and embroidered dragon robes, majestic benevolent expression",
+                "aliases": ["vua hùng", "vua", "nhà vua", "hùng vương", "phụ vương"]
+            }
+        }
+    if any(k in text_lower for k in ["trầu cau", "trau cau", "tân và lang", "cây cau", "tảng đá vôi"]):
+        return {
+            "Tân": {
+                "gender": "male",
+                "role": "lead",
+                "dna": "handsome young Vietnamese youth Tân, gentle loyal eyes, wearing rustic brown collarless tunic and headband, sorrowful dedicated expression, no kimono",
+                "aliases": ["tân", "người anh", "chàng"]
+            },
+            "Lang": {
+                "gender": "male",
+                "role": "supporting",
+                "dna": "handsome young Vietnamese youth Lang, devoted younger brother, wearing simple rustic brown peasant clothes and headband, no kimono",
+                "aliases": ["lang", "người em", "em trai"]
+            },
+            "Nàng": {
+                "gender": "female",
+                "role": "supporting",
+                "dna": "faithful beautiful young Vietnamese woman, tearful loving eyes, wearing modest traditional Áo Tứ Thân with dark scarf, no kimono",
+                "aliases": ["nàng", "người vợ", "cô gái"]
+            }
+        }
+    if any(k in text_lower for k in ["sọ dừa", "so dua", "chăn bò", "chan bo", "phú ông", "phu ong", "cô út", "co ut"]):
         # Determine whether Sọ Dừa is currently in coconut baby form or handsome flute-playing form
-        is_coconut_baby = any(k in text_lower for k in ["mẹ", "vứt", "sinh ra", "quá dừa", "tròn", "lông lốc", "bụng mẹ", "uống nước"])
-        is_flute_youth = any(k in text_lower for k in ["thổi sáo", "võng", "rặng tre", "chăn bò", "biến hóa", "thanh niên"])
-        is_mandarin = any(k in text_lower for k in ["trạng nguyên", "quan trạng", "thuyền", "đi sứ"])
+        is_coconut_baby = any(k in text_lower for k in ["mẹ", "me", "vứt", "vut", "sinh ra", "quả dừa", "qua dua", "tròn", "tron", "lông lốc", "long loc", "bụng mẹ", "uống nước", "uong nuoc"])
+        is_flute_youth = any(k in text_lower for k in ["thổi sáo", "thoi sao", "võng", "vong", "rặng tre", "rang tre", "chăn bò", "chan bo", "biến hóa", "bien hoa", "thanh niên", "thanh nien"])
+        is_mandarin = any(k in text_lower for k in ["trạng nguyên", "trang nguyen", "quan trạng", "quan trang", "thuyền", "thuyen", "đi sứ", "di su"])
 
         if is_coconut_baby:
             lead_dna = "miraculous mythical Vietnamese baby Sọ Dừa, round spherical coconut-shaped child, innocent round face with expressive pleading dark eyes, resting on rustic woven straw mat in a humble Vietnamese thatched cottage, no arms, no legs, no kimono, no samurai"
@@ -779,47 +854,59 @@ def infer_fallback_setting_dna(story_text: str) -> dict:
     """Dynamically infer authentic setting anchor from Vietnamese story context without classroom bias."""
     text_lower = str(story_text).lower()
 
-    if any(k in text_lower for k in ["bạch đằng", "chiến trận", "chiến thuyền", "bãi cọc", "sa trường", "sông", "giặc"]):
+    if any(k in text_lower for k in ["bạch đằng", "bach dang", "chiến trận", "chien tran", "chiến thuyền", "bãi cọc", "bai coc", "sa trường"]):
         return {
             "location_name": "Chiến trường lịch sử Việt Nam",
-            "setting_anchor": "historic Vietnamese battlefield along the river, wooden stakes rising from swirling waters, historic battle boats, fluttering war banners, dynamic manga ink lineart",
-            "atmosphere": "epic dramatic historical battlefield screentone with wind and smoke"
+            "setting_anchor": "historic Vietnamese battlefield along the river, wooden stakes rising from swirling waters, historic battle boats, fluttering war banners, dynamic ink lineart",
+            "atmosphere": "epic dramatic historical battlefield with wind and smoke"
         }
-    if any(k in text_lower for k in ["hoàng cung", "kinh thành", "thăng long", "cung điện", "ngai vàng", "triều đình"]):
+    if any(k in text_lower for k in ["hoàng cung", "hoang cung", "kinh thành", "kinh thanh", "thăng long", "thang long", "cung điện", "ngai vàng", "triều đình", "tử cấm thành"]):
         return {
             "location_name": "Hoàng thành Đại Việt",
             "setting_anchor": "grand historic Đại Việt imperial palace hall, carved wooden pillars, ornate dragon motifs, solemn royal court architecture",
-            "atmosphere": "majestic solemn imperial manga screentone"
+            "atmosphere": "majestic solemn imperial Vietnamese palace illustration"
         }
-    if any(k in text_lower for k in ["sọ dừa", "chăn bò", "phú ông", "cô út"]):
+    if any(k in text_lower for k in ["cây tre trăm đốt", "cay tre tram dot", "khắc nhập", "khac nhap", "bụi tre", "bui tre", "rừng tre"]):
+        return {
+            "location_name": "Rặng tre làng quê Việt Nam",
+            "setting_anchor": "ancient dense Vietnamese bamboo grove with tall green bamboo stalks, dirt path, tranquil rustic village atmosphere",
+            "atmosphere": "mystical folklore comic art atmosphere"
+        }
+    if any(k in text_lower for k in ["cây khế", "cay khe", "ăn khế", "an khe", "đảo vàng", "dao vang", "túi ba gang", "tui ba gang"]):
+        return {
+            "location_name": "Vườn khế làng quê Việt Nam",
+            "setting_anchor": "rustic Vietnamese rural garden with thatched cottage, lush starfruit tree laden with ripe golden fruits, dirt yard, wooden fence",
+            "atmosphere": "peaceful nostalgic Vietnamese folklore comic art atmosphere"
+        }
+    if any(k in text_lower for k in ["sọ dừa", "so dua"]) or (any(k in text_lower for k in ["phú ông", "phu ong"]) and any(k in text_lower for k in ["cô út", "co ut", "chăn bò", "chan bo"])):
         return {
             "location_name": "Làng quê đồng bằng Bắc Bộ (Truyện Sọ Dừa)",
             "setting_anchor": "tranquil ancient Vietnamese rural village, lush green bamboo grove by dirt path, humble thatched cottages with mud walls, wooden fence, herd of grazing cows under shade, authentic Vietnamese countryside landscape, no fantasy, no neon",
             "atmosphere": "warm nostalgic Vietnamese folklore comic art atmosphere"
         }
-    if any(k in text_lower for k in ["làng", "cây đa", "bến nước", "mái đình", "thôn", "đồng ruộng", "bờ tre"]):
+    if any(k in text_lower for k in ["làng", "lang", "cây đa", "cay da", "bến nước", "ben nuoc", "mái đình", "mai dinh", "thôn", "đồng ruộng", "dong ruong", "bờ tre", "lũy tre"]):
         return {
             "location_name": "Làng quê truyền thống Việt Nam",
             "setting_anchor": "historic Vietnamese village, ancient mossy village gate, banyan tree by the river wharf, rustic thatched cottages and bamboo grove",
-            "atmosphere": "peaceful nostalgic Vietnamese rural screentone"
+            "atmosphere": "peaceful nostalgic Vietnamese rural comic illustration"
         }
-    if any(k in text_lower for k in ["núi", "rừng", "sơn tinh", "hang", "thác"]):
+    if any(k in text_lower for k in ["sơn tinh", "son tinh", "thủy tinh", "thuy tinh", "núi rừng", "nui rung", "đỉnh núi", "dinh nui", "rừng sâu", "rung sau"]):
         return {
             "location_name": "Vùng rừng núi hùng vĩ",
             "setting_anchor": "majestic ancient Vietnamese mountain landscape, misty primeval forest, towering rocky crags, sacred natural aura",
-            "atmosphere": "mystical legendary nature lineart"
+            "atmosphere": "mystical legendary nature comic art lineart"
         }
-    if any(k in text_lower for k in ["lớp", "trường", "phòng học", "bảng đen"]):
+    if any(k in text_lower for k in ["lớp học", "lop hoc", "trường học", "truong hoc", "phòng học", "bảng đen"]):
         return {
             "location_name": "Lớp học",
             "setting_anchor": "bright high school classroom interior, neat student wooden desks, large chalkboard on front wall, window sunlight",
-            "atmosphere": "peaceful youth school manga screentone"
+            "atmosphere": "peaceful youth school comic illustration"
         }
 
     return {
         "location_name": "Bối cảnh câu chuyện",
-        "setting_anchor": "atmospheric narrative setting matching the scene, cinematic composition, authentic screentone textures",
-        "atmosphere": "expressive high contrast manga screentone"
+        "setting_anchor": "atmospheric narrative setting matching the scene, cinematic composition, authentic Vietnamese comic lineart",
+        "atmosphere": "expressive high contrast Vietnamese comic illustration"
     }
 
 

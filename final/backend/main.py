@@ -46,9 +46,16 @@ if available_groq_key:
 
 app = FastAPI(title="NarrAI MVP")
 
-@app.get("/")
 @app.get("/health")
 async def root_health():
+    return {"status": "ok", "service": "NarrAI API", "version": "1.0.0"}
+
+@app.get("/")
+async def root_landing():
+    from fastapi.responses import FileResponse
+    index_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend", "out", "index.html"))
+    if os.path.isfile(index_file):
+        return FileResponse(index_file, headers={"Cache-Control": "no-cache, no-store, must-revalidate", "Pragma": "no-cache", "Expires": "0"})
     return {"status": "ok", "service": "NarrAI API", "version": "1.0.0"}
 
 REQUIRED_API_KEYS = {

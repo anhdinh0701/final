@@ -332,8 +332,8 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
                     {/* Main Establishing Battle Panel */}
                     <div className="relative aspect-[16/10] w-full rounded-xl overflow-hidden border border-neutral-200 bg-black group shadow-sm">
                       <Image
-                        src="/assets/landing/hero_preview_panel_01_battle.png"
-                        alt="Chiến trận bãi cọc Bạch Đằng - Manga Studio"
+                        src="/assets/landing/vietnam_culture_le_hoi_den_hung.png"
+                        alt="Đại lễ Lễ hội Đền Hùng - Bản sắc Văn hóa Việt Nam"
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                         priority
@@ -341,15 +341,15 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
                       <div className="absolute bottom-2.5 left-3 right-3 flex items-end justify-between">
                         <div>
-                          <span className="inline-block px-1.5 py-0.5 rounded bg-black/80 text-[9px] font-mono text-white font-bold tracking-widest border border-white/20 mb-1">
-                            [PANEL 01 · GÓC RỘNG]
+                          <span className="inline-block px-1.5 py-0.5 rounded bg-black/80 text-[9px] font-mono text-emerald-300 font-bold tracking-widest border border-emerald-500/30 mb-1">
+                            [DI SẢN · LỄ HỘI ĐỀN HÙNG]
                           </span>
                           <p className="text-xs font-serif italic text-white/95 line-clamp-1">
-                            "Mặt nước dậy sóng, hàng cọc nhọn vươn lên đón đợi đại quân..."
+                            "Dòng người nô nức trẩy hội Đền Hùng linh thiêng, hướng về cội nguồn non sông đất Việt."
                           </p>
                         </div>
-                        <span className="text-[10px] font-mono text-neutral-300 font-bold">
-                          100% INK
+                        <span className="text-[10px] font-mono text-emerald-400 font-bold">
+                          100% VIỆT NAM
                         </span>
                       </div>
                     </div>
@@ -358,27 +358,27 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
                     <div className="grid grid-cols-2 gap-3">
                       <div className="relative aspect-[4/3] rounded-lg overflow-hidden border border-neutral-200 bg-neutral-900 group shadow-sm">
                         <Image
-                          src="/assets/landing/hero_preview_panel_lore_thiem.png"
-                          alt="Nhân vật cổ trang Việt - Character Lore"
+                          src="/assets/landing/vietnam_woman_aodai_white_lotus.png"
+                          alt="Thiếu nữ tà áo dài trắng tinh khôi bên đầm sen"
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent pointer-events-none" />
-                        <span className="absolute bottom-1.5 left-2 px-1 rounded bg-black/80 text-[8px] font-mono text-white font-bold border border-white/20">
-                          [LORE: NÀNG THIỀM]
+                        <span className="absolute bottom-1.5 left-2 px-1.5 py-0.5 rounded bg-black/80 text-[8px] font-mono text-rose-200 font-bold border border-rose-400/30">
+                          [ÁO DÀI · ĐẦM SEN]
                         </span>
                       </div>
 
                       <div className="relative aspect-[4/3] rounded-lg overflow-hidden border border-neutral-200 bg-neutral-900 group shadow-sm">
                         <Image
-                          src="/assets/landing/hero_preview_panel_02_close.png"
-                          alt="Chân dung manga hiệp nữ"
+                          src="/assets/landing/vietnam_ao_ba_ba_rice_field.png"
+                          alt="Người mặc quần áo bà ba trên cánh đồng lúa chín"
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent pointer-events-none" />
-                        <span className="absolute bottom-1.5 left-2 px-1 rounded bg-black/80 text-[8px] font-mono text-white font-bold border border-white/20">
-                          [PANEL 02: CẬN CẢNH]
+                        <span className="absolute bottom-1.5 left-2 px-1.5 py-0.5 rounded bg-black/80 text-[8px] font-mono text-amber-200 font-bold border border-amber-400/30">
+                          [ÁO BÀ BA · ĐỒNG LÚA]
                         </span>
                       </div>
                     </div>

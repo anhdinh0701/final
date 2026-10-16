@@ -338,20 +338,6 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                         priority
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
-                      <div className="absolute bottom-2.5 left-3 right-3 flex items-end justify-between">
-                        <div>
-                          <span className="inline-block px-1.5 py-0.5 rounded bg-black/80 text-[9px] font-mono text-emerald-300 font-bold tracking-widest border border-emerald-500/30 mb-1">
-                            [DI SẢN · LỄ HỘI ĐỀN HÙNG]
-                          </span>
-                          <p className="text-xs font-serif italic text-white/95 line-clamp-1">
-                            "Dòng người nô nức trẩy hội Đền Hùng linh thiêng, hướng về cội nguồn non sông đất Việt."
-                          </p>
-                        </div>
-                        <span className="text-[10px] font-mono text-emerald-400 font-bold">
-                          100% VIỆT NAM
-                        </span>
-                      </div>
                     </div>
 
                     {/* Secondary Dual Inset Strip */}
@@ -363,10 +349,6 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-500"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent pointer-events-none" />
-                        <span className="absolute bottom-1.5 left-2 px-1.5 py-0.5 rounded bg-black/80 text-[8px] font-mono text-rose-200 font-bold border border-rose-400/30">
-                          [ÁO DÀI · ĐẦM SEN]
-                        </span>
                       </div>
 
                       <div className="relative aspect-[4/3] rounded-lg overflow-hidden border border-neutral-200 bg-neutral-900 group shadow-sm">
@@ -376,10 +358,6 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-500"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent pointer-events-none" />
-                        <span className="absolute bottom-1.5 left-2 px-1.5 py-0.5 rounded bg-black/80 text-[8px] font-mono text-amber-200 font-bold border border-amber-400/30">
-                          [ÁO BÀ BA · ĐỒNG LÚA]
-                        </span>
                       </div>
                     </div>
                   </div>

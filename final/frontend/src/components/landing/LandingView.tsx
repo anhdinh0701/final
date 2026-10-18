@@ -305,7 +305,7 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
             </p>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             
             {/* Studio 1: Story Lab */}
             <div className="group rounded-xl border border-neutral-300/80 bg-white/90 p-5 hover:border-neutral-950 transition-all shadow-sm hover:shadow-lg flex flex-col justify-between">
@@ -343,48 +343,12 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
               </button>
             </div>
 
-            {/* Studio 2: Manga Studio */}
-            <div className="group rounded-xl border border-neutral-300/80 bg-white/90 p-5 hover:border-neutral-950 transition-all shadow-sm hover:shadow-lg flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between text-[10px] font-mono font-bold text-neutral-500 uppercase tracking-widest mb-3">
-                  <span>{t.studio_manga_tag}</span>
-                  <span className="rounded bg-neutral-100 border border-neutral-200 px-1.5 py-0.5 text-neutral-700">[02]</span>
-                </div>
-                <div className="relative aspect-[16/10] w-full rounded-lg overflow-hidden border border-neutral-200 bg-neutral-900 mb-4 group-hover:scale-[1.02] transition-transform">
-                  <Image
-                    src="/assets/landing/manga_heroine_portrait.png"
-                    alt="Manga Studio Showcase"
-                    fill
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
-                  <span className="absolute bottom-1.5 left-2 px-1 rounded bg-black/80 text-[8px] font-mono text-white border border-white/20">
-                    B&W Inking
-                  </span>
-                </div>
-                <h3 className="font-serif text-lg font-bold text-neutral-950">
-                  {t.studio_manga_name}
-                </h3>
-                <p className="mt-2 text-xs leading-relaxed text-neutral-600">
-                  {t.studio_manga_desc}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => (onNavigateStudio ? onNavigateStudio("comic") : onOpenAuth())}
-                className="mt-5 inline-flex items-center justify-between text-xs font-mono font-bold uppercase tracking-wider text-neutral-950 border-t border-neutral-200 pt-3 group-hover:underline cursor-pointer"
-              >
-                <span>{lang === "vi" ? "Mở Manga Studio" : "Open Manga Studio"}</span>
-                <span>➔</span>
-              </button>
-            </div>
-
-            {/* Studio 3: Character & Lore */}
+            {/* Studio 2: Character & Lore */}
             <div className="group rounded-xl border border-neutral-300/80 bg-white/90 p-5 hover:border-neutral-950 transition-all shadow-sm hover:shadow-lg flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between text-[10px] font-mono font-bold text-neutral-500 uppercase tracking-widest mb-3">
                   <span>{t.studio_lore_tag}</span>
-                  <span className="rounded bg-neutral-100 border border-neutral-200 px-1.5 py-0.5 text-neutral-700">[03]</span>
+                  <span className="rounded bg-neutral-100 border border-neutral-200 px-1.5 py-0.5 text-neutral-700">[02]</span>
                 </div>
                 <div className="relative aspect-[16/10] w-full rounded-lg overflow-hidden border border-neutral-200 bg-neutral-900 mb-4 group-hover:scale-[1.02] transition-transform">
                   <Image
@@ -415,12 +379,12 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
               </button>
             </div>
 
-            {/* Studio 4: Motion Studio */}
+            {/* Studio 3: Motion Studio */}
             <div className="group rounded-xl border border-neutral-300/80 bg-white/90 p-5 hover:border-neutral-950 transition-all shadow-sm hover:shadow-lg flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between text-[10px] font-mono font-bold text-neutral-500 uppercase tracking-widest mb-3">
                   <span>{t.studio_motion_tag}</span>
-                  <span className="rounded bg-neutral-100 border border-neutral-200 px-1.5 py-0.5 text-neutral-700">[04]</span>
+                  <span className="rounded bg-neutral-100 border border-neutral-200 px-1.5 py-0.5 text-neutral-700">[03]</span>
                 </div>
                 <div className="relative aspect-[16/10] w-full rounded-lg overflow-hidden border border-neutral-200 bg-neutral-900 mb-4 group-hover:scale-[1.02] transition-transform">
                   <Image
@@ -697,7 +661,6 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
             <span>{t.footer_copyright}</span>
             <div className="flex items-center gap-4 text-[11px] text-neutral-600">
               <a href="#studios" className="hover:text-neutral-950 hover:underline">Story Lab</a>
-              <a href="#studios" className="hover:text-neutral-950 hover:underline">Manga Studio</a>
               <a href="#studios" className="hover:text-neutral-950 hover:underline">Character Lore</a>
               <a href="#studios" className="hover:text-neutral-950 hover:underline">Motion Studio</a>
             </div>

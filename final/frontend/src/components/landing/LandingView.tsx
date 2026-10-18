@@ -216,6 +216,69 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
         </header>
 
         {/* ========================================================= */}
+        {/* DONG SON BRONZE DRUM & 3D NARRAI BANNER                   */}
+        {/* ========================================================= */}
+        <section className="relative z-10 w-full border-b border-neutral-300 shadow-md">
+          {/* Red Lacquer Background */}
+          <div className="w-full pt-8 pb-10 px-4 flex flex-col items-center justify-center relative overflow-hidden bg-[radial-gradient(circle_at_50%_30%,#a82024_0%,#8b181b_50%,#680d10_100%)] border-b border-amber-600/30">
+            {/* Subtle traditional dots */}
+            <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#ffd700_1px,transparent_1px)] [background-size:20px_20px]" />
+
+            {/* High-res Dong Son Drum Artwork */}
+            <div className="relative w-full max-w-2xl rounded-xl overflow-hidden shadow-2xl border-2 border-amber-400/50 bg-black/60 mb-3 group">
+              <div className="relative aspect-[812/286] w-full max-h-[240px]">
+                <Image
+                  src="/landing/dong_son_drum_banner.png"
+                  alt="Trống Đồng Đông Sơn"
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  priority
+                />
+              </div>
+              <div className="absolute inset-0 ring-1 ring-inset ring-amber-300/40 rounded-xl pointer-events-none" />
+            </div>
+
+            {/* 3D Gold Typography "NARRAI" */}
+            <h2 className="font-serif text-5xl sm:text-7xl md:text-8xl font-black text-center text-[#FFE15C] select-none tracking-wider mt-2 [text-shadow:0_1px_0_#cf9400,0_2px_0_#b37e00,0_3px_0_#8f6200,0_4px_0_#6e4900,0_5px_0_#4f3300,0_7px_4px_rgba(0,0,0,0.45),0_10px_12px_rgba(0,0,0,0.35)]">
+              NARRAI
+            </h2>
+            <p className="text-amber-200/90 font-mono text-xs tracking-widest uppercase mt-2">
+              {lang === "vi" ? "NỀN TẢNG ĐỒNG SÁNG TÁC TIỂU THUYẾT & TRUYỆN TRANH AI" : "AI NOVEL & MANGA CO-CREATION PLATFORM"}
+            </p>
+          </div>
+
+          {/* Cream / Parchment Accent Bar */}
+          <div className="bg-[#FFF0C2] w-full px-4 sm:px-8 py-3.5 border-b border-amber-200 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-inner">
+            <div className="flex items-center gap-2.5 text-center sm:text-left">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#8B181B]" />
+              <h3 className="font-serif text-lg sm:text-xl font-bold tracking-tight text-[#681417]">
+                {lang === "vi" ? "Hãy bắt đầu ngay hôm nay" : "Start your journey today"}
+              </h3>
+              <span className="hidden md:inline text-xs text-[#8B181B]/70 font-mono">
+                {lang === "vi" ? "— Đồng sáng tác văn học và truyện tranh bản sắc Việt" : "— Co-creating Vietnamese cultural literature & comics"}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const heritageSection = document.getElementById("heritage");
+                  if (heritageSection) {
+                    heritageSection.scrollIntoView({ behavior: "smooth" });
+                  } else {
+                    onOpenAuth();
+                  }
+                }}
+                className="px-5 py-2 rounded-full bg-neutral-950 hover:bg-neutral-800 text-white font-mono text-xs font-bold tracking-wider uppercase transition-all shadow-md hover:scale-105 active:scale-95 cursor-pointer"
+              >
+                {lang === "vi" ? "Hợp tác với chúng tôi" : "Partner with us"}
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* ========================================================= */}
         {/* HERO SECTION */}
         {/* ========================================================= */}
         <section className="relative z-10 mx-auto max-w-7xl px-4 pb-14 pt-8 sm:px-8 sm:pb-20 sm:pt-12 lg:px-10 lg:pb-24 lg:pt-14">

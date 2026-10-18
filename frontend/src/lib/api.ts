@@ -52,6 +52,30 @@ function parseErrorDetail(data: any): string {
 
 export const api = {
   // Auth
+  async guestLogin(): Promise<AuthResponse> {
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/guest`, {
+        method: 'POST',
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && (data.access_token || data.token)) {
+        const token = data.access_token || data.token;
+        storage.setToken(token);
+        storage.setUser({ username: data.username, full_name: data.full_name });
+        return {
+          status: 'success',
+          token,
+          access_token: token,
+          username: data.username,
+          full_name: data.full_name,
+        };
+      }
+      return { status: 'error', message: 'Failed to initialize guest session' };
+    } catch (e: any) {
+      return { status: 'error', message: e?.message || 'Guest login error' };
+    }
+  },
+
   async login(username: string, password: string): Promise<AuthResponse> {
     try {
       const formData = new URLSearchParams();

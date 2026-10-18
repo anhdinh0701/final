@@ -261,9 +261,33 @@ USER_CACHE = _UserCacheProxy()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/login", auto_error=False)
 
+def _get_or_create_guest_user(db: Session) -> User:
+    guest = db.query(User).filter(User.username == "khach_trai_nghiem").first()
+    if not guest:
+        guest = User(
+            username="khach_trai_nghiem",
+            full_name="Khách Trải Nghiệm",
+            password_hash="guest_open_access",
+            coins=9999
+        )
+        db.add(guest)
+        try:
+            db.commit()
+            db.refresh(guest)
+        except Exception:
+            db.rollback()
+            guest = db.query(User).filter(User.username == "khach_trai_nghiem").first()
+    elif (guest.coins or 0) < 500:
+        guest.coins = 9999
+        try:
+            db.commit()
+        except Exception:
+            db.rollback()
+    return guest
+
 async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     if not token:
-        return None
+        return _get_or_create_guest_user(db)
         
     cache_mgr = get_cache_manager()
     cached_user = cache_mgr.get_user_token(token)
@@ -282,7 +306,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
         
     payload = decode_access_token(token)
     if not payload:
-        return None
+        return _get_or_create_guest_user(db)
     username: str = payload.get("sub")
     user = db.query(User).filter(User.username == username).first()
     
@@ -480,6 +504,21 @@ async def login_user(request: Request, db: Session = Depends(get_db)):
         "token_type": "bearer",
         "username": user.username,
         "full_name": user.full_name or user.username
+    }
+
+@app.get("/api/auth/guest")
+@app.post("/api/auth/guest")
+def guest_auto_login(db: Session = Depends(get_db)):
+    guest = _get_or_create_guest_user(db)
+    access_token = create_access_token(data={"sub": guest.username})
+    return {
+        "status": "success",
+        "access_token": access_token,
+        "token": access_token,
+        "token_type": "bearer",
+        "username": guest.username,
+        "full_name": guest.full_name or "Khách Trải Nghiệm",
+        "coins": guest.coins or 9999
     }
 
 @app.get("/api/me")

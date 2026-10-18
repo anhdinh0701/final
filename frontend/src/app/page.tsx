@@ -11,7 +11,6 @@ import { LandingView } from "@/components/landing/LandingView";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
-import { AuthModal } from "@/components/modals/AuthModal";
 import { HistoryModal } from "@/components/modals/HistoryModal";
 import { CoinTopupModal } from "@/components/modals/CoinTopupModal";
 import { MessengerModal } from "@/components/modals/MessengerModal";
@@ -193,14 +192,13 @@ export default function WorkspacePage() {
   }, []);
 
   // Modals
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isCoinModalOpen, setIsCoinModalOpen] = useState(false);
   const [isMessengerOpen, setIsMessengerOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileCopilotOpen, setIsMobileCopilotOpen] = useState(false);
   const [isNeuralModalOpen, setIsNeuralModalOpen] = useState(false);
-  const [coinBalance, setCoinBalance] = useState<number>(100);
+  const [coinBalance, setCoinBalance] = useState<number>(9999);
 
 
   // Setup Flow State
@@ -236,29 +234,54 @@ export default function WorkspacePage() {
 
     const initAuth = async () => {
       const token = storage.getToken();
-      if (!token) return;
+      if (!token) {
+        setUser({ username: "creator", fullName: "Nhà Sáng Tác" });
+        setCoinBalance(9999);
+        return;
+      }
 
       try {
         const res = await api.getMe();
         if (res.status === "success" && res.username) {
           setUser({ username: res.username, fullName: res.full_name || res.username });
-          setView("workspace");
-
-          // Load authenticated coin balance
           api.getCoinsBalance().then((bal) => {
             if (typeof bal.coins === "number") setCoinBalance(bal.coins);
             else if (typeof bal.balance === "number") setCoinBalance(bal.balance);
-          }).catch(() => {});
+          }).catch(() => {
+            setCoinBalance(9999);
+          });
         } else {
-          storage.removeToken();
+          setUser({ username: "creator", fullName: "Nhà Sáng Tác" });
+          setCoinBalance(9999);
         }
       } catch (err) {
-        console.error("Auth check error:", err);
+        setUser({ username: "creator", fullName: "Nhà Sáng Tác" });
+        setCoinBalance(9999);
       }
     };
 
     initAuth();
   }, []);
+
+  const handleEnterWorkspace = async (targetTab: "setup" | "editor" | "comic" | "lore" | "motion" | "posts" | "pipeline" = "setup") => {
+    try {
+      if (!storage.getToken()) {
+        const guestRes = await api.guestLogin();
+        if (guestRes && guestRes.user) {
+          setUser({ username: guestRes.user.username, fullName: guestRes.user.full_name || guestRes.user.username });
+        } else {
+          setUser({ username: "creator", fullName: "Nhà Sáng Tác" });
+        }
+      } else if (!user) {
+        setUser({ username: "creator", fullName: "Nhà Sáng Tác" });
+      }
+    } catch {
+      setUser({ username: "creator", fullName: "Nhà Sáng Tác" });
+    }
+    setCoinBalance(9999);
+    setActiveTab(targetTab);
+    setView("workspace");
+  };
 
   const handleLanguageChange = (newLang: Language) => {
     setLang(newLang);
@@ -267,7 +290,8 @@ export default function WorkspacePage() {
 
   const handleLogout = () => {
     storage.removeToken();
-    setUser(null);
+    setUser({ username: "creator", fullName: "Nhà Sáng Tác" });
+    setCoinBalance(9999);
     setView("landing");
   };
 
@@ -379,26 +403,14 @@ export default function WorkspacePage() {
     }
 
     let activeUser = user;
-    const token = storage.getToken();
-    if (!activeUser && token) {
-      const session = await api.getMe();
-      if (session.status === "success" && session.username) {
-        activeUser = { username: session.username, fullName: session.full_name || session.username };
-        setUser(activeUser);
-      } else {
-        if (session.statusCode === 401) {
-          storage.removeToken();
-        } else {
-          toast.error(session.message || t.unknown_error);
-          return;
-        }
-      }
+    if (!activeUser) {
+      activeUser = { username: "creator", fullName: "Nhà Sáng Tác" };
+      setUser(activeUser);
     }
-
-    if (!activeUser || !storage.getToken()) {
-      toast.warning(lang === "vi" ? "Vui lòng đăng nhập để đăng bài lên cộng đồng." : "Please log in to publish your story.");
-      setIsAuthOpen(true);
-      return;
+    if (!storage.getToken()) {
+      try {
+        await api.guestLogin();
+      } catch {}
     }
 
     // Extract title from first line or markdown header
@@ -433,12 +445,12 @@ export default function WorkspacePage() {
         toast.success(t.publish_success || (lang === "vi" ? "Đã xuất bản tác phẩm lên Bảng tin cộng đồng thành công!" : "Story published to community feed successfully!"));
         setActiveTab("posts");
       } else if (res.statusCode === 401) {
-        storage.removeToken();
-        setUser(null);
+        try {
+          await api.guestLogin();
+        } catch {}
         toast.warning(lang === "vi"
-          ? "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để đăng bài."
-          : "Your session has expired. Please log in again to publish.");
-        setIsAuthOpen(true);
+          ? "Đã khôi phục phiên sáng tác. Vui lòng nhấn đăng lại."
+          : "Session refreshed. Please try publishing again.");
       } else {
         toast.error(res.message || t.unknown_error);
       }
@@ -848,16 +860,19 @@ export default function WorkspacePage() {
     }
 
     if (!user) {
-      toast.warning(lang === "vi" ? "Vui lòng đăng nhập để chuyển thể truyện tranh." : "Please log in to adapt to comic.");
-      setIsAuthOpen(true);
-      return;
+      setUser({ username: "creator", fullName: "Nhà Sáng Tác" });
+      try {
+        await api.guestLogin();
+      } catch {}
     }
 
     // Refresh coin balance in background
     api.getCoinsBalance().then((bal) => {
       if (typeof bal.coins === "number") setCoinBalance(bal.coins);
       else if (typeof bal.balance === "number") setCoinBalance(bal.balance);
-    }).catch(() => {});
+    }).catch(() => {
+      setCoinBalance(9999);
+    });
 
     setComicLoading(true);
     setActiveTab("comic");
@@ -877,7 +892,9 @@ export default function WorkspacePage() {
         const errMsg = res.message || (lang === "vi" ? "Lỗi chuyển thể truyện tranh" : "Failed to adapt to comic");
         toast.error(errMsg);
         if ((res as any).code === 401) {
-          setIsAuthOpen(true);
+          try {
+            await api.guestLogin();
+          } catch {}
         }
         setActiveTab("editor");
       }
@@ -995,28 +1012,9 @@ export default function WorkspacePage() {
         <LandingView
           lang={lang}
           onLanguageChange={handleLanguageChange}
-          onOpenAuth={() => setIsAuthOpen(true)}
-          onExploreCommunity={() => {
-            setActiveTab("posts");
-            setView("workspace");
-          }}
-          onNavigateStudio={(studio) => {
-            setActiveTab(studio);
-            setView("workspace");
-          }}
-        />
-        <AuthModal
-          isOpen={isAuthOpen}
-          onClose={() => setIsAuthOpen(false)}
-          onSuccess={(u, fn) => {
-            setUser({ username: u, fullName: fn || u });
-            setView("workspace");
-            api.getCoinsBalance().then((bal) => {
-              if (typeof bal.coins === "number") setCoinBalance(bal.coins);
-              else if (typeof bal.balance === "number") setCoinBalance(bal.balance);
-            }).catch(() => {});
-          }}
-          lang={lang}
+          onOpenAuth={() => handleEnterWorkspace("setup")}
+          onExploreCommunity={() => handleEnterWorkspace("posts")}
+          onNavigateStudio={(studio) => handleEnterWorkspace(studio as any)}
         />
         <CoinTopupModal
           isOpen={isCoinModalOpen}
@@ -1247,19 +1245,7 @@ export default function WorkspacePage() {
         </>
       )}
 
-      {/* Modals */}
-      <AuthModal
-        isOpen={isAuthOpen}
-        onClose={() => setIsAuthOpen(false)}
-        onSuccess={(u, fn) => {
-          setUser({ username: u, fullName: fn || u });
-          api.getCoinsBalance().then((bal) => {
-            if (typeof bal.coins === "number") setCoinBalance(bal.coins);
-            else if (typeof bal.balance === "number") setCoinBalance(bal.balance);
-          }).catch(() => {});
-        }}
-        lang={lang}
-      />
+
 
       <HistoryModal
         isOpen={isHistoryOpen}

@@ -206,9 +206,10 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
               <button
                 type="button"
                 onClick={onOpenAuth}
-                className="rounded-lg px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider bg-neutral-950 text-white hover:bg-neutral-800 shadow-md transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-900"
+                className="inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider bg-neutral-950 text-white hover:bg-neutral-800 shadow-md transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-900"
               >
-                {t.login}
+                <span>✨</span>
+                <span>{lang === "vi" ? "Trải nghiệm ngay" : "Experience Now"}</span>
               </button>
             </div>
           </nav>

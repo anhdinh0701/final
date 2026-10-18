@@ -15,7 +15,6 @@ interface Props {
 
 export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommunity, onNavigateStudio }: Props) {
   const t = translations[lang];
-  const [activeHeroTab, setActiveHeroTab] = useState<"prose" | "manga">("manga");
   const [activeWorldIdx, setActiveWorldIdx] = useState<number>(0);
 
   const featuredWorlds = [
@@ -248,7 +247,7 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
           </div>
 
           {/* Cream / Parchment Accent Bar */}
-          <div className="bg-[#FFF0C2] w-full px-4 sm:px-8 py-3.5 border-b border-amber-200 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-inner">
+          <div className="bg-[#FFF0C2] w-full px-4 sm:px-8 py-4 border-b border-amber-200 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-inner">
             <div className="flex items-center gap-2.5 text-center sm:text-left">
               <span className="w-2.5 h-2.5 rounded-full bg-[#8B181B]" />
               <h3 className="font-serif text-lg sm:text-xl font-bold tracking-tight text-[#681417]">
@@ -259,7 +258,16 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
               </span>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={onOpenAuth}
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-neutral-950 hover:bg-neutral-800 text-white font-mono text-xs font-bold tracking-wider uppercase transition-all shadow-md hover:scale-105 active:scale-95 cursor-pointer"
+              >
+                <span>✨</span>
+                <span>{lang === "vi" ? "Trải nghiệm ngay" : "Experience Now"}</span>
+                <span className="text-xs">➔</span>
+              </button>
               <button
                 type="button"
                 onClick={() => {
@@ -270,206 +278,13 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
                     onOpenAuth();
                   }
                 }}
-                className="px-5 py-2 rounded-full bg-neutral-950 hover:bg-neutral-800 text-white font-mono text-xs font-bold tracking-wider uppercase transition-all shadow-md hover:scale-105 active:scale-95 cursor-pointer"
+                className="px-5 py-2.5 rounded-full border border-neutral-800 bg-white hover:bg-neutral-100 text-neutral-950 font-mono text-xs font-bold tracking-wider uppercase transition-all shadow-xs hover:scale-105 active:scale-95 cursor-pointer"
               >
                 {lang === "vi" ? "Hợp tác với chúng tôi" : "Partner with us"}
               </button>
             </div>
           </div>
         </section>
-
-        {/* ========================================================= */}
-        {/* HERO SECTION */}
-        {/* ========================================================= */}
-        <section className="relative z-10 mx-auto max-w-7xl px-4 pb-14 pt-8 sm:px-8 sm:pb-20 sm:pt-12 lg:px-10 lg:pb-24 lg:pt-14">
-          <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
-            
-            {/* Left: Headline, Value Proposition, Action CTAs */}
-            <div className="text-center lg:text-left">
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-neutral-300 bg-white/90 px-3.5 py-1 text-[11px] font-mono font-bold uppercase tracking-wider text-neutral-800 shadow-sm backdrop-blur-sm">
-                <span className="h-1.5 w-1.5 rounded-full bg-red-600 animate-pulse" />
-                <span>[GEN-AI NARRATIVE PLATFORM]</span>
-                <span>—</span>
-                <span>{t.hero_badge}</span>
-              </div>
-
-              <h1 className="font-serif text-3xl font-bold leading-[1.2] tracking-tight sm:text-5xl lg:text-6xl text-neutral-950">
-                {t.hero_title}
-              </h1>
-
-              <p className="mt-5 max-w-xl mx-auto lg:mx-0 text-base leading-relaxed text-neutral-700 font-medium sm:text-lg">
-                {t.hero_sub}
-              </p>
-
-              {/* CTAs */}
-              <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center lg:justify-start">
-                <button
-                  type="button"
-                  onClick={onOpenAuth}
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg px-7 py-3.5 text-sm font-mono font-bold uppercase tracking-wider bg-neutral-950 text-white hover:bg-neutral-800 transition-all shadow-xl cursor-pointer"
-                >
-                  <span>{t.hero_cta}</span>
-                  <span className="text-xs">➔</span>
-                </button>
-                <a
-                  href="#recent-projects"
-                  className="inline-flex min-h-12 items-center justify-center rounded-lg border border-neutral-300 bg-white/90 px-5 py-3.5 text-sm font-mono font-bold uppercase tracking-wider text-neutral-900 hover:bg-white shadow-sm transition-colors text-center"
-                >
-                  {lang === "vi" ? "Xem Dự Án Mẫu" : "View Sample Works"}
-                </a>
-              </div>
-
-              {/* Verified Trust Stats */}
-              <div className="mt-8 grid grid-cols-3 gap-3 border-t border-neutral-300/80 pt-5 text-center lg:text-left">
-                <div>
-                  <div className="font-serif text-lg sm:text-xl font-bold text-neutral-950">
-                    35,000+
-                  </div>
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-600 font-medium">
-                    {lang === "vi" ? "Từ bản thảo AI" : "Prose drafted"}
-                  </div>
-                </div>
-                <div>
-                  <div className="font-serif text-lg sm:text-xl font-bold text-neutral-950">
-                    1,200+
-                  </div>
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-600 font-medium">
-                    {lang === "vi" ? "Khung manga mực" : "Manga panels"}
-                  </div>
-                </div>
-                <div>
-                  <div className="font-serif text-lg sm:text-xl font-bold text-neutral-950">
-                    100%
-                  </div>
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-600 font-medium">
-                    {lang === "vi" ? "Bản quyền tác giả" : "Creator IP"}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right: Integrated Dual-Media Showcase Preview (Prose + Manga Panel) */}
-            <div className="relative mx-auto w-full max-w-[540px]">
-              <div className="relative rounded-2xl border border-neutral-200/90 bg-white/92 backdrop-blur-md p-3 sm:p-5 shadow-2xl overflow-hidden">
-                
-                {/* Live Preview Header with Tabs */}
-                <div className="flex items-center justify-between border-b border-neutral-200/80 pb-3 mb-3">
-                  <div className="flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-red-500" />
-                    <span className="h-2 w-2 rounded-full bg-yellow-400" />
-                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                    <span className="ml-2 font-mono text-[10px] uppercase tracking-widest text-neutral-600 font-bold">
-                      {t.live_preview_badge}
-                    </span>
-                  </div>
-
-                  {/* Mode switcher tab buttons */}
-                  <div className="flex rounded-md border border-neutral-200 bg-neutral-100 p-0.5 text-[10px] font-mono font-bold">
-                    <button
-                      type="button"
-                      onClick={() => setActiveHeroTab("manga")}
-                      className={`px-2.5 py-1 rounded transition-colors ${
-                        activeHeroTab === "manga"
-                          ? "bg-neutral-950 text-white shadow-sm"
-                          : "text-neutral-600 hover:text-neutral-950"
-                      }`}
-                    >
-                      Manga Panel
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveHeroTab("prose")}
-                      className={`px-2.5 py-1 rounded transition-colors ${
-                        activeHeroTab === "prose"
-                          ? "bg-neutral-950 text-white shadow-sm"
-                          : "text-neutral-600 hover:text-neutral-950"
-                      }`}
-                    >
-                      Bản Thảo
-                    </button>
-                  </div>
-                </div>
-
-                {/* Tab A: Manga Adaptation Interactive View */}
-                {activeHeroTab === "manga" ? (
-                  <div className="space-y-3">
-                    {/* Main Establishing Battle Panel */}
-                    <div className="relative aspect-[16/10] w-full rounded-xl overflow-hidden border border-neutral-200 bg-black group shadow-sm">
-                      <Image
-                        src="/assets/landing/vietnam_culture_le_hoi_den_hung.png"
-                        alt="Đại lễ Lễ hội Đền Hùng - Bản sắc Văn hóa Việt Nam"
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                        priority
-                      />
-                    </div>
-
-                    {/* Secondary Dual Inset Strip */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="relative aspect-[4/3] rounded-lg overflow-hidden border border-neutral-200 bg-neutral-900 group shadow-sm">
-                        <Image
-                          src="/assets/landing/vietnam_woman_aodai_white_lotus.png"
-                          alt="Thiếu nữ tà áo dài trắng tinh khôi bên đầm sen"
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      </div>
-
-                      <div className="relative aspect-[4/3] rounded-lg overflow-hidden border border-neutral-200 bg-neutral-900 group shadow-sm">
-                        <Image
-                          src="/assets/landing/vietnam_ao_ba_ba_rice_field.png"
-                          alt="Người mặc quần áo bà ba trên cánh đồng lúa chín"
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  /* Tab B: Prose Manuscript View */
-                  <div className="rounded-xl border border-neutral-200 bg-white p-4 space-y-3 font-serif shadow-sm">
-                    <div className="flex items-center justify-between border-b border-neutral-200 pb-2">
-                      <span className="text-[10px] font-mono uppercase tracking-widest text-neutral-600 font-bold">
-                        BẢN THẢO CHƯƠNG 01 · DÃ SỬ
-                      </span>
-                      <span className="text-[10px] font-mono text-emerald-600 font-bold">
-                        ● Đang đồng bộ với Copilot
-                      </span>
-                    </div>
-
-                    <h3 className="text-base font-bold text-neutral-950">
-                      Hồi 1: Đêm Trăng Cửa Sông Bạch Đằng
-                    </h3>
-
-                    <p className="text-xs leading-relaxed text-neutral-700">
-                      Mưa lất phất trên bến đò Vạn Kiếp. Nước triều bắt đầu rút về phía biển lớn, để lộ những đầu cọc gỗ lim đen bóng ngâm mình trong dòng phù sa nghìn năm. 
-                      Người tráng sĩ khoác chiếc áo tơi nón lá, bàn tay ghì chặt chuôi kiếm cổ. Đôi mắt chàng hướng ra dòng sông mênh mông, nơi gió đông bắc đang dồn dập kéo tới...
-                    </p>
-
-                    <div className="rounded border border-neutral-200 bg-neutral-50 p-2.5 font-mono text-[11px] text-neutral-700">
-                      <span className="font-bold text-neutral-950">🤖 Gợi ý Co-pilot: </span>
-                      <span>"Tăng thêm nhịp thở kịch tính của quân sĩ trước giờ phục kích."</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Footer conversion prompt */}
-                <div className="mt-3 pt-2.5 border-t border-neutral-200 flex items-center justify-between text-[11px] font-mono text-neutral-600">
-                  <span>[TỰ ĐỘNG CHUYỂN THỂ]</span>
-                  <button
-                    type="button"
-                    onClick={onOpenAuth}
-                    className="text-neutral-950 font-bold hover:underline cursor-pointer"
-                  >
-                    {lang === "vi" ? "Thử nghiệm phân khung ngay ➔" : "Try storyboard now ➔"}
-                  </button>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </section>
-
 
         {/* ========================================================= */}
         {/* 4 CORE STUDIOS (THẺ CHỨC NĂNG) */}

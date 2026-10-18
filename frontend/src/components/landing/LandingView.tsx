@@ -56,15 +56,15 @@ export function LandingView({ lang, onLanguageChange, onOpenAuth, onExploreCommu
   const recentProjects = [
     {
       title: lang === "vi" ? "Chiến Thần Bạch Đằng" : "Warlord of Bach Dang",
-      genre: lang === "vi" ? "Dã sử · Thủy chiến · Manga đen trắng" : "Historical Fiction · Naval Battle · B&W Manga",
+      genre: lang === "vi" ? "Dã sử · Thủy chiến · Tranh màu sử thi" : "Historical Fiction · Naval Battle · Epic Color",
       image: "/assets/landing/story_bach_dang_epic.png",
-      stats: lang === "vi" ? "4 Chương · 18 Khung manga" : "4 Chapters · 18 Manga panels",
+      stats: lang === "vi" ? "4 Chương · 18 Khung màu sử thi" : "4 Chapters · 18 Epic color panels",
       progress: "92%",
       synopsis:
         lang === "vi"
           ? "Đoàn thuyền xé toang màn sương mù dày đặc bến Bạch Đằng, trận địa cọc ngầm chuẩn bị đóng dấu định mệnh cho quân giặc phương Bắc..."
           : "War galleys pierce the thick river mist along the Bach Dang River as hidden stake barriers prepare to seal the northern armada's fate...",
-      tag: "[MANGA STORYBOARD]",
+      tag: "[THỦY CHIẾN SỬ THI]",
     },
     {
       title: lang === "vi" ? "Bóng Kiếm Đêm Mưa" : "Sword in the Rain",
